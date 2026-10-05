@@ -68,12 +68,13 @@ class PackagingTests(unittest.TestCase):
     def test_catalog_paths_do_not_depend_on_cwd(self):
         original = os.getcwd()
         expected = windows_common.runtime_datas()
-        try:
-            with tempfile.TemporaryDirectory(prefix="openmotor-пути-") as directory:
+        with tempfile.TemporaryDirectory(prefix="openmotor-пути-") as directory:
+            try:
                 os.chdir(directory)
                 self.assertEqual(windows_common.runtime_datas(), expected)
-        finally:
-            os.chdir(original)
+            finally:
+                # Windows cannot remove a directory while it is the process cwd.
+                os.chdir(original)
 
     def test_missing_application_catalog_fails_before_build(self):
         with tempfile.TemporaryDirectory() as directory:
