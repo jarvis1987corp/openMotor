@@ -421,7 +421,9 @@ class LocalizationTests(unittest.TestCase):
                                      message.findtext("translation"))
 
     def test_catalog_matches_fresh_extraction_including_all_forms(self):
-        with tempfile.TemporaryDirectory() as directory:
+        # pylupdate computes relative locations. Windows sources and the .ts
+        # must share a drive; a system temp folder can be on a different drive.
+        with tempfile.TemporaryDirectory(prefix="openmotor-extraction-", dir=ROOT) as directory:
             target = Path(directory) / "extracted.ts"
             command = [sys.executable, "-c", "from PyQt6.lupdate.pylupdate import main; raise SystemExit(main())",
                        "app.py", "uilib", "motorlib", "mathlib", "--exclude", "*_ui.py",
