@@ -55,6 +55,9 @@ jobs:
             '```text' | Out-File $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
             Get-Content build\windows-build.log -Tail 120 | Out-File $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
             '```' | Out-File $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+            $tail = Get-Content build\windows-build.log -Tail 120 | Out-String
+            $annotation = $tail.Replace('%', '%25').Replace("`r", '%0D').Replace("`n", '%0A')
+            Write-Output "::error title=Windows build diagnostics::$annotation"
           }
 
       - name: Build frozen GUI validation executable
