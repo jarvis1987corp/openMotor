@@ -2,7 +2,7 @@ import math
 import itertools
 
 from PyQt6.QtWidgets import QWidget, QPushButton, QHBoxLayout, QFileDialog, QApplication
-from PyQt6.QtCore import pyqtSignal
+from PyQt6.QtCore import QEvent, pyqtSignal
 
 import ezdxf
 import ezdxf.path
@@ -16,7 +16,7 @@ class PolygonEditor(QWidget):
         super().__init__(parent)
         self.setLayout(QHBoxLayout())
 
-        self.selectButton = QPushButton('Select')
+        self.selectButton = QPushButton(self.tr('Select'))
         self.selectButton.pressed.connect(self.loadDXF)
         self.layout().addWidget(self.selectButton)
 
@@ -26,7 +26,7 @@ class PolygonEditor(QWidget):
 
     def loadDXF(self, path=None):
         if path is None:
-            path = QFileDialog.getOpenFileName(None, 'Load core geometry', '', 'DXF Files (*.dxf *.DXF)')[0]
+            path = QFileDialog.getOpenFileName(None, self.tr('Load core geometry'), '', self.tr('DXF Files (*.dxf *.DXF)'))[0]
         if path != '': # If they cancel the dialog, path will be an empty string
             dwg = ezdxf.readfile(path)
             msp = dwg.modelspace()
@@ -52,13 +52,13 @@ class PolygonEditor(QWidget):
                     p = ezdxf.path.make_path(ent)
                     pts = [(v.x, v.y) for v in p.flattening(0.01)]
                     if len(pts) < 2:
-                        alerts.append('Skipped degenerate {} entity'.format(ent.dxftype()))
+                        alerts.append(self.tr('Skipped degenerate {} entity').format(ent.dxftype()))
                     elif motorlib.geometry.dist(pts[0], pts[-1]) < close:
                         self.points.append(pts)
                     else:
                         chunks.append(pts)
                 else:
-                    alerts.append("Can't import entity of type: {}".format(ent.dxftype()))
+                    alerts.append(self.tr("Can't import entity of type: {}").format(ent.dxftype()))
 
             # Join together the segments in chunks to closed contours
             join = None
@@ -90,11 +90,16 @@ class PolygonEditor(QWidget):
             oldLen = len(chunks)
             chunks = list(filter(lambda chunk: motorlib.geometry.dist(chunk[0], chunk[-1]) < close, chunks))
             if len(chunks) != oldLen:
-                alerts.append('Open contours cannot be imported')
+                alerts.append(self.tr('Open contours cannot be imported'))
 
             self.points += chunks # Add the now-closed contours to the poly list
 
             self.pointsChanged.emit()
 
             if len(alerts) > 0:
-                QApplication.instance().outputMessage('\n'.join(alerts), "DXF import warnings")
+                QApplication.instance().outputMessage('\n'.join(alerts), self.tr("DXF import warnings"))
+
+    def changeEvent(self, event):
+        if event.type() == QEvent.Type.LanguageChange and hasattr(self, 'selectButton'):
+            self.selectButton.setText(self.tr('Select'))
+        super().changeEvent(event)

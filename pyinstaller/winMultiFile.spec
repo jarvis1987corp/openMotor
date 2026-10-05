@@ -1,37 +1,31 @@
 # -*- mode: python -*-
+from pathlib import Path
+import sys
 
-block_cipher = None
+sys.path.insert(0, str(Path(SPECPATH)))
+from windows_common import ROOT, analysis
 
-
-a = Analysis(['../main.py'],
-             pathex=['../'],
-             binaries=[],
-             datas=[('../resources', 'resources')],
-             hiddenimports=['pywt._extensions._cwt'],
-             hookspath=[],
-             runtime_hooks=[],
-             excludes=[],
-             win_no_prefer_redirects=False,
-             win_private_assemblies=False,
-             cipher=block_cipher,
-             noarchive=False)
-pyz = PYZ(a.pure, a.zipped_data,
-             cipher=block_cipher)
-exe = EXE(pyz,
-          a.scripts,
-          [],
-          exclude_binaries=True,
-          name='openMotor',
-          debug=False,
-          bootloader_ignore_signals=False,
-          strip=False,
-          upx=True,
-          console=False,
-          icon='../resources/oMIconCycles.ico')
-coll = COLLECT(exe,
-               a.binaries,
-               a.zipfiles,
-               a.datas,
-               strip=False,
-               upx=True,
-               name='openMotor')
+a = analysis()
+pyz = PYZ(a.pure)
+exe = EXE(
+    pyz,
+    a.scripts,
+    [],
+    exclude_binaries=True,
+    name="openMotor",
+    debug=False,
+    bootloader_ignore_signals=False,
+    strip=False,
+    upx=False,
+    console=False,
+    contents_directory="_internal",
+    icon=str(ROOT / "resources" / "oMIconCycles.ico"),
+)
+coll = COLLECT(
+    exe,
+    a.binaries,
+    a.datas,
+    strip=False,
+    upx=False,
+    name="openMotor",
+)

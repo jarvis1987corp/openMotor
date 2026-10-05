@@ -1,0 +1,582 @@
+"""Exercise real widgets, background calculations and explicit document handoff."""
+
+import ast
+import copy
+import dataclasses
+import json
+import math
+import time
+import unittest
+import xml.etree.ElementTree as ET
+from pathlib import Path
+from unittest.mock import patch
+
+# Reuse the existing cross-platform isolation BEFORE App/logger imports.
+from test.localization import test_localization as isolation
+
+# isort: split
+from PyQt6.QtCore import QCoreApplication, Qt, QThread, QTimer
+from PyQt6.QtWidgets import QMessageBox
+
+from designassistant import CandidateGenerator, MetricValue, OutcomeStatus, SimulationOutcome, Snapshot
+from motorlib.motor import Motor
+from motorlib.units import convert
+from uilib.designassistant.presentation import CORE_MESSAGES, UI_MESSAGES, diagnostic_text
+from uilib.designassistant.results import ID_ROLE
+from uilib.fileIO import fileTypes, loadFile, saveFile
+from uilib.localization import TRANSLATIONS_PATH
+
+ROOT = Path(__file__).resolve().parents[2]
+APP = None
+BASELINE = None
+SOURCE = None
+
+
+def setUpModule():
+    global APP, BASELINE, SOURCE
+    isolation.setUpModule()
+    APP = isolation.APP
+    BASELINE = Motor(loadFile(ROOT / "test/data/regression/simple/motor.ric", fileTypes.MOTOR)).getDict()
+    APP.propellantManager.propellants.append(Motor(copy.deepcopy(BASELINE)).propellant)
+    SOURCE = Path(isolation._data.name) / "исходный двигатель.ric"
+
+
+def tearDownModule():
+    isolation.tearDownModule()
+
+
+class DesignGuiTests(unittest.TestCase):
+    def setUp(self):
+        APP.translationManager.setLanguage("en")
+        APP.processEvents()
+        APP.window.ui.motorEditor.close()
+        saveFile(SOURCE, copy.deepcopy(BASELINE), fileTypes.MOTOR)
+        APP.fileManager.startFromMotor(Motor(copy.deepcopy(BASELINE)), str(SOURCE), checkPropellant=False)
+        APP.window.postLoadUpdate()
+        self.original_snapshot = Snapshot.from_dict(APP.fileManager.getCurrentMotor().getDict())
+        APP.window.designAssistantAction.trigger()
+        self.window = APP.window.designAssistant
+        self.warnings = patch.object(QMessageBox, "warning", return_value=QMessageBox.StandardButton.Ok)
+        self.warning = self.warnings.start()
+
+    def tearDown(self):
+        self.window.controller.stop()
+        self.wait_finished()
+        APP.translationManager.setLanguage("en")
+        APP.processEvents()
+        self.window.close()
+        APP.processEvents()
+        APP.processEvents()
+        APP.window.ui.motorEditor.close()
+        self.warnings.stop()
+
+    def wait_finished(self, timeout=30):
+        deadline = time.monotonic() + timeout
+        while self.window.controller.is_running and time.monotonic() < deadline:
+            APP.processEvents()
+            time.sleep(0.002)
+        APP.processEvents()
+        self.assertFalse(self.window.controller.is_running, "Worker failed to finish")
+
+    def configure(self, *, minimum=None, maximum=None, points=3, budget=3, strategy="grid", seed=123):
+        self.window.add_variable("nozzle.throat")
+        row = self.window.variable_rows[0]
+        value = convert(BASELINE["nozzle"]["throat"], row.option.unit, row.option.display_unit)
+        row.minimum.setValue(value * 0.99 if minimum is None else minimum)
+        row.maximum.setValue(value * 1.01 if maximum is None else maximum)
+        row.points.setValue(points)
+        self.window.budget.setValue(budget)
+        self.window.strategy.setCurrentIndex(self.window.strategy.findData(strategy))
+        self.window.seed.setValue(seed)
+
+    def search(self):
+        self.window.startButton.click()
+        self.wait_finished()
+        self.warning.assert_not_called()
+        return self.window.controller.evaluations
+
+    def select_source_row(self, row):
+        proxy_index = self.window.proxy.mapFromSource(self.window.model.index(row, 0))
+        self.window.table.selectRow(proxy_index.row())
+        APP.processEvents()
+
+    def test_menu_opens_separate_window_and_reuses_active_window(self):
+        self.assertTrue(self.window.isWindow())
+        APP.window.designAssistantAction.trigger()
+        self.assertIs(APP.window.designAssistant, self.window)
+        self.assertEqual(self.window.controller.baseline, self.original_snapshot)
+
+    def test_available_variables_use_friendly_labels_and_fixed_paths(self):
+        labels = [self.window.variableChooser.itemText(i) for i in range(self.window.variableChooser.count())]
+        paths = [self.window.variableChooser.itemData(i) for i in range(self.window.variableChooser.count())]
+        self.assertIn("nozzle.throat", paths)
+        self.assertIn("grains.0.length", paths)
+        self.assertFalse(any(path.startswith(("config.", "propellant.")) for path in paths))
+        self.assertFalse(any("nozzle." in label or "grains." in label for label in labels))
+
+    def test_input_units_convert_to_engine_units_once(self):
+        self.configure(minimum=0.4, maximum=0.5)
+        requirements = self.window.build_requirements()
+        option = self.window.variable_rows[0].option
+        self.assertEqual(requirements.variables[0].range.minimum, convert(0.4, option.display_unit, option.unit))
+        self.window.add_target("maximum_pressure")
+        row = self.window.target_rows[-1]
+        row.value.setValue(100)
+        row.scale.setValue(10)
+        target = self.window.build_requirements().targets[-1]
+        unit = APP.preferencesManager.preferences.getUnit("Pa")
+        self.assertEqual(target.value, convert(100, unit, "Pa"))
+        self.assertEqual(target.scale, convert(10, unit, "Pa"))
+
+    def test_grid_budget_and_order(self):
+        self.configure(points=5, budget=3)
+        self.search()
+        proposals = list(self.window.controller.proposals.values())
+        values = [p.assignments[0].value for p in proposals]
+        self.assertEqual(len(values), 3)
+        self.assertEqual(values, sorted(values))
+        self.assertEqual(self.window._progress.total, 3)
+        self.assertEqual(self.window._progress.processed, 3)
+
+    def test_zero_variable_grid_runs_baseline_once(self):
+        self.window.budget.setValue(100)
+        self.assertEqual(len(self.search()), 1)
+
+    def test_random_search_same_seed_includes_identical_metrics(self):
+        self.configure(strategy="random", budget=8, seed=91)
+        self.search()
+        first = tuple(self.window.model.rows)
+        self.search()
+        self.assertEqual(tuple(self.window.model.rows), first)
+        self.window.seed.setValue(92)
+        self.search()
+        self.assertNotEqual(tuple(p for p, _ in self.window.model.rows), tuple(p for p, _ in first))
+
+    def test_gui_heartbeat_and_signal_thread_affinity(self):
+        self.configure(strategy="random", budget=15)
+        ticks, receivers = [], []
+        timer = QTimer()
+        timer.setInterval(1)
+        timer.timeout.connect(lambda: ticks.append(True))
+        self.window.controller.candidateReady.connect(lambda *_: receivers.append(QThread.currentThread()))
+        timer.start()
+        original = Motor.runSimulation
+
+        def slow_calculation(motor, callback=None):
+            time.sleep(0.02)
+            return original(motor, callback)
+
+        with patch.object(Motor, "runSimulation", slow_calculation):
+            self.search()
+        timer.stop()
+        self.assertGreater(len(ticks), 5)
+        self.assertTrue(receivers)
+        self.assertTrue(all(thread == APP.thread() for thread in receivers))
+
+    def test_stop_prevents_new_candidates(self):
+        self.configure(strategy="random", budget=1000)
+        self.window.start_search()
+        self.window.stopButton.click()
+        self.wait_finished()
+        self.assertEqual(self.window._state, "stopped")
+        self.assertLess(self.window._progress.processed, 1000)
+        self.assertTrue(self.window.startButton.isEnabled())
+
+    def test_stop_during_engine_callback(self):
+        self.configure(strategy="random", budget=1000)
+        self.window.controller.progressChanged.connect(
+            lambda p: self.window.stop_search() if p.current > 0 and self.window.controller.is_running else None
+        )
+        self.window.start_search()
+        self.wait_finished()
+        self.assertEqual(self.window._state, "stopped")
+        self.assertLess(self.window._progress.processed, 1000)
+
+    def test_invalid_candidate_does_not_abort_search(self):
+        self.configure(minimum=0, points=2, budget=2)
+        self.search()
+        evaluations = list(self.window.controller.evaluations.values())
+        self.assertFalse(evaluations[0].outcome.valid)
+        self.assertTrue(evaluations[1].outcome.valid)
+        self.assertEqual(self.window._progress.errors, 1)
+        self.assertEqual(self.window._progress.rejected, 1)
+        self.assertEqual(self.window._progress.feasible, 1)
+        self.select_source_row(0)
+        self.assertFalse(self.window.openButton.isEnabled())
+
+    def test_engine_exception_does_not_abort_search(self):
+        self.configure(points=3)
+        original = Motor.runSimulation
+        count = 0
+
+        def fail_once(motor, callback=None):
+            nonlocal count
+            count += 1
+            if count == 1:
+                raise RuntimeError("Injected candidate failure")
+            return original(motor, callback)
+
+        with patch.object(Motor, "runSimulation", fail_once):
+            self.search()
+        self.assertEqual(self.window._progress.processed, 3)
+        self.assertEqual(self.window._progress.errors, 1)
+        self.assertEqual(self.window._progress.feasible, 2)
+
+    def test_generator_exception_is_candidate_local(self):
+        self.configure(points=3)
+        original = CandidateGenerator.generate
+        count = 0
+
+        def fail_once(generator, proposal):
+            nonlocal count
+            count += 1
+            if count == 1:
+                raise RuntimeError("Injected generator failure")
+            return original(generator, proposal)
+
+        with patch.object(CandidateGenerator, "generate", fail_once):
+            self.search()
+        self.assertEqual(self.window._progress.processed, 3)
+        self.assertEqual(self.window._progress.errors, 1)
+        self.assertEqual(self.window._progress.feasible, 2)
+
+    def test_rejected_setter_never_reaches_engine(self):
+        self.configure(points=3)
+        original = CandidateGenerator.generate
+        run = Motor.runSimulation
+        count = 0
+        simulated = []
+
+        def generate(generator, proposal):
+            nonlocal count
+            count += 1
+            if count == 1:
+
+                def reject(snapshot):
+                    motor = Motor(snapshot)
+                    motor.nozzle.props["throat"].setValue = lambda value: None
+                    return motor
+
+                with patch("designassistant.generator.Motor", side_effect=reject):
+                    return original(generator, proposal)
+            return original(generator, proposal)
+
+        def simulate(motor, callback=None):
+            simulated.append(True)
+            return run(motor, callback)
+
+        with patch.object(CandidateGenerator, "generate", generate), patch.object(Motor, "runSimulation", simulate):
+            self.search()
+        self.assertEqual(len(simulated), 2)
+        self.assertEqual(self.window._progress.errors, 1)
+
+    def _draft_and_select_candidate(self):
+        self.configure()
+        self.search()
+        APP.window.ui.tableWidgetGrainList.selectRow(0)
+        APP.window.editGrain()
+        editor = APP.window.ui.motorEditor
+        editor.propertyEditors["length"].editor.setValue(editor.propertyEditors["length"].editor.value() + 0.01)
+        self.select_source_row(0)
+        return editor
+
+    def test_apply_draft_then_cancel_handoff_preserves_current_document(self):
+        editor = self._draft_and_select_candidate()
+        source = SOURCE.read_bytes()
+        with (
+            patch.object(QMessageBox, "question", return_value=QMessageBox.StandardButton.Apply),
+            patch.object(QMessageBox, "exec", return_value=QMessageBox.StandardButton.Cancel),
+        ):
+            self.window.open_selected()
+        self.assertFalse(editor.hasPendingChanges())
+        self.assertEqual(APP.fileManager.fileName, str(SOURCE))
+        self.assertEqual(APP.fileManager.currentVersion, 1)
+        self.assertEqual(SOURCE.read_bytes(), source)
+        self.assertEqual(self.window.controller.baseline, self.original_snapshot)
+
+    def test_discard_editor_draft_allows_unsaved_candidate_handoff(self):
+        editor = self._draft_and_select_candidate()
+        source = SOURCE.read_bytes()
+        with patch.object(QMessageBox, "question", return_value=QMessageBox.StandardButton.Discard):
+            self.window.open_selected()
+        self.assertFalse(editor.hasPendingChanges())
+        self.assertIsNone(APP.fileManager.fileName)
+        self.assertEqual(APP.fileManager.savedVersion, -1)
+        self.assertEqual(SOURCE.read_bytes(), source)
+
+    def test_main_window_exit_defers_until_worker_stops_then_checks_unsaved(self):
+        self.configure(strategy="random", budget=1000)
+        self.window.start_search()
+        with patch.object(APP.fileManager, "unsavedCheck", return_value=False) as check:
+            APP.window.close()
+            self.wait_finished()
+            APP.processEvents()
+            check.assert_called_once()
+        self.assertFalse(APP.window._closeAfterDesignSearch)
+        self.assertEqual(self.window._state, "stopped")
+
+    def test_constraints_and_warning_policy(self):
+        self.configure()
+        self.window.add_constraint("maximum_pressure")
+        bound = self.window.constraint_rows[0].maximum
+        bound.value.setValue(0)
+        self.search()
+        self.assertTrue(all(e.score is None for e in self.window.controller.evaluations.values()))
+        self.assertEqual(self.window._progress.rejected, 3)
+        self.assertEqual(self.window._progress.errors, 0)
+        self.window.constraint_rows.clear()
+        self.window.constraintsTable.setRowCount(0)
+        self.window.rejectWarnings.setChecked(True)
+        self.search()
+        for evaluation in self.window.controller.evaluations.values():
+            if any(d.level == "WARNING" for d in evaluation.outcome.diagnostics):
+                self.assertIsNone(evaluation.score)
+
+    def test_invalid_settings_preserve_existing_results(self):
+        self.configure()
+        self.search()
+        before = tuple(self.window.model.rows)
+        self.window.variable_rows[0].points.setValue(1)
+        self.window.start_search()
+        self.warning.assert_called_once()
+        self.assertEqual(tuple(self.window.model.rows), before)
+        self.assertFalse(self.window.controller.is_running)
+
+    def test_missing_target_rejected_before_start(self):
+        self.window.target_rows.clear()
+        self.window.targetsTable.setRowCount(0)
+        self.window.start_search()
+        self.warning.assert_called_once()
+        self.assertFalse(self.window.controller.is_running)
+
+    def test_language_roundtrip_preserves_inputs_results_selection_and_details(self):
+        self.configure(strategy="random", budget=5)
+        self.window.add_constraint("maximum_pressure")
+        self.window.constraint_rows[0].maximum.value.setValue(100000)
+        self.search()
+        self.select_source_row(2)
+        selected = self.window.selected_id()
+        self.window.show_details()
+        requirements = self.window.build_requirements()
+        rows = tuple(self.window.model.rows)
+        for language in ("en", "ru", "en"):
+            APP.translationManager.setLanguage(language)
+            APP.processEvents()
+            self.assertEqual(self.window.build_requirements(), requirements)
+            self.assertEqual(tuple(self.window.model.rows), rows)
+            self.assertEqual(self.window.selected_id(), selected)
+            self.assertEqual(self.window.details.candidate_id, selected)
+            self.assertEqual(self.window.tabs.tabText(0), "Переменные" if language == "ru" else "Variables")
+            self.assertEqual(
+                APP.window.designAssistantAction.text(),
+                "Помощник проектирования" if language == "ru" else "Design Assistant",
+            )
+            self.assertIn(
+                "Средняя тяга" if language == "ru" else "Average Thrust", self.window.details.text.toPlainText()
+            )
+
+    def test_switch_language_during_search(self):
+        self.configure(strategy="random", budget=10)
+        requirements = self.window.build_requirements()
+        self.window.start_search()
+        APP.translationManager.setLanguage("ru")
+        APP.processEvents()
+        self.wait_finished()
+        self.assertEqual(self.window.build_requirements(), requirements)
+        self.assertEqual(len(self.window.model.rows), 10)
+        APP.translationManager.setLanguage("en")
+        APP.processEvents()
+        self.assertEqual(len(self.window.model.rows), 10)
+
+    def test_sorting_and_status_text_filtering(self):
+        self.configure(minimum=0, points=3)
+        self.search()
+        self.window.statusFilter.setCurrentIndex(self.window.statusFilter.findData("error"))
+        self.assertEqual(self.window.proxy.rowCount(), 1)
+        self.window.textFilter.setText("definitely no matching text")
+        self.assertEqual(self.window.proxy.rowCount(), 0)
+        self.window.textFilter.clear()
+        self.window.statusFilter.setCurrentIndex(self.window.statusFilter.findData("feasible"))
+        self.assertEqual(self.window.proxy.rowCount(), 2)
+        self.window.proxy.sort(2, Qt.SortOrder.AscendingOrder)
+        ids = [self.window.proxy.data(self.window.proxy.index(i, 0), ID_ROLE) for i in range(2)]
+        scores = [self.window.controller.evaluations[key].score for key in ids]
+        self.assertEqual(scores, sorted(scores))
+
+    def test_open_candidate_is_new_unsaved_document_with_no_source_write(self):
+        self.configure()
+        original_bytes = SOURCE.read_bytes()
+        history = copy.deepcopy(APP.fileManager.fileHistory)
+        self.search()
+        self.assertEqual(APP.fileManager.fileHistory, history)
+        self.select_source_row(1)
+        candidate_id = self.window.selected_id()
+        expected = self.window.controller.request_for(candidate_id).snapshot
+        self.window.openButton.click()
+        self.assertIsNone(APP.fileManager.fileName)
+        self.assertEqual(APP.fileManager.savedVersion, -1)
+        self.assertEqual(APP.fileManager.currentVersion, 0)
+        self.assertEqual(Snapshot.from_dict(APP.fileManager.getCurrentMotor().getDict()), expected)
+        self.assertTrue(APP.window.windowTitle().endswith("*"))
+        self.assertEqual(SOURCE.read_bytes(), original_bytes)
+        self.assertEqual(self.window.controller.baseline, self.original_snapshot)
+        self.assertFalse(APP.fileManager.canUndo())
+        self.assertFalse(APP.fileManager.canRedo())
+
+    def test_cancel_unsaved_original_prevents_candidate_handoff(self):
+        self.configure()
+        self.search()
+        motor = APP.fileManager.getCurrentMotor()
+        motor.nozzle.setProperty("throat", motor.nozzle.getProperty("throat") * 1.02)
+        APP.fileManager.addNewMotorHistory(motor)
+        history = copy.deepcopy(APP.fileManager.fileHistory)
+        self.select_source_row(0)
+        with patch.object(QMessageBox, "exec", return_value=QMessageBox.StandardButton.Cancel):
+            self.window.open_selected()
+        self.assertEqual(APP.fileManager.fileHistory, history)
+        self.assertEqual(APP.fileManager.fileName, str(SOURCE))
+
+    def test_cancel_save_as_does_not_discard_unsaved_candidate(self):
+        APP.fileManager.openUnsavedSnapshot(copy.deepcopy(BASELINE))
+        history = copy.deepcopy(APP.fileManager.fileHistory)
+        with (
+            patch.object(QMessageBox, "exec", return_value=QMessageBox.StandardButton.Save),
+            patch.object(APP.fileManager, "showSaveDialog", return_value=None),
+        ):
+            self.assertFalse(APP.fileManager.openUnsavedSnapshot(copy.deepcopy(BASELINE)))
+        self.assertEqual(APP.fileManager.fileHistory, history)
+        self.assertIsNone(APP.fileManager.fileName)
+        self.assertEqual(APP.fileManager.savedVersion, -1)
+
+    def test_failed_save_does_not_allow_document_replacement(self):
+        APP.fileManager.savedVersion = -1
+        with (
+            patch.object(QMessageBox, "exec", return_value=QMessageBox.StandardButton.Save),
+            patch("uilib.fileManager.saveFile", side_effect=OSError("Injected failure")),
+            patch.object(APP, "outputException"),
+        ):
+            self.assertFalse(APP.fileManager.unsavedCheck())
+        self.assertEqual(APP.fileManager.fileName, str(SOURCE))
+
+    def test_unapplied_editor_cancel_preserves_draft_and_project(self):
+        self.configure()
+        self.search()
+        APP.window.ui.tableWidgetGrainList.selectRow(0)
+        APP.window.editGrain()
+        editor = APP.window.ui.motorEditor
+        widget = editor.propertyEditors["length"].editor
+        widget.setValue(widget.value() + 0.01)
+        self.assertTrue(editor.hasPendingChanges())
+        history = copy.deepcopy(APP.fileManager.fileHistory)
+        self.select_source_row(0)
+        with patch.object(QMessageBox, "question", return_value=QMessageBox.StandardButton.Cancel):
+            self.window.open_selected()
+        self.assertTrue(editor.hasPendingChanges())
+        self.assertEqual(APP.fileManager.fileHistory, history)
+
+    def test_unsaved_candidate_save_as_keeps_original_file(self):
+        before = SOURCE.read_bytes()
+        APP.fileManager.openUnsavedSnapshot(copy.deepcopy(BASELINE))
+        destination = SOURCE.parent / "выбранный кандидат.ric"
+        with patch.object(APP.fileManager, "showSaveDialog", return_value=str(destination)):
+            APP.fileManager.save()
+        self.assertEqual(SOURCE.read_bytes(), before)
+        self.assertEqual(APP.fileManager.fileName, str(destination))
+        self.assertEqual(APP.fileManager.savedVersion, 0)
+        self.assertEqual(loadFile(destination, fileTypes.MOTOR), BASELINE)
+
+    def test_close_window_stops_worker_without_blocking(self):
+        self.configure(strategy="random", budget=1000)
+        self.window.start_search()
+        started = time.monotonic()
+        self.window.close()
+        self.assertLess(time.monotonic() - started, 0.2)
+        self.wait_finished()
+        self.assertIsNone(APP.window.designAssistant)
+        # WA_DeleteOnClose deletes the dialog later; avoid a second close in teardown.
+        self.window = self._replacement_window()
+
+    def _replacement_window(self):
+        APP.window.openDesignAssistant()
+        return APP.window.designAssistant
+
+    def test_localized_diagnostic_keeps_english_core_unchanged(self):
+        self.configure(minimum=0, points=2, budget=2)
+        self.search()
+        evaluation = next(iter(self.window.controller.evaluations.values()))
+        diagnostic = evaluation.outcome.diagnostics[0]
+        before = dataclasses.asdict(diagnostic)
+        english = diagnostic_text(diagnostic, self.window.options)
+        APP.translationManager.setLanguage("ru")
+        APP.processEvents()
+        russian = diagnostic_text(diagnostic, self.window.options)
+        self.assertNotEqual(english, russian)
+        self.assertEqual(dataclasses.asdict(diagnostic), before)
+
+    def test_nonfinite_result_is_rejected_with_localized_channel_diagnostic(self):
+        self.configure(points=2, budget=2)
+        original = Motor.runSimulation
+
+        def nonfinite(motor, callback=None):
+            result = original(motor, callback)
+            result.channels["pressure"].data[-1] = math.nan
+            return result
+
+        with patch.object(Motor, "runSimulation", nonfinite):
+            self.search()
+        self.assertEqual(self.window._progress.errors, 2)
+        self.assertTrue(all(e.score is None for e in self.window.controller.evaluations.values()))
+        APP.translationManager.setLanguage("ru")
+        APP.processEvents()
+        diagnostic = list(self.window.controller.evaluations.values())[0].outcome.diagnostics[-1]
+        text = diagnostic_text(diagnostic, self.window.options)
+        self.assertIn("Давление в камере", text)
+        self.assertNotIn("Nonfinite", text)
+
+    def test_all_programmatic_and_core_messages_are_in_catalog(self):
+        root = ET.parse(TRANSLATIONS_PATH / "openmotor_ru.ts").getroot()
+        identities = {
+            (c.findtext("name"), m.findtext("source")) for c in root.findall("context") for m in c.findall("message")
+        }
+        for message in (*CORE_MESSAGES, *UI_MESSAGES):
+            self.assertIn((message.context, message.source), identities)
+        literals = set()
+        for filename in ("window.py", "results.py", "presentation.py"):
+            tree = ast.parse((ROOT / "uilib/designassistant" / filename).read_text())
+            for node in ast.walk(tree):
+                if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "translate":
+                    if node.args and isinstance(node.args[0], ast.Constant):
+                        literals.add(node.args[0].value)
+        for source in literals:
+            self.assertIn(("DesignAssistant", source), identities)
+        for source in ("Search: %v/%m", "Current candidate: %p%"):
+            self.assertEqual(QCoreApplication.translate("DesignAssistant", source), source)
+
+    def test_numeric_sort_is_not_lexicographic(self):
+        # Table sorting must distinguish 2 vs 10 without formatting affecting order.
+        self.configure(points=2, budget=2)
+        self.search()
+        model = self.window.model
+        for index, value in enumerate((10.0, 2.0)):
+            proposal, evaluation = model.rows[index]
+            metrics = tuple(
+                MetricValue(m.key, value if m.key == "burn_time" else m.value, m.unit)
+                for m in evaluation.outcome.metrics
+            )
+            outcome = dataclasses.replace(evaluation.outcome, metrics=metrics)
+            model.rows[index] = proposal, dataclasses.replace(evaluation, outcome=outcome)
+        self.window.proxy.sort(5 + len(model.variables), Qt.SortOrder.AscendingOrder)
+        first = self.window.proxy.data(self.window.proxy.index(0, 0), ID_ROLE)
+        self.assertEqual(first, model.rows[1][0].candidate_id)
+
+    def test_outcome_does_not_acquire_gui_objects(self):
+        self.configure()
+        self.search()
+        for evaluation in self.window.controller.evaluations.values():
+            self.assertIsInstance(evaluation.outcome, SimulationOutcome)
+            self.assertEqual(evaluation.outcome.status, OutcomeStatus.COMPLETED)
+            json.dumps(dataclasses.asdict(evaluation.outcome), allow_nan=False)
+
+
+if __name__ == "__main__":
+    unittest.main()

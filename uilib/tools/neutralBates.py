@@ -1,3 +1,4 @@
+from motorlib.localization import QT_TRANSLATE_NOOP
 import motorlib
 
 from ..tool import Tool
@@ -5,14 +6,14 @@ from motorlib.constants import maximumRefDiameter, maximumRefLength
 
 class NeutralBatesTool(Tool):
     def __init__(self, manager):
-        props = {'length': motorlib.properties.FloatProperty('Propellant length', 'm', 0, maximumRefLength),
-                 'diameter': motorlib.properties.FloatProperty('Propellant diameter', 'm', 0, maximumRefDiameter),
-                 'grainSpace': motorlib.properties.FloatProperty('Grain spacer length', 'm', 0, maximumRefLength/10),
-                 'Kn': motorlib.properties.FloatProperty('Initial Kn', '', 1, 1000)}
+        props = {'length': motorlib.properties.FloatProperty(QT_TRANSLATE_NOOP('MotorProperties', 'Propellant length'), 'm', 0, maximumRefLength),
+                 'diameter': motorlib.properties.FloatProperty(QT_TRANSLATE_NOOP('MotorProperties', 'Propellant diameter'), 'm', 0, maximumRefDiameter),
+                 'grainSpace': motorlib.properties.FloatProperty(QT_TRANSLATE_NOOP('MotorProperties', 'Grain spacer length'), 'm', 0, maximumRefLength/10),
+                 'Kn': motorlib.properties.FloatProperty(QT_TRANSLATE_NOOP('MotorProperties', 'Initial Kn'), '', 1, 1000)}
 
         super().__init__(manager,
-                         'Neutral BATES Geometry',
-                         'Use this tool to generate the geometry for a neutral BATES motor of a specified diameter and length. The length field should be the total length that the propellant fits into, including spacers.',
+                         QT_TRANSLATE_NOOP('Tools', 'Neutral BATES Geometry'),
+                         QT_TRANSLATE_NOOP('Tools', 'Use this tool to generate the geometry for a neutral BATES motor of a specified diameter and length. The length field should be the total length that the propellant fits into, including spacers.'),
                          props,
                          False)
 

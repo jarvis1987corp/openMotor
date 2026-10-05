@@ -1,7 +1,10 @@
+from motorlib.localization import QT_TRANSLATE_NOOP
 import xml.etree.ElementTree as ET
 
 import motorlib
 from motorlib.constants import standardGravity
+from PyQt6.QtCore import QCoreApplication
+from ..localization import geometry_name
 from ..converter import Exporter
 
 # Attributes for the root element of the BSX file
@@ -35,9 +38,9 @@ def mToIn(value):
 
 class BurnSimExporter(Exporter):
     def __init__(self, manager):
-        super().__init__(manager, 'BurnSim File',
-            'Exports the current motor for use in BurnSim 3.0', {'.bsx': 'BurnSim Files'})
-        self.reqNotMet = "Current motor must have a propellant set to export as a BurnSim file."
+        super().__init__(manager, QT_TRANSLATE_NOOP('Converters', 'BurnSim File'),
+            QT_TRANSLATE_NOOP('Converters', 'Exports the current motor for use in BurnSim 3.0'), {'.bsx': QT_TRANSLATE_NOOP('Converters', 'BurnSim Files')})
+        self.reqNotMet = QT_TRANSLATE_NOOP('Converters', "Current motor must have a propellant set to export as a BurnSim file.")
 
     def doConversion(self, path, config):
         """Takes a path to a bsx file and motor object and dumps the BSX version of the motor to the file"""
@@ -115,12 +118,12 @@ class BurnSimExporter(Exporter):
                 ET.SubElement(outProp, 'Notes')
 
             else:
-                errors += "Can't export grain #" + str(gid + 1) + " because it has type " + grain.geomName + ".\n"
+                errors += QCoreApplication.translate('BurnSimExporter', "Can't export grain #{} because it has type {}.\n").format(gid + 1, geometry_name(grain.geomName))
         # Add empty notes section
         ET.SubElement(outMotor, 'MotorNotes')
 
         if errors != '':
-            self.manager.app.outputMessage(errors + '\nThe rest of the motor will be exported.')
+            self.manager.app.outputMessage(errors + QCoreApplication.translate('BurnSimExporter', '\nThe rest of the motor will be exported.'))
 
         with open(path, 'wb') as outFile:
             outFile.write(ET.tostring(outMotor))

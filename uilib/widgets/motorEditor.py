@@ -1,4 +1,7 @@
 from PyQt6.QtWidgets import QLabel
+from PyQt6.QtCore import QEvent
+from motorlib.localization import QT_TRANSLATE_NOOP
+from ..localization import display_text
 
 import motorlib.grain
 import motorlib.nozzle
@@ -12,7 +15,8 @@ class MotorEditor(CollectionEditor):
     def __init__(self, parent):
         super().__init__(parent, True)
 
-        self.expRatioLabel = QLabel("Expansion ratio: -")
+        self._expRatioText = QT_TRANSLATE_NOOP('MotorEditor', 'Expansion ratio: -')
+        self.expRatioLabel = QLabel(display_text(self._expRatioText))
         self.expRatioLabel.hide()
         self.stats.addWidget(self.expRatioLabel)
 
@@ -31,9 +35,10 @@ class MotorEditor(CollectionEditor):
             exitDia = self.propertyEditors['exit'].getValue()
             throatDia = self.propertyEditors['throat'].getValue()
             if throatDia == 0:
-                self.expRatioLabel.setText('Expansion ratio: -')
+                self._expRatioText = QT_TRANSLATE_NOOP('MotorEditor', 'Expansion ratio: -')
             else:
-                self.expRatioLabel.setText('Expansion ratio: {:.3f}'.format((exitDia / throatDia) ** 2))
+                self._expRatioText = QT_TRANSLATE_NOOP('MotorEditor', 'Expansion ratio: {:.3f}').format((exitDia / throatDia) ** 2)
+            self.expRatioLabel.setText(display_text(self._expRatioText))
             nozzle = self.objType()
             nozzle.setProperties(self.getProperties())
             self.nozzlePreview.loadNozzle(nozzle)
@@ -69,3 +74,8 @@ class MotorEditor(CollectionEditor):
         self.nozzlePreview.hide()
         self.grainPreview.cleanup()
         super().cleanup()
+
+    def changeEvent(self, event):
+        if event.type() == QEvent.Type.LanguageChange and hasattr(self, '_expRatioText'):
+            self.expRatioLabel.setText(display_text(self._expRatioText))
+        super().changeEvent(event)

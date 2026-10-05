@@ -1,3 +1,4 @@
+from motorlib.localization import QT_TRANSLATE_NOOP
 import motorlib
 
 from ..tool import Tool
@@ -7,8 +8,8 @@ class ExpansionTool(Tool):
     def __init__(self, manager):
         props = {}
         super().__init__(manager,
-                         'Nozzle Expansion',
-                         'Use this tool to set the nozzle exit diameter to optimize expansion for your configured ambient pressure.',
+                         QT_TRANSLATE_NOOP('Tools', 'Nozzle Expansion'),
+                         QT_TRANSLATE_NOOP('Tools', 'Use this tool to set the nozzle exit diameter to optimize expansion for your configured ambient pressure.'),
                          props,
                          True)
 

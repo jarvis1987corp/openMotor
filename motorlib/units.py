@@ -1,21 +1,23 @@
 """This module contains tables of units and their long form names, their conversion rates with other units, and
 functions for performing conversion."""
 
+from .localization import QT_TRANSLATE_NOOP
+
 # The keys in this dictionary specify the units that all calculations are done in internally
 unitLabels = {
-    'm': 'Length',
-    'm^3': 'Volume',
-    'm/s': 'Velocity',
-    'N': 'Force',
-    'Ns': 'Impulse',
-    'Pa': 'Pressure',
-    'kg': 'Mass',
-    'kg/m^3': 'Density',
-    'kg/s': 'Mass Flow',
-    'kg/(m^2*s)': 'Mass Flux',
-    'm/(s*Pa^n)': 'Burn Rate Coefficient',
-    '(m*Pa)/s': 'Nozzle Slag Coefficient',
-    'm/(s*Pa)': 'Nozzle Erosion Coefficient'
+    'm': QT_TRANSLATE_NOOP('MotorProperties', 'Length'),
+    'm^3': QT_TRANSLATE_NOOP('MotorProperties', 'Volume'),
+    'm/s': QT_TRANSLATE_NOOP('MotorProperties', 'Velocity'),
+    'N': QT_TRANSLATE_NOOP('MotorProperties', 'Force'),
+    'Ns': QT_TRANSLATE_NOOP('MotorProperties', 'Impulse'),
+    'Pa': QT_TRANSLATE_NOOP('MotorProperties', 'Pressure'),
+    'kg': QT_TRANSLATE_NOOP('MotorProperties', 'Mass'),
+    'kg/m^3': QT_TRANSLATE_NOOP('MotorProperties', 'Density'),
+    'kg/s': QT_TRANSLATE_NOOP('MotorProperties', 'Mass Flow'),
+    'kg/(m^2*s)': QT_TRANSLATE_NOOP('MotorProperties', 'Mass Flux'),
+    'm/(s*Pa^n)': QT_TRANSLATE_NOOP('MotorProperties', 'Burn Rate Coefficient'),
+    '(m*Pa)/s': QT_TRANSLATE_NOOP('MotorProperties', 'Nozzle Slag Coefficient'),
+    'm/(s*Pa)': QT_TRANSLATE_NOOP('MotorProperties', 'Nozzle Erosion Coefficient')
 }
 
 unitTable = [
@@ -89,7 +91,7 @@ def getConversion(originUnit, destUnit):
             return conversion[2]
         if conversion[1] == originUnit and conversion[0] == destUnit:
             return 1/conversion[2]
-    raise KeyError("Cannot find conversion from <" + originUnit + "> to <" + destUnit + ">")
+    raise KeyError(QT_TRANSLATE_NOOP('ModelErrors', "Cannot find conversion from <{}> to <{}>").format(originUnit, destUnit))
 
 def convert(quantity, originUnit, destUnit):
     """Returns the value of 'quantity' when it is converted from 'originUnit' to 'destUnit'."""

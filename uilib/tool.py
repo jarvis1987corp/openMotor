@@ -1,9 +1,11 @@
 from PyQt6.QtWidgets import QApplication, QDialog, QLabel, QVBoxLayout
+from PyQt6.QtCore import QEvent
 
 import motorlib
 
 from .logger import logger
 from .widgets.collectionEditor import CollectionEditor
+from .localization import display_text
 
 
 class Tool(QDialog):
@@ -22,11 +24,11 @@ class Tool(QDialog):
         # Previously entered value(s), if any
         self.previousValues = None
 
-        self.setWindowTitle(self.name)
+        self.setWindowTitle(display_text(self.name))
         self.setWindowIcon(QApplication.instance().icon)
         self.setLayout(QVBoxLayout())
 
-        self.descLabel = QLabel(self.description)
+        self.descLabel = QLabel(display_text(self.description))
         self.descLabel.setWordWrap(True)
         self.layout().addWidget(self.descLabel)
 
@@ -38,6 +40,12 @@ class Tool(QDialog):
     def setPreferences(self, pref):
         self.preferences = pref
         self.editor.setPreferences(pref)
+
+    def changeEvent(self, event):
+        if event.type() == QEvent.Type.LanguageChange and hasattr(self, 'descLabel'):
+            self.setWindowTitle(display_text(self.name))
+            self.descLabel.setText(display_text(self.description))
+        super().changeEvent(event)
 
     def show(self):
         logger.log('Showing "{}" tool'.format(self.name))

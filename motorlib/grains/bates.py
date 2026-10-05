@@ -1,5 +1,7 @@
 """BATES submodule"""
 
+from ..localization import QT_TRANSLATE_NOOP
+
 import numpy as np
 import skfmm
 import mathlib
@@ -15,7 +17,7 @@ class BatesGrain(PerforatedGrain):
     geomName = "BATES"
     def __init__(self):
         super().__init__()
-        self.props['coreDiameter'] = FloatProperty('Core Diameter', 'm', 0, 5)
+        self.props['coreDiameter'] = FloatProperty(QT_TRANSLATE_NOOP('MotorProperties', 'Core Diameter'), 'm', 0, 5)
 
     def simulationSetup(self, config):
         self.wallWeb = (self.props['diameter'].getValue() - self.props['coreDiameter'].getValue()) / 2
@@ -29,15 +31,15 @@ class BatesGrain(PerforatedGrain):
         return outer - inner
 
     def getDetailsString(self, lengthUnit='m'):
-        return 'Length: {}, Core: {}'.format(self.props['length'].dispFormat(lengthUnit),
+        return QT_TRANSLATE_NOOP('GrainDetails', 'Length: {}, Core: {}').format(self.props['length'].dispFormat(lengthUnit),
                                              self.props['coreDiameter'].dispFormat(lengthUnit))
 
     def getGeometryErrors(self):
         errors = super().getGeometryErrors()
         if self.props['coreDiameter'].getValue() == 0:
-            errors.append(SimAlert(SimAlertLevel.ERROR, SimAlertType.GEOMETRY, 'Core diameter must not be 0'))
+            errors.append(SimAlert(SimAlertLevel.ERROR, SimAlertType.GEOMETRY, QT_TRANSLATE_NOOP('SimulationAlerts', 'Core diameter must not be 0')))
         if self.props['coreDiameter'].getValue() >= self.props['diameter'].getValue():
-            aText = 'Core diameter must be less than grain diameter'
+            aText = QT_TRANSLATE_NOOP('SimulationAlerts', 'Core diameter must be less than grain diameter')
             errors.append(SimAlert(SimAlertLevel.ERROR, SimAlertType.GEOMETRY, aText))
         return errors
 

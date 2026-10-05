@@ -1,4 +1,6 @@
 """This submodule houses the nozzle object and functions related to isentropic flow"""
+
+from .localization import QT_TRANSLATE_NOOP
 import math
 
 from scipy.optimize import fsolve
@@ -16,18 +18,18 @@ class Nozzle(PropertyCollection):
     """An object that contains the details about a motor's nozzle."""
     def __init__(self):
         super().__init__()
-        self.props['throat'] = FloatProperty('Throat Diameter', 'm', 0, maximumRefDiameter)
-        self.props['exit'] = FloatProperty('Exit Diameter', 'm', 0, maximumRefDiameter)
-        self.props['efficiency'] = FloatProperty('Efficiency', '', 0, 2)
-        self.props['divAngle'] = FloatProperty('Divergence Half Angle', 'deg', 0, 90)
-        self.props['convAngle'] = FloatProperty('Convergence Half Angle', 'deg', 0, 90)
-        self.props['throatLength'] = FloatProperty('Throat Length', 'm', 0, maximumRefLength / 10)
-        self.props['slagCoeff'] = FloatProperty('Slag Buildup Coefficient', '(m*Pa)/s', 0, 1e6)
-        self.props['erosionCoeff'] = FloatProperty('Throat Erosion Coefficient', 'm/(s*Pa)', 0, 1e6)
+        self.props['throat'] = FloatProperty(QT_TRANSLATE_NOOP('MotorProperties', 'Throat Diameter'), 'm', 0, maximumRefDiameter)
+        self.props['exit'] = FloatProperty(QT_TRANSLATE_NOOP('MotorProperties', 'Exit Diameter'), 'm', 0, maximumRefDiameter)
+        self.props['efficiency'] = FloatProperty(QT_TRANSLATE_NOOP('MotorProperties', 'Efficiency'), '', 0, 2)
+        self.props['divAngle'] = FloatProperty(QT_TRANSLATE_NOOP('MotorProperties', 'Divergence Half Angle'), 'deg', 0, 90)
+        self.props['convAngle'] = FloatProperty(QT_TRANSLATE_NOOP('MotorProperties', 'Convergence Half Angle'), 'deg', 0, 90)
+        self.props['throatLength'] = FloatProperty(QT_TRANSLATE_NOOP('MotorProperties', 'Throat Length'), 'm', 0, maximumRefLength / 10)
+        self.props['slagCoeff'] = FloatProperty(QT_TRANSLATE_NOOP('MotorProperties', 'Slag Buildup Coefficient'), '(m*Pa)/s', 0, 1e6)
+        self.props['erosionCoeff'] = FloatProperty(QT_TRANSLATE_NOOP('MotorProperties', 'Throat Erosion Coefficient'), 'm/(s*Pa)', 0, 1e6)
 
     def getDetailsString(self, lengthUnit='m'):
         """Returns a human-readable string containing some details about the nozzle."""
-        return 'Throat: {}'.format(self.props['throat'].dispFormat(lengthUnit))
+        return QT_TRANSLATE_NOOP('GrainDetails', 'Throat: {}').format(self.props['throat'].dispFormat(lengthUnit))
 
     def calcExpansion(self):
         """Returns the nozzle's expansion ratio."""
@@ -104,12 +106,12 @@ class Nozzle(PropertyCollection):
         """Returns a list containing any errors with the nozzle's properties."""
         errors = []
         if self.props['throat'].getValue() == 0:
-            aText = 'Throat diameter must not be 0'
-            errors.append(SimAlert(SimAlertLevel.ERROR, SimAlertType.GEOMETRY, aText, 'Nozzle'))
+            aText = QT_TRANSLATE_NOOP('SimulationAlerts', 'Throat diameter must not be 0')
+            errors.append(SimAlert(SimAlertLevel.ERROR, SimAlertType.GEOMETRY, aText, QT_TRANSLATE_NOOP('SimulationAlerts', 'Nozzle')))
         if self.props['exit'].getValue() < self.props['throat'].getValue():
-            aText = 'Exit diameter must not be smaller than throat diameter'
-            errors.append(SimAlert(SimAlertLevel.ERROR, SimAlertType.GEOMETRY, aText, 'Nozzle'))
+            aText = QT_TRANSLATE_NOOP('SimulationAlerts', 'Exit diameter must not be smaller than throat diameter')
+            errors.append(SimAlert(SimAlertLevel.ERROR, SimAlertType.GEOMETRY, aText, QT_TRANSLATE_NOOP('SimulationAlerts', 'Nozzle')))
         if self.props['efficiency'].getValue() == 0:
-            aText = 'Efficiency must not be 0'
-            errors.append(SimAlert(SimAlertLevel.ERROR, SimAlertType.CONSTRAINT, aText, 'Nozzle'))
+            aText = QT_TRANSLATE_NOOP('SimulationAlerts', 'Efficiency must not be 0')
+            errors.append(SimAlert(SimAlertLevel.ERROR, SimAlertType.CONSTRAINT, aText, QT_TRANSLATE_NOOP('SimulationAlerts', 'Nozzle')))
         return errors

@@ -1,5 +1,7 @@
 """Contains the motor class and a supporting configuration property collection."""
 
+from .localization import QT_TRANSLATE_NOOP
+
 from typing import Dict, Union, List
 import numpy as np
 from scipy.optimize import newton
@@ -22,34 +24,34 @@ class MotorConfig(PropertyCollection):
         super().__init__()
         # Limits
         self.props["maxPressure"] = FloatProperty(
-            "Maximum Allowed Pressure", "Pa", 0, 7e7
+            QT_TRANSLATE_NOOP('MotorProperties', "Maximum Allowed Pressure"), "Pa", 0, 7e7
         )
         self.props["maxMassFlux"] = FloatProperty(
-            "Maximum Allowed Mass Flux", "kg/(m^2*s)", 0, 1e4
+            QT_TRANSLATE_NOOP('MotorProperties', "Maximum Allowed Mass Flux"), "kg/(m^2*s)", 0, 1e4
         )
         self.props["maxMachNumber"] = FloatProperty(
-            "Maximum Allowed Core Mach Number", "", 0.00, 1e2
+            QT_TRANSLATE_NOOP('MotorProperties', "Maximum Allowed Core Mach Number"), "", 0.00, 1e2
         )
         self.props["minPortThroat"] = FloatProperty(
-            "Minimum Allowed Port/Throat Ratio", "", 1, 4
+            QT_TRANSLATE_NOOP('MotorProperties', "Minimum Allowed Port/Throat Ratio"), "", 1, 4
         )
         self.props["flowSeparationWarnPercent"] = FloatProperty(
-            "Flow Separation Warning Threshold", "", 0.00, 1
+            QT_TRANSLATE_NOOP('MotorProperties', "Flow Separation Warning Threshold"), "", 0.00, 1
         )
         # Simulation
         self.props["burnoutWebThres"] = FloatProperty(
-            "Web Burnout Threshold", "m", 2.54e-5, 3.175e-3
+            QT_TRANSLATE_NOOP('MotorProperties', "Web Burnout Threshold"), "m", 2.54e-5, 3.175e-3
         )
         self.props["burnoutThrustThres"] = FloatProperty(
-            "Thrust Burnout Threshold", "%", 0.01, 10
+            QT_TRANSLATE_NOOP('MotorProperties', "Thrust Burnout Threshold"), "%", 0.01, 10
         )
-        self.props["timestep"] = FloatProperty("Simulation Timestep", "s", 0.0001, 0.1)
+        self.props["timestep"] = FloatProperty(QT_TRANSLATE_NOOP('MotorProperties', "Simulation Timestep"), "s", 0.0001, 0.1)
         self.props["ambPressure"] = FloatProperty(
-            "Ambient Pressure", "Pa", 0.0001, 102000
+            QT_TRANSLATE_NOOP('MotorProperties', "Ambient Pressure"), "Pa", 0.0001, 102000
         )
-        self.props["mapDim"] = IntProperty("Grain Map Dimension", "", 250, 2000)
+        self.props["mapDim"] = IntProperty(QT_TRANSLATE_NOOP('MotorProperties', "Grain Map Dimension"), "", 250, 2000)
         self.props["sepPressureRatio"] = FloatProperty(
-            "Separation Pressure Ratio", "", 0.001, 1
+            QT_TRANSLATE_NOOP('MotorProperties', "Separation Pressure Ratio"), "", 0.001, 1
         )
 
 
@@ -202,25 +204,25 @@ class Motor:
 
         # Check for geometry errors
         if len(self.grains) == 0:
-            aText = "Motor must have at least one propellant grain"
+            aText = QT_TRANSLATE_NOOP('SimulationAlerts', "Motor must have at least one propellant grain")
             simRes.addAlert(
-                SimAlert(SimAlertLevel.ERROR, SimAlertType.CONSTRAINT, aText, "Motor")
+                SimAlert(SimAlertLevel.ERROR, SimAlertType.CONSTRAINT, aText, QT_TRANSLATE_NOOP('SimulationAlerts', "Motor"))
             )
         for gid, grain in enumerate(self.grains):
             if (
                 isinstance(grain, EndBurningGrain) and gid != 0
             ):  # Endburners have to be at the foward end
-                aText = "End burning grains must be the forward-most grain in the motor"
+                aText = QT_TRANSLATE_NOOP('SimulationAlerts', "End burning grains must be the forward-most grain in the motor")
                 simRes.addAlert(
                     SimAlert(
                         SimAlertLevel.ERROR,
                         SimAlertType.CONSTRAINT,
                         aText,
-                        "Grain {}".format(gid + 1),
+                        QT_TRANSLATE_NOOP('SimulationAlerts', "Grain {}").format(gid + 1),
                     )
                 )
             for alert in grain.getGeometryErrors():
-                alert.location = "Grain {}".format(gid + 1)
+                alert.location = QT_TRANSLATE_NOOP('SimulationAlerts', "Grain {}").format(gid + 1)
                 simRes.addAlert(alert)
         for alert in self.nozzle.getGeometryErrors():
             simRes.addAlert(alert)
@@ -230,8 +232,8 @@ class Motor:
             alert = SimAlert(
                 SimAlertLevel.ERROR,
                 SimAlertType.CONSTRAINT,
-                "Motor must have a propellant set",
-                "Motor",
+                QT_TRANSLATE_NOOP('SimulationAlerts', "Motor must have a propellant set"),
+                QT_TRANSLATE_NOOP('SimulationAlerts', "Motor"),
             )
             simRes.addAlert(alert)
         else:
@@ -285,7 +287,7 @@ class Motor:
             )
             if ratio < minAllowed:
                 description = (
-                    "Initial port/throat ratio of {:.3f} was less than {:.3f}".format(
+                    QT_TRANSLATE_NOOP('SimulationAlerts', "Initial port/throat ratio of {:.3f} was less than {:.3f}").format(
                         ratio, minAllowed
                     )
                 )
@@ -294,7 +296,7 @@ class Motor:
                         SimAlertLevel.WARNING,
                         SimAlertType.CONSTRAINT,
                         description,
-                        "N/A",
+                        QT_TRANSLATE_NOOP('SimulationAlerts', "N/A"),
                     )
                 )
 
@@ -393,29 +395,29 @@ class Motor:
         simRes.success = True
 
         if simRes.getPeakMassFlux() > self.config.getProperty("maxMassFlux"):
-            desc = "Peak mass flux exceeded configured limit"
+            desc = QT_TRANSLATE_NOOP('SimulationAlerts', "Peak mass flux exceeded configured limit")
             alert = SimAlert(
-                SimAlertLevel.WARNING, SimAlertType.CONSTRAINT, desc, "Motor"
+                SimAlertLevel.WARNING, SimAlertType.CONSTRAINT, desc, QT_TRANSLATE_NOOP('SimulationAlerts', "Motor")
             )
             simRes.addAlert(alert)
 
         if simRes.getMaxPressure() > self.config.getProperty("maxPressure"):
-            desc = "Max pressure exceeded configured limit"
+            desc = QT_TRANSLATE_NOOP('SimulationAlerts', "Max pressure exceeded configured limit")
             alert = SimAlert(
-                SimAlertLevel.WARNING, SimAlertType.CONSTRAINT, desc, "Motor"
+                SimAlertLevel.WARNING, SimAlertType.CONSTRAINT, desc, QT_TRANSLATE_NOOP('SimulationAlerts', "Motor")
             )
             simRes.addAlert(alert)
 
         if simRes.getPeakMachNumber() >= 1.0:
-            desc = "Max core Mach number exceeded allowable subsonic limit (M>1.0)"
+            desc = QT_TRANSLATE_NOOP('SimulationAlerts', "Max core Mach number exceeded allowable subsonic limit (M>1.0)")
             alert = SimAlert(
-                SimAlertLevel.WARNING, SimAlertType.CONSTRAINT, desc, "Motor"
+                SimAlertLevel.WARNING, SimAlertType.CONSTRAINT, desc, QT_TRANSLATE_NOOP('SimulationAlerts', "Motor")
             )
             simRes.addAlert(alert)
         elif simRes.getPeakMachNumber() > self.config.getProperty("maxMachNumber"):
-            desc = "Max core Mach number exceeded configured limit"
+            desc = QT_TRANSLATE_NOOP('SimulationAlerts', "Max core Mach number exceeded configured limit")
             alert = SimAlert(
-                SimAlertLevel.WARNING, SimAlertType.CONSTRAINT, desc, "Motor"
+                SimAlertLevel.WARNING, SimAlertType.CONSTRAINT, desc, QT_TRANSLATE_NOOP('SimulationAlerts', "Motor")
             )
             simRes.addAlert(alert)
 
@@ -424,13 +426,13 @@ class Motor:
             self.config.getProperty("ambPressure")
             * self.config.getProperty("sepPressureRatio"),
         ) > self.config.getProperty("flowSeparationWarnPercent"):
-            desc = "Low exit pressure, nozzle flow may separate"
-            alert = SimAlert(SimAlertLevel.WARNING, SimAlertType.VALUE, desc, "Nozzle")
+            desc = QT_TRANSLATE_NOOP('SimulationAlerts', "Low exit pressure, nozzle flow may separate")
+            alert = SimAlert(SimAlertLevel.WARNING, SimAlertType.VALUE, desc, QT_TRANSLATE_NOOP('SimulationAlerts', "Nozzle"))
             simRes.addAlert(alert)
 
         if simRes.getAverageForce() < burnoutThrustThres:
-            desc = "Motor did not generate thrust. Check Kn, chamber pressure and expansion ratio."
-            alert = SimAlert(SimAlertLevel.ERROR, SimAlertType.VALUE, desc, "Motor")
+            desc = QT_TRANSLATE_NOOP('SimulationAlerts', "Motor did not generate thrust. Check Kn, chamber pressure and expansion ratio.")
+            alert = SimAlert(SimAlertLevel.ERROR, SimAlertType.VALUE, desc, QT_TRANSLATE_NOOP('SimulationAlerts', "Motor"))
             simRes.addAlert(alert)
 
         # Note that this only adds all errors found on the first datapoint where there were errors to avoid repeating

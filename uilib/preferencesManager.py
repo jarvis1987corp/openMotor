@@ -12,9 +12,11 @@ from .fileIO import loadFile, saveFile, getConfigPath, fileTypes
 from .defaults import DEFAULT_PREFERENCES
 from .widgets import preferencesMenu
 from .logger import logger
+from .localization import DEFAULT_LANGUAGE, normalize_language
 
 class Preferences():
     def __init__(self, propDict=None):
+        self.language = DEFAULT_LANGUAGE
         self.general = MotorConfig()
         self.units = PropertyCollection()
         for unit in unitLabels:
@@ -27,11 +29,13 @@ class Preferences():
         prefDict = {}
         prefDict['general'] = self.general.getProperties()
         prefDict['units'] = self.units.getProperties()
+        prefDict['language'] = self.language
         return prefDict
 
     def applyDict(self, dictionary):
         self.general.setProperties(dictionary['general'])
         self.units.setProperties(dictionary['units'])
+        self.language = normalize_language(dictionary.get('language', DEFAULT_LANGUAGE))
 
     def getUnit(self, fromUnit):
         if fromUnit in self.units.props:
@@ -42,20 +46,30 @@ class Preferences():
 class PreferencesManager(QObject):
 
     preferencesChanged = pyqtSignal(object)
+    languageChanged = pyqtSignal(str)
 
     def __init__(self, makeMenu=True):
         super().__init__()
         self.preferences = Preferences(DEFAULT_PREFERENCES)
-        if makeMenu:
-            self.menu = preferencesMenu.PreferencesMenu()
-            self.menu.preferencesApplied.connect(self.newPreferences)
         self.loadPreferences()
+        if makeMenu:
+            self.createMenu()
+
+    def createMenu(self):
+        self.menu = preferencesMenu.PreferencesMenu()
+        self.menu.preferencesApplied.connect(self.newPreferences)
 
     def newPreferences(self, prefDict):
         logger.log('Updating preferences')
+        previous = self.preferences.getDict()
         self.preferences.applyDict(prefDict)
         self.savePreferences()
-        self.publishPreferences()
+        if previous['language'] != self.preferences.language:
+            self.languageChanged.emit(self.preferences.language)
+        current = self.preferences.getDict()
+        # A language-only change must not clear displayed simulation results.
+        if previous['general'] != current['general'] or previous['units'] != current['units']:
+            self.publishPreferences()
 
     def loadPreferences(self):
         preferencesPath = join(getConfigPath(), 'preferences.yaml')
@@ -69,7 +83,7 @@ class PreferencesManager(QObject):
         except Exception as error:
             backupPath = join(getConfigPath(), 'preferences_backup.yaml')
             logger.warn('Error loading preferences: {}'.format(error))
-            QApplication.instance().outputException(error, "Failed to load preferences. Backing up file to '{}' and starting fresh.".format(backupPath))
+            QApplication.instance().outputException(error, self.tr("Failed to load preferences. Backing up file to '{}' and starting fresh.").format(backupPath))
             replace(preferencesPath, backupPath)
             self.savePreferences()
 

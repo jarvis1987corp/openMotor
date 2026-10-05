@@ -1,5 +1,7 @@
 """Custom Grain submodule"""
 
+from ..localization import QT_TRANSLATE_NOOP
+
 import skimage.draw as draw
 
 from ..grain import FmmGrain
@@ -14,8 +16,8 @@ class CustomGrain(FmmGrain):
     geomName = 'Custom Grain'
     def __init__(self):
         super().__init__()
-        self.props['points'] = PolygonProperty('Core geometry')
-        self.props['dxfUnit'] = EnumProperty('DXF Unit', getAllConversions('m'))
+        self.props['points'] = PolygonProperty(QT_TRANSLATE_NOOP('MotorProperties', 'Core geometry'))
+        self.props['dxfUnit'] = EnumProperty(QT_TRANSLATE_NOOP('MotorProperties', 'DXF Unit'), getAllConversions('m'))
 
     def generateCoreMap(self):
         inUnit = self.props['dxfUnit'].getValue()
@@ -29,7 +31,7 @@ class CustomGrain(FmmGrain):
         errors = super().getGeometryErrors()
 
         if len(self.props['points'].getValue()) > 1:
-            aText = 'Support for custom grains with multiple cores is experimental'
+            aText = QT_TRANSLATE_NOOP('SimulationAlerts', 'Support for custom grains with multiple cores is experimental')
             errors.append(SimAlert(SimAlertLevel.WARNING, SimAlertType.GEOMETRY, aText))
 
         return errors

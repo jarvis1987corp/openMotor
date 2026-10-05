@@ -1,5 +1,7 @@
 """Moon burning grain submodule"""
 
+from ..localization import QT_TRANSLATE_NOOP
+
 from ..grain import FmmGrain
 from ..properties import FloatProperty
 from ..simResult import SimAlert, SimAlertLevel, SimAlertType
@@ -10,8 +12,8 @@ class MoonBurner(FmmGrain):
     geomName = 'Moon Burner'
     def __init__(self):
         super().__init__()
-        self.props['coreOffset'] = FloatProperty('Core offset', 'm', 0, maximumRefDiameter)
-        self.props['coreDiameter'] = FloatProperty('Core diameter', 'm', 0, maximumRefDiameter)
+        self.props['coreOffset'] = FloatProperty(QT_TRANSLATE_NOOP('MotorProperties', 'Core offset'), 'm', 0, maximumRefDiameter)
+        self.props['coreDiameter'] = FloatProperty(QT_TRANSLATE_NOOP('MotorProperties', 'Core diameter'), 'm', 0, maximumRefDiameter)
 
     def generateCoreMap(self):
         coreRadius = self.normalize(self.props['coreDiameter'].getValue()) / 2
@@ -21,19 +23,19 @@ class MoonBurner(FmmGrain):
         self.coreMap[(self.mapX - coreOffset)**2 + self.mapY**2 < coreRadius**2] = 0
 
     def getDetailsString(self, lengthUnit='m'):
-        return 'Length: {}, Core: {}'.format(self.props['length'].dispFormat(lengthUnit),
+        return QT_TRANSLATE_NOOP('GrainDetails', 'Length: {}, Core: {}').format(self.props['length'].dispFormat(lengthUnit),
                                              self.props['coreDiameter'].dispFormat(lengthUnit))
 
     def getGeometryErrors(self):
         errors = super().getGeometryErrors()
         if self.props['coreDiameter'].getValue() == 0:
-            errors.append(SimAlert(SimAlertLevel.ERROR, SimAlertType.GEOMETRY, 'Core diameter must not be 0'))
+            errors.append(SimAlert(SimAlertLevel.ERROR, SimAlertType.GEOMETRY, QT_TRANSLATE_NOOP('SimulationAlerts', 'Core diameter must not be 0')))
         if self.props['coreDiameter'].getValue() >= self.props['diameter'].getValue():
-            aText = 'Core diameter must be less than or equal to grain diameter'
+            aText = QT_TRANSLATE_NOOP('SimulationAlerts', 'Core diameter must be less than or equal to grain diameter')
             errors.append(SimAlert(SimAlertLevel.ERROR, SimAlertType.GEOMETRY, aText))
 
         if self.props['coreOffset'].getValue() * 2 > self.props['diameter'].getValue():
-            aText = 'Core offset should be less than or equal to grain radius'
+            aText = QT_TRANSLATE_NOOP('SimulationAlerts', 'Core offset should be less than or equal to grain radius')
             errors.append(SimAlert(SimAlertLevel.WARNING, SimAlertType.GEOMETRY, aText))
 
         return errors

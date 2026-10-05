@@ -264,12 +264,6 @@
           <height>170</height>
          </size>
         </property>
-        <property name="maximumSize">
-         <size>
-          <width>16777215</width>
-          <height>170</height>
-         </size>
-        </property>
         <property name="title">
          <string>Motor Statistics</string>
         </property>
@@ -416,6 +410,9 @@
           <layout class="QHBoxLayout" name="horizontalLayoutPeakMassFlux">
            <item>
             <widget class="QLabel" name="labelPeakMassFluxText">
+             <property name="wordWrap">
+              <bool>true</bool>
+             </property>
              <property name="text">
               <string>Peak Mass Flux:</string>
              </property>
@@ -434,6 +431,9 @@
           <layout class="QHBoxLayout" name="horizontalLayoutPortThroatRatio">
            <item>
             <widget class="QLabel" name="labelPortThroatRatioText">
+             <property name="wordWrap">
+              <bool>true</bool>
+             </property>
              <property name="text">
               <string>Port/Throat Ratio:</string>
              </property>
@@ -612,7 +612,7 @@
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
-     <string>Edit</string>
+     <string comment="menu">Edit</string>
     </property>
     <addaction name="actionUndo"/>
     <addaction name="actionRedo"/>

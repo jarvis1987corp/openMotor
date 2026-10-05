@@ -6,6 +6,15 @@ from .tools import ExpansionTool
 from .tools import NeutralBatesTool
 from .tools import NozzleCoeffTool
 from .logger import logger
+from .localization import display_text
+from motorlib.localization import QT_TRANSLATE_NOOP
+
+CATEGORY_LABELS = {
+    'Set': QT_TRANSLATE_NOOP('ToolCategories', 'Set'),
+    'Optimize': QT_TRANSLATE_NOOP('ToolCategories', 'Optimize'),
+    'Design': QT_TRANSLATE_NOOP('ToolCategories', 'Design'),
+    'Analyze': QT_TRANSLATE_NOOP('ToolCategories', 'Analyze'),
+}
 
 class ToolManager(QObject):
 
@@ -17,6 +26,9 @@ class ToolManager(QObject):
         self.fileManager = app.fileManager
         self.simulationManager = app.simulationManager
         self.propellantManager = app.propellantManager
+        self.menuCategories = []
+        self.menuActions = []
+        app.translationManager.languageChanged.connect(self.retranslateMenu)
 
         self.tools = {'Set': [
                                 ChangeDiameterTool(self),
@@ -40,12 +52,21 @@ class ToolManager(QObject):
 
     def setupMenu(self, menu):
         for toolCategory in self.tools:
-            category = menu.addMenu(toolCategory)
+            category = menu.addMenu(display_text(CATEGORY_LABELS[toolCategory]))
+            self.menuCategories.append((category, toolCategory))
             for toolToSetup in self.tools[toolCategory]:
-                toolAction = QAction(toolToSetup.name, category)
-                toolAction.setStatusTip(toolToSetup.description)
+                toolAction = QAction(display_text(toolToSetup.name), category)
+                toolAction.setStatusTip(display_text(toolToSetup.description))
+                self.menuActions.append((toolAction, toolToSetup))
                 toolAction.triggered.connect(toolToSetup.show)
                 category.addAction(toolAction)
+
+    def retranslateMenu(self):
+        for menu, key in self.menuCategories:
+            menu.setTitle(display_text(CATEGORY_LABELS[key]))
+        for action, tool in self.menuActions:
+            action.setText(display_text(tool.name))
+            action.setStatusTip(display_text(tool.description))
 
     def getMotor(self):
         return self.fileManager.getCurrentMotor()

@@ -1,5 +1,7 @@
 """X Core grain submodule"""
 
+from ..localization import QT_TRANSLATE_NOOP
+
 import numpy as np
 
 from ..grain import FmmGrain
@@ -12,8 +14,8 @@ class XCore(FmmGrain):
     geomName = 'X Core'
     def __init__(self):
         super().__init__()
-        self.props['slotWidth'] = FloatProperty('Slot width', 'm', 0, maximumRefDiameter)
-        self.props['slotLength'] = FloatProperty('Slot length', 'm', 0, maximumRefDiameter)
+        self.props['slotWidth'] = FloatProperty(QT_TRANSLATE_NOOP('MotorProperties', 'Slot width'), 'm', 0, maximumRefDiameter)
+        self.props['slotLength'] = FloatProperty(QT_TRANSLATE_NOOP('MotorProperties', 'Slot length'), 'm', 0, maximumRefDiameter)
 
     def generateCoreMap(self):
         slotWidth = self.normalize(self.props['slotWidth'].getValue())
@@ -23,22 +25,22 @@ class XCore(FmmGrain):
         self.coreMap[np.logical_and(np.abs(self.mapX) < slotWidth/2, np.abs(self.mapY) < slotLength)] = 0
 
     def getDetailsString(self, lengthUnit='m'):
-        return 'Length: {}, Slots: {} by {}'.format(self.props['length'].dispFormat(lengthUnit),
+        return QT_TRANSLATE_NOOP('GrainDetails', 'Length: {}, Slots: {} by {}').format(self.props['length'].dispFormat(lengthUnit),
                                                     self.props['slotWidth'].dispFormat(lengthUnit),
                                                     self.props['slotLength'].dispFormat(lengthUnit))
 
     def getGeometryErrors(self):
         errors = super().getGeometryErrors()
         if self.props['slotWidth'].getValue() == 0:
-            errors.append(SimAlert(SimAlertLevel.ERROR, SimAlertType.GEOMETRY, 'Slot width must not be 0'))
+            errors.append(SimAlert(SimAlertLevel.ERROR, SimAlertType.GEOMETRY, QT_TRANSLATE_NOOP('SimulationAlerts', 'Slot width must not be 0')))
         if self.props['slotWidth'].getValue() > self.props['diameter'].getValue():
-            aText = 'Slot width should be less than or equal to grain diameter'
+            aText = QT_TRANSLATE_NOOP('SimulationAlerts', 'Slot width should be less than or equal to grain diameter')
             errors.append(SimAlert(SimAlertLevel.WARNING, SimAlertType.GEOMETRY, aText))
 
         if self.props['slotLength'].getValue() == 0:
-            errors.append(SimAlert(SimAlertLevel.ERROR, SimAlertType.GEOMETRY, 'Slot length must not be 0'))
+            errors.append(SimAlert(SimAlertLevel.ERROR, SimAlertType.GEOMETRY, QT_TRANSLATE_NOOP('SimulationAlerts', 'Slot length must not be 0')))
         if self.props['slotLength'].getValue() * 2 > self.props['diameter'].getValue():
-            aText = 'Slot length should be less than or equal to grain radius'
+            aText = QT_TRANSLATE_NOOP('SimulationAlerts', 'Slot length should be less than or equal to grain radius')
             errors.append(SimAlert(SimAlertLevel.WARNING, SimAlertType.GEOMETRY, aText))
 
         return errors

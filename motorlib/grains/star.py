@@ -1,5 +1,7 @@
 """Star grain submodule"""
 
+from ..localization import QT_TRANSLATE_NOOP
+
 import numpy as np
 
 from ..grain import FmmGrain
@@ -12,9 +14,9 @@ class StarGrain(FmmGrain):
     geomName = 'Star Grain'
     def __init__(self):
         super().__init__()
-        self.props['numPoints'] = IntProperty('Number of points', '', 0, 64)
-        self.props['pointLength'] = FloatProperty('Point length', 'm', 0, maximumRefDiameter)
-        self.props['pointWidth'] = FloatProperty('Point base width', 'm', 0, maximumRefDiameter)
+        self.props['numPoints'] = IntProperty(QT_TRANSLATE_NOOP('MotorProperties', 'Number of points'), '', 0, 64)
+        self.props['pointLength'] = FloatProperty(QT_TRANSLATE_NOOP('MotorProperties', 'Point length'), 'm', 0, maximumRefDiameter)
+        self.props['pointWidth'] = FloatProperty(QT_TRANSLATE_NOOP('MotorProperties', 'Point base width'), 'm', 0, maximumRefDiameter)
 
     def generateCoreMap(self):
         numPoints = self.props['numPoints'].getValue()
@@ -33,21 +35,21 @@ class StarGrain(FmmGrain):
             self.coreMap[np.logical_and(vect, near)] = 0
 
     def getDetailsString(self, lengthUnit='m'):
-        return 'Length: {}, Points: {}'.format(self.props['length'].dispFormat(lengthUnit),
+        return QT_TRANSLATE_NOOP('GrainDetails', 'Length: {}, Points: {}').format(self.props['length'].dispFormat(lengthUnit),
                                                self.props['numPoints'].getValue())
 
     def getGeometryErrors(self):
         errors = super().getGeometryErrors()
         if self.props['numPoints'].getValue() == 0:
-            errors.append(SimAlert(SimAlertLevel.ERROR, SimAlertType.GEOMETRY, 'Star grain has 0 points'))
+            errors.append(SimAlert(SimAlertLevel.ERROR, SimAlertType.GEOMETRY, QT_TRANSLATE_NOOP('SimulationAlerts', 'Star grain has 0 points')))
 
         if self.props['pointLength'].getValue() == 0:
-            errors.append(SimAlert(SimAlertLevel.ERROR, SimAlertType.GEOMETRY, 'Point length must not be 0'))
+            errors.append(SimAlert(SimAlertLevel.ERROR, SimAlertType.GEOMETRY, QT_TRANSLATE_NOOP('SimulationAlerts', 'Point length must not be 0')))
         if self.props['pointLength'].getValue() * 2 > self.props['diameter'].getValue():
-            aText = 'Point length should be less than or equal to grain radius'
+            aText = QT_TRANSLATE_NOOP('SimulationAlerts', 'Point length should be less than or equal to grain radius')
             errors.append(SimAlert(SimAlertLevel.WARNING, SimAlertType.GEOMETRY, aText))
 
         if self.props['pointWidth'].getValue() == 0:
-            errors.append(SimAlert(SimAlertLevel.ERROR, SimAlertType.GEOMETRY, 'Point width must not be 0'))
+            errors.append(SimAlert(SimAlertLevel.ERROR, SimAlertType.GEOMETRY, QT_TRANSLATE_NOOP('SimulationAlerts', 'Point width must not be 0')))
 
         return errors

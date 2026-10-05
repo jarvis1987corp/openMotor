@@ -1,5 +1,7 @@
 """Propellant submodule that contains the propellant class."""
 
+from .localization import QT_TRANSLATE_NOOP
+
 from scipy.optimize import fsolve
 
 from .properties import PropertyCollection, FloatProperty, StringProperty, TabularProperty
@@ -10,13 +12,13 @@ class PropellantTab(PropertyCollection):
     """Contains the combustion properties of a propellant over a specified pressure range."""
     def __init__(self, tabDict=None):
         super().__init__()
-        self.props['minPressure'] = FloatProperty('Minimum Pressure', 'Pa', 0, 7e7)
-        self.props['maxPressure'] = FloatProperty('Maximum Pressure', 'Pa', 0, 7e7)
-        self.props['a'] = FloatProperty('Burn rate Coefficient', 'm/(s*Pa^n)', 1E-8, 2)
-        self.props['n'] = FloatProperty('Burn rate Exponent', '', -0.99, 0.99)
-        self.props['k'] = FloatProperty('Specific Heat Ratio', '', 1+1e-6, 10)
-        self.props['t'] = FloatProperty('Combustion Temperature', 'K', 1, 10000)
-        self.props['m'] = FloatProperty('Exhaust Molar Mass', 'g/mol', 1e-6, 100)
+        self.props['minPressure'] = FloatProperty(QT_TRANSLATE_NOOP('MotorProperties', 'Minimum Pressure'), 'Pa', 0, 7e7)
+        self.props['maxPressure'] = FloatProperty(QT_TRANSLATE_NOOP('MotorProperties', 'Maximum Pressure'), 'Pa', 0, 7e7)
+        self.props['a'] = FloatProperty(QT_TRANSLATE_NOOP('MotorProperties', 'Burn rate Coefficient'), 'm/(s*Pa^n)', 1E-8, 2)
+        self.props['n'] = FloatProperty(QT_TRANSLATE_NOOP('MotorProperties', 'Burn rate Exponent'), '', -0.99, 0.99)
+        self.props['k'] = FloatProperty(QT_TRANSLATE_NOOP('MotorProperties', 'Specific Heat Ratio'), '', 1+1e-6, 10)
+        self.props['t'] = FloatProperty(QT_TRANSLATE_NOOP('MotorProperties', 'Combustion Temperature'), 'K', 1, 10000)
+        self.props['m'] = FloatProperty(QT_TRANSLATE_NOOP('MotorProperties', 'Exhaust Molar Mass'), 'g/mol', 1e-6, 100)
         if tabDict is not None:
             self.setProperties(tabDict)
 
@@ -25,9 +27,9 @@ class Propellant(PropertyCollection):
     """Contains the physical and thermodynamic properties of a propellant formula."""
     def __init__(self, propDict=None):
         super().__init__()
-        self.props['name'] = StringProperty('Name')
-        self.props['density'] = FloatProperty('Density', 'kg/m^3', 1, 10000)
-        self.props['tabs'] = TabularProperty('Properties', PropellantTab)
+        self.props['name'] = StringProperty(QT_TRANSLATE_NOOP('MotorProperties', 'Name'))
+        self.props['density'] = FloatProperty(QT_TRANSLATE_NOOP('MotorProperties', 'Density'), 'kg/m^3', 1, 10000)
+        self.props['tabs'] = TabularProperty(QT_TRANSLATE_NOOP('MotorProperties', 'Properties'), PropellantTab)
         if propDict is not None:
             self.setProperties(propDict)
 
@@ -103,16 +105,16 @@ class Propellant(PropertyCollection):
         errors = []
         for tabId, tab in enumerate(self.getProperty('tabs')):
             if tab['maxPressure'] == tab['minPressure']:
-                errText = 'Tab #{} has the same minimum and maximum pressures.'.format(tabId + 1)
-                errors.append(SimAlert(SimAlertLevel.ERROR, SimAlertType.VALUE, errText, 'Propellant'))
+                errText = QT_TRANSLATE_NOOP('SimulationAlerts', 'Tab #{} has the same minimum and maximum pressures.').format(tabId + 1)
+                errors.append(SimAlert(SimAlertLevel.ERROR, SimAlertType.VALUE, errText, QT_TRANSLATE_NOOP('SimulationAlerts', 'Propellant')))
             if tab['maxPressure'] < tab['minPressure']:
-                errText = 'Tab #{} has reversed pressure limits.'.format(tabId + 1)
-                errors.append(SimAlert(SimAlertLevel.ERROR, SimAlertType.VALUE, errText, 'Propellant'))
+                errText = QT_TRANSLATE_NOOP('SimulationAlerts', 'Tab #{} has reversed pressure limits.').format(tabId + 1)
+                errors.append(SimAlert(SimAlertLevel.ERROR, SimAlertType.VALUE, errText, QT_TRANSLATE_NOOP('SimulationAlerts', 'Propellant')))
             for otherTabId, otherTab in enumerate(self.getProperty('tabs')):
                 if tabId != otherTabId:
                     if otherTab['minPressure'] < tab['maxPressure'] < otherTab['maxPressure']:
-                        err = 'Tabs #{} and #{} have overlapping ranges.'.format(tabId + 1, otherTabId + 1)
-                        errors.append(SimAlert(SimAlertLevel.ERROR, SimAlertType.VALUE, err, 'Propellant'))
+                        err = QT_TRANSLATE_NOOP('SimulationAlerts', 'Tabs #{} and #{} have overlapping ranges.').format(tabId + 1, otherTabId + 1)
+                        errors.append(SimAlert(SimAlertLevel.ERROR, SimAlertType.VALUE, err, QT_TRANSLATE_NOOP('SimulationAlerts', 'Propellant')))
         return errors
 
     def getPressureErrors(self, pressure):
@@ -122,8 +124,8 @@ class Propellant(PropertyCollection):
         for tab in self.getProperty('tabs'):
             if tab['minPressure'] < pressure < tab['maxPressure']:
                 return errors
-        aText = "Chamber pressure deviated from propellant's entered ranges. Results may not be accurate."
-        errors.append(SimAlert(SimAlertLevel.WARNING, SimAlertType.VALUE, aText, 'Propellant'))
+        aText = QT_TRANSLATE_NOOP('SimulationAlerts', "Chamber pressure deviated from propellant's entered ranges. Results may not be accurate.")
+        errors.append(SimAlert(SimAlertLevel.WARNING, SimAlertType.VALUE, aText, QT_TRANSLATE_NOOP('SimulationAlerts', 'Propellant')))
         return errors
 
     def addTab(self, tab):

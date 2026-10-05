@@ -1,5 +1,7 @@
 from PyQt6.QtWidgets import QLabel
-from PyQt6.QtCore import pyqtSignal
+from PyQt6.QtCore import QEvent, pyqtSignal
+from motorlib.localization import QT_TRANSLATE_NOOP
+from ..localization import display_text
 
 from motorlib.units import convert
 from motorlib.propellant import PropellantTab
@@ -14,7 +16,8 @@ class PropellantTabEditor(CollectionEditor):
     def __init__(self, parent):
         super().__init__(parent, False)
 
-        self.labelCStar = QLabel("Characteristic Velocity: -")
+        self._cStarText = QT_TRANSLATE_NOOP('PropellantTabEditor', 'Characteristic Velocity: -')
+        self.labelCStar = QLabel(display_text(self._cStarText))
         self.labelCStar.hide()
         self.stats.addWidget(self.labelCStar)
 
@@ -33,7 +36,8 @@ class PropellantTabEditor(CollectionEditor):
 
         cStarText = '{} {}'.format(int(convert(charVel, 'm/s', dispUnit)), dispUnit)
 
-        self.labelCStar.setText('Characteristic Velocity: {}'.format(cStarText))
+        self._cStarText = QT_TRANSLATE_NOOP('PropellantTabEditor', 'Characteristic Velocity: {}').format(cStarText)
+        self.labelCStar.setText(display_text(self._cStarText))
         self.modified.emit()
 
     def cleanup(self):
@@ -58,3 +62,8 @@ class PropellantTabEditor(CollectionEditor):
         newPropTab.setProperties(props)
         super().loadProperties(newPropTab)
         self.labelCStar.show()
+
+    def changeEvent(self, event):
+        if event.type() == QEvent.Type.LanguageChange and hasattr(self, '_cStarText'):
+            self.labelCStar.setText(display_text(self._cStarText))
+        super().changeEvent(event)

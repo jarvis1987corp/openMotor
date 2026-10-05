@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import QGroupBox, QCheckBox, QRadioButton, QVBoxLayout
-from PyQt6.QtCore import pyqtSignal, Qt
+from PyQt6.QtCore import QEvent, pyqtSignal, Qt
 
 class GrainSelector(QGroupBox):
 
@@ -10,7 +10,7 @@ class GrainSelector(QGroupBox):
 
         self.checks = []
         self.setLayout(QVBoxLayout())
-        self.setTitle("Grains")
+        self.setTitle(self.tr("Grains"))
 
     def resetChecks(self):
         for _ in range(0, len(self.checks)):
@@ -20,7 +20,7 @@ class GrainSelector(QGroupBox):
 
     def setupChecks(self, numGrains, multiselect):
         for gid in range(numGrains):
-            checkTitle = "Grain " + str(gid + 1)
+            checkTitle = self.tr("Grain {}").format(gid + 1)
             if multiselect:
                 check = QCheckBox(checkTitle)
                 check.setCheckState(Qt.CheckState.Checked)
@@ -52,3 +52,10 @@ class GrainSelector(QGroupBox):
 
     def getNumberChecks(self):
         return len(self.checks)
+
+    def changeEvent(self, event):
+        if event.type() == QEvent.Type.LanguageChange:
+            self.setTitle(self.tr('Grains'))
+            for index, check in enumerate(getattr(self, 'checks', [])):
+                check.setText(self.tr('Grain {}').format(index + 1))
+        super().changeEvent(event)

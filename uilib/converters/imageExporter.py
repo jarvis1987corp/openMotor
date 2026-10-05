@@ -1,11 +1,13 @@
+from motorlib.localization import QT_TRANSLATE_NOOP
 from PyQt6.QtWidgets import QDialog, QApplication
 
 from motorlib.simResult import singleValueChannels, multiValueChannels
 from ..converter import Exporter
 
 from ..views.ImageExporter_ui import Ui_ImageExporter
+from ..localization import TranslatedForm
 
-class ImageExportMenu(QDialog):
+class ImageExportMenu(TranslatedForm, QDialog):
     def __init__(self, converter):
         QDialog.__init__(self)
         self.ui = Ui_ImageExporter()
@@ -42,10 +44,10 @@ class ImageExportMenu(QDialog):
 
 class ImageExporter(Exporter):
     def __init__(self, manager):
-        super().__init__(manager, 'Image File',
-                         'Exports the results of a simulation in a graph.', {'.png': 'Portable network graphic'})
+        super().__init__(manager, QT_TRANSLATE_NOOP('Converters', 'Image File'),
+                         QT_TRANSLATE_NOOP('Converters', 'Exports the results of a simulation in a graph.'), {'.png': QT_TRANSLATE_NOOP('Converters', 'Portable network graphic')})
         self.menu = ImageExportMenu(self)
-        self.reqNotMet = "Must have run a simulation to export a .PNG file."
+        self.reqNotMet = QT_TRANSLATE_NOOP('Converters', "Must have run a simulation to export a .PNG file.")
 
     def doConversion(self, path, config):
         # TODO: This is ugly and should be refactored. The app should own the grapher.

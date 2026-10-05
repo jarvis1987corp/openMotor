@@ -1,3 +1,4 @@
+from motorlib.localization import QT_TRANSLATE_NOOP
 from PyQt6.QtWidgets import QDialog, QApplication
 
 from motorlib.properties import PropertyCollection, FloatProperty, StringProperty, EnumProperty
@@ -5,19 +6,20 @@ from ..converter import Exporter
 
 from ..views.EngExporter_ui import Ui_EngExporterDialog
 from motorlib.constants import maximumRefDiameter, maximumRefLength
+from ..localization import TranslatedForm
 
 class EngSettings(PropertyCollection):
     def __init__(self):
         super().__init__()
-        self.props['diameter'] = FloatProperty('Motor Diameter', 'm', 0, maximumRefDiameter)
-        self.props['length'] = FloatProperty('Motor Length', 'm', 0, maximumRefLength)
-        self.props['hardwareMass'] = FloatProperty('Hardware Mass', 'kg', 0, 10000)
-        self.props['designation'] = StringProperty('Motor Designation')
-        self.props['manufacturer'] = StringProperty('Motor Manufacturer')
-        self.props['append'] = EnumProperty('Existing File', ['Append', 'Overwrite'])
+        self.props['diameter'] = FloatProperty(QT_TRANSLATE_NOOP('MotorProperties', 'Motor Diameter'), 'm', 0, maximumRefDiameter)
+        self.props['length'] = FloatProperty(QT_TRANSLATE_NOOP('MotorProperties', 'Motor Length'), 'm', 0, maximumRefLength)
+        self.props['hardwareMass'] = FloatProperty(QT_TRANSLATE_NOOP('MotorProperties', 'Hardware Mass'), 'kg', 0, 10000)
+        self.props['designation'] = StringProperty(QT_TRANSLATE_NOOP('MotorProperties', 'Motor Designation'))
+        self.props['manufacturer'] = StringProperty(QT_TRANSLATE_NOOP('MotorProperties', 'Motor Manufacturer'))
+        self.props['append'] = EnumProperty(QT_TRANSLATE_NOOP('MotorProperties', 'Existing File'), ['Append', 'Overwrite'])
 
 
-class EngExportMenu(QDialog):
+class EngExportMenu(TranslatedForm, QDialog):
     def __init__(self, exporter):
         QDialog.__init__(self)
         self.ui = Ui_EngExporterDialog()
@@ -40,10 +42,10 @@ class EngExportMenu(QDialog):
 
 class EngExporter(Exporter):
     def __init__(self, manager):
-        super().__init__(manager, 'ENG File',
-            'Exports the results of a simulation in the RASP ENG format', {'.eng': 'RASP Files'}, False)
+        super().__init__(manager, QT_TRANSLATE_NOOP('Converters', 'ENG File'),
+            QT_TRANSLATE_NOOP('Converters', 'Exports the results of a simulation in the RASP ENG format'), {'.eng': QT_TRANSLATE_NOOP('Converters', 'RASP Files')}, False)
         self.menu = EngExportMenu(self)
-        self.reqNotMet = "Must have run a simulation to export a .ENG file."
+        self.reqNotMet = QT_TRANSLATE_NOOP('Converters', "Must have run a simulation to export a .ENG file.")
 
     def doConversion(self, path, config):
         mode = 'a' if config['append'] == 'Append' else 'w'

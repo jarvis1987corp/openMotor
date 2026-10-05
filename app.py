@@ -1,5 +1,4 @@
 import sys
-import os
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 
@@ -14,12 +13,14 @@ from uilib import importExportManager
 import uilib.widgets.mainWindow
 from uilib.logger import logger
 from uilib.fileIO import appVersionStr
+from uilib.localization import TranslationManager, display_text
+from uilib.resources import resource_path
 
 class App(QApplication):
     def __init__(self, args):
         super().__init__(args)
 
-        self.icon = QIcon(os.path.join(os.path.dirname(sys.argv[0]), 'resources/oMIconCyclesSmall.png'))
+        self.icon = QIcon(resource_path('oMIconCyclesSmall.png'))
 
         self.headless = '-h' in args
 
@@ -29,7 +30,11 @@ class App(QApplication):
             mpl.rcParams['axes.facecolor'] = '1e1e1e'
             mpl.rcParams['figure.facecolor'] = '1e1e1e'
 
-        self.preferencesManager = uilib.preferencesManager.PreferencesManager()
+        self.translationManager = TranslationManager(self)
+        self.preferencesManager = uilib.preferencesManager.PreferencesManager(makeMenu=False)
+        self.translationManager.setLanguage(self.preferencesManager.preferences.language)
+        self.preferencesManager.languageChanged.connect(self.translationManager.setLanguage)
+        self.preferencesManager.createMenu()
 
         self.propellantManager = uilib.propellantManager.PropellantManager()
         self.preferencesManager.preferencesChanged.connect(self.propellantManager.setPreferences)
@@ -53,18 +58,18 @@ class App(QApplication):
 
         if self.headless:
             if len(args) < 3:
-                print('Not enough arguments. Headless mode requires an input file.')
+                print(self.tr('Not enough arguments. Headless mode requires an input file.'))
             elif not startupFileLoaded:
-                print('Could not load motor file')
+                print(self.tr('Could not load motor file'))
                 sys.exit(1)
             else:
                 motor = self.fileManager.getCurrentMotor()
                 simulationResult = motor.runSimulation()
                 for alert in simulationResult.alerts:
-                    print('{} ({}, {}): {}'.format(motorlib.simResult.alertLevelNames[alert.level],
-                        motorlib.simResult.alertTypeNames[alert.type],
-                        alert.location,
-                        alert.description))
+                    print('{} ({}, {}): {}'.format(display_text(motorlib.simResult.alertLevelNames[alert.level]),
+                        display_text(motorlib.simResult.alertTypeNames[alert.type]),
+                        display_text(alert.location),
+                        display_text(alert.description)))
                 print()
                 if '-o' in args:
                     with open(args[args.index('-o') + 1], 'w') as outputFile:
@@ -100,6 +105,7 @@ class App(QApplication):
         return self.styleHints().colorScheme() == Qt.ColorScheme.Dark
 
     def outputMessage(self, content, title='openMotor'):
+        content, title = display_text(content), display_text(title)
         if self.headless:
             print(content)
         else:
@@ -111,6 +117,7 @@ class App(QApplication):
             msg.exec()
 
     def promptYesNo(self, content, title='openMotor'):
+        content, title = display_text(content), display_text(title)
         if self.headless:
             return input('{} (y/n): '.format(content)) == 'y'
         else:
@@ -122,15 +129,19 @@ class App(QApplication):
             msg.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
             return msg.exec() == QMessageBox.StandardButton.Yes
 
-    def outputException(self, exception, text, title='openMotor - Error'):
+    def outputException(self, exception, text, title=None):
+        if title is None:
+            title = self.tr('openMotor - Error')
+        text, title = display_text(text), display_text(title)
+        details = display_text(exception.args[0]) if len(exception.args) == 1 and hasattr(exception.args[0], 'source') else str(exception)
         if self.headless:
-            print(text + " " + str(exception))
+            print(text + " " + details)
         else:
             logger.error(text)
             logger.error(exception)
             msg = QMessageBox()
             msg.setWindowIcon(self.icon)
             msg.setText(text)
-            msg.setInformativeText(str(exception))
+            msg.setInformativeText(details)
             msg.setWindowTitle(title)
             msg.exec()

@@ -1,0 +1,20 @@
+{
+  "test/data/real/n2950/motor.ric": "951d512daded35bca2f3784ae6956ff92b19154a4a7625ccdb5119610d25013d",
+  "test/data/real/o3100/motor.ric": "a478ad444547f595a78b0ddebd86906d927ec0c11b1ed0de81cd7025f3f40337",
+  "test/data/real/o3800/motor.ric": "e4255bb4869232579c9ec754f508c168400842f2cfb26f2acbd5f23efd378569",
+  "test/data/real/p9100/flight.ric": "8942f6744182154fc9d342046cd19e3809eb05c888a46f4d3691383970e3ca41",
+  "test/data/regression/c/motor.ric": "2b3dbc8da20fcc323537758ce9e98ed882569a5423a7514d855792d907099218",
+  "test/data/regression/custom/motor.ric": "b61781133d3e9d986878215f902bd4cc5e91b7fc2ae94c7aa6d2d091cec4001a",
+  "test/data/regression/d/motor.ric": "b3e109633d273b461406677939d961c2ad6c67aa4eaa8661273dd4daf4372f82",
+  "test/data/regression/endburner/motor.ric": "dd10c5e0e9645d216657404fd07b0eb8914b67eb0e84dc912ef6435d9d1555e0",
+  "test/data/regression/inhibited/motor.ric": "3b4913531aac0f4c64766208ce80582bbea14a36e6b164543025b0d7423aaeba",
+  "test/data/regression/moon/motor.ric": "52b31418d76279d1e8ef5747cbcad3c96812da449e6b5345e0446ca210c3bec2",
+  "test/data/regression/nozzleErosion/motor.ric": "7491fbe12afb362ae4ed67418d6a94030cde3a0a68d6d71910ddedaf521a7573",
+  "test/data/regression/nozzleSlag/motor.ric": "6d026dbabb67683969f2f735a6806ee36150caa2ecf18cf0d7a587d020693989",
+  "test/data/regression/rodtube/motor.ric": "6a08cc9d8c35e9fd43754b2ddf2de878322e4f5f19fbb85f50b07967d596f2a4",
+  "test/data/regression/simple/motor.ric": "63a0fd0b70f57dbadadf41ddeb29703332d162ed54cf57eae59bab72c3373662",
+  "test/data/regression/star/motor.ric": "62d4ccd3509fad22751d707ed884f9f8498fa49a1c0abf97da99beaeac7ddb7b",
+  "test/data/regression/tabular/motor.ric": "b4037b01c611eb8f522c4b23a4d3e7ec8d7be5738048df377c46b53a72006166",
+  "test/data/regression/tiny/motor.ric": "184490706435f4b1caaf36902bc7777120f707c248e2ee30be33f9951ff47582",
+  "test/data/regression/x/motor.ric": "270368f2b4eefeb25935eb30415a909dfaf41e938eb539d41829e3c94a28586f"
+}

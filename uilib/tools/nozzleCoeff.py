@@ -1,3 +1,4 @@
+from motorlib.localization import QT_TRANSLATE_NOOP
 import copy
 
 import motorlib
@@ -12,21 +13,21 @@ class NozzleCoeffTool(Tool):
     def __init__(self, manager):
         props = {
             'finalDiameter': motorlib.properties.FloatProperty(
-                'Post-Fire Throat Diameter', 'm', 0, motorlib.constants.maximumRefDiameter
+                QT_TRANSLATE_NOOP('MotorProperties', 'Post-Fire Throat Diameter'), 'm', 0, motorlib.constants.maximumRefDiameter
             ),
             'convergenceThreshold': motorlib.properties.FloatProperty(
-                'Convergence Threshold', '%', 0, 100
+                QT_TRANSLATE_NOOP('MotorProperties', 'Convergence Threshold'), '%', 0, 100
             )
         }
         props['convergenceThreshold'].setValue(1)
         super().__init__(manager,
-                         'Nozzle Erosion/Slag Coefficient',
-                         'Use this tool to back-calculate the throat erosion or '
+                         QT_TRANSLATE_NOOP('Tools', 'Nozzle Erosion/Slag Coefficient'),
+                         QT_TRANSLATE_NOOP('Tools', 'Use this tool to back-calculate the throat erosion or '
                          'slag buildup coefficient from a measured post-firing '
                          'throat diameter. If the throat grew, the erosion '
                          'coefficient will be set (and slag cleared). If the '
                          'throat shrank, the slag buildup coefficient will be '
-                         'set (and erosion cleared).',
+                         'set (and erosion cleared).'),
                          props,
                          True)
 

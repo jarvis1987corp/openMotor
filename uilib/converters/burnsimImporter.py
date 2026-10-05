@@ -1,7 +1,10 @@
+from motorlib.localization import QT_TRANSLATE_NOOP
 import xml.etree.ElementTree as ET
 
 import motorlib
 from motorlib.constants import gasConstant, standardGravity
+from PyQt6.QtCore import QCoreApplication
+from ..localization import geometry_name
 
 from ..converter import Importer
 
@@ -45,7 +48,7 @@ def importPropellant(node):
     # If the user didn't set molar mass, it'll come through as 0. If this happens, use a sensible default
     if impMolarMass == '0':
         molarMass = 23.67
-        errors = "Propellant didn't specify molar mass, using default.\n"
+        errors = QCoreApplication.translate('BurnSimImporter', "Propellant didn't specify molar mass, using default.\n")
     else:
         molarMass = float(impMolarMass)
     propTab.setProperty('m', molarMass)
@@ -61,7 +64,7 @@ def importPropellant(node):
 
 class BurnSimImporter(Importer):
     def __init__(self, manager):
-        super().__init__(manager, 'BurnSim File', 'Loads motor files for BurnSim 3.0', {'.bsx': 'BurnSim Files'})
+        super().__init__(manager, QT_TRANSLATE_NOOP('Converters', 'BurnSim File'), QT_TRANSLATE_NOOP('Converters', 'Loads motor files for BurnSim 3.0'), {'.bsx': QT_TRANSLATE_NOOP('Converters', 'BurnSim Files')})
 
     def doConversion(self, path):
         motor = motorlib.motor.Motor()
@@ -71,7 +74,7 @@ class BurnSimImporter(Importer):
         errors = ''
         propSet = False
         if root.find('Grain') is None:
-            errors += "Motor contains no grains, but the propellant and nozzle can still be imported.\n"
+            errors += self.tr("Motor contains no grains, but the propellant and nozzle can still be imported.\n")
         for child in root:
             if child.tag == 'Nozzle':
                 motor.nozzle.setProperty('throat', inToM(child.attrib['ThroatDia']))
@@ -79,7 +82,7 @@ class BurnSimImporter(Importer):
                 motor.nozzle.setProperty('efficiency', float(child.attrib['NozzleEfficiency']) / 100)
                 motor.nozzle.setProperty('divAngle', 15)
                 motor.nozzle.setProperty('convAngle', 45)
-                errors += 'Nozzle angles not specified, assumed to be 15° and 45°.\n'
+                errors += self.tr('Nozzle angles not specified, assumed to be 15° and 45°.\n')
             if child.tag == 'Grain':
                 if child.attrib['Type'] in SUPPORTED_GRAINS:
                     motor.grains.append(SUPPORTED_GRAINS[child.attrib['Type']]())
@@ -124,14 +127,12 @@ class BurnSimImporter(Importer):
 
                 else:
                     if child.attrib['Type'] in UNSUPPORTED_GRAINS:
-                        errors += "File contains a "
-                        errors += UNSUPPORTED_GRAINS[child.attrib['Type']]
-                        errors += " grain, which can't be imported.\n"
+                        errors += self.tr("File contains a {} grain, which can't be imported.\n").format(geometry_name(UNSUPPORTED_GRAINS[child.attrib['Type']]))
                     else:
-                        errors += "File contains an unknown grain of type " + child.attrib['Type'] + '.\n'
+                        errors += self.tr("File contains an unknown grain of type {}.\n").format(child.attrib['Type'])
 
             if child.tag == 'TestData':
-                errors += "\nFile contains test data, which is not imported."
+                errors += self.tr("\nFile contains test data, which is not imported.")
 
             if child.tag == "Propellant":
                 if not propSet:
@@ -141,6 +142,6 @@ class BurnSimImporter(Importer):
                     propSet = True
 
         if errors != '':
-            self.manager.app.outputMessage(errors + '\nThe rest of the motor will be imported.')
+            self.manager.app.outputMessage(errors + self.tr('\nThe rest of the motor will be imported.'))
 
         self.manager.startFromMotor(motor)

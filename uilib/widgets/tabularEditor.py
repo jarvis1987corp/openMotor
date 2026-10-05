@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import QWidget
-from PyQt6.QtCore import pyqtSignal
+from PyQt6.QtCore import QEvent, pyqtSignal
 
 from motorlib.propellant import PropellantTab
 
@@ -23,6 +23,13 @@ class TabularEditor(QWidget):
 
     def setPreferences(self, pref):
         self.preferences = pref
+
+    def changeEvent(self, event):
+        if event.type() == QEvent.Type.LanguageChange and hasattr(self, 'ui'):
+            current = self.ui.labelCurrentTab.text()
+            self.ui.retranslateUi(self)
+            self.ui.labelCurrentTab.setText(current)
+        super().changeEvent(event)
 
     def addTab(self, propDict):
         from .propellantTabEditor import PropellantTabEditor

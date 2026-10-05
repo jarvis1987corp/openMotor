@@ -1,6 +1,7 @@
 """Provides default properties for the UI."""
 
 DEFAULT_PREFERENCES = {
+    'language': 'en',
     'general': {
         'maxPressure': 1500 * 6895,
         'maxMassFlux': 2 / 0.001422,

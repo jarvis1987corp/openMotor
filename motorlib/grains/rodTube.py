@@ -1,5 +1,7 @@
 """Rod and Tube submodule"""
 
+from ..localization import QT_TRANSLATE_NOOP
+
 import numpy as np
 import skfmm
 import mathlib
@@ -16,9 +18,9 @@ class RodTubeGrain(PerforatedGrain):
     geomName = "Rod and Tube"
     def __init__(self):
         super().__init__()
-        self.props['coreDiameter'] = FloatProperty('Core Diameter', 'm', 0, maximumRefDiameter)
-        self.props['rodDiameter'] = FloatProperty('Rod Diameter', 'm', 0, maximumRefDiameter)
-        self.props['supportDiameter'] = FloatProperty('Support Diameter', 'm', 0, maximumRefDiameter)
+        self.props['coreDiameter'] = FloatProperty(QT_TRANSLATE_NOOP('MotorProperties', 'Core Diameter'), 'm', 0, maximumRefDiameter)
+        self.props['rodDiameter'] = FloatProperty(QT_TRANSLATE_NOOP('MotorProperties', 'Rod Diameter'), 'm', 0, maximumRefDiameter)
+        self.props['supportDiameter'] = FloatProperty(QT_TRANSLATE_NOOP('MotorProperties', 'Support Diameter'), 'm', 0, maximumRefDiameter)
         self.tubeWeb = None
         self.rodWeb = None
 
@@ -54,19 +56,19 @@ class RodTubeGrain(PerforatedGrain):
         return tubeArea + rodArea
 
     def getDetailsString(self, lengthUnit='m'):
-        return 'Length: {}, Core: {}, Rod: {}'.format(self.props['length'].dispFormat(lengthUnit),
+        return QT_TRANSLATE_NOOP('GrainDetails', 'Length: {}, Core: {}, Rod: {}').format(self.props['length'].dispFormat(lengthUnit),
                                                       self.props['coreDiameter'].dispFormat(lengthUnit),
                                                       self.props['rodDiameter'].dispFormat(lengthUnit))
 
     def getGeometryErrors(self):
         errors = super().getGeometryErrors()
         if self.props['coreDiameter'].getValue() == 0:
-            errors.append(SimAlert(SimAlertLevel.ERROR, SimAlertType.GEOMETRY, 'Core diameter must not be 0'))
+            errors.append(SimAlert(SimAlertLevel.ERROR, SimAlertType.GEOMETRY, QT_TRANSLATE_NOOP('SimulationAlerts', 'Core diameter must not be 0')))
         if self.props['coreDiameter'].getValue() >= self.props['diameter'].getValue():
-            aText = 'Core diameter must be less than grain diameter'
+            aText = QT_TRANSLATE_NOOP('SimulationAlerts', 'Core diameter must be less than grain diameter')
             errors.append(SimAlert(SimAlertLevel.ERROR, SimAlertType.GEOMETRY, aText))
         if self.props['rodDiameter'].getValue() >= self.props['coreDiameter'].getValue():
-            aText = 'Rod diameter must be less than core diameter'
+            aText = QT_TRANSLATE_NOOP('SimulationAlerts', 'Rod diameter must be less than core diameter')
             errors.append(SimAlert(SimAlertLevel.ERROR, SimAlertType.GEOMETRY, aText))
         return errors
 

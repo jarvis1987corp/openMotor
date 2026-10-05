@@ -19,7 +19,7 @@ class Logger():
         path = platformdirs.user_log_dir('openMotor', 'openMotor')
         if not os.path.isdir(path):
             os.makedirs(path)
-        self._file = open(os.path.join(path, "openMotor.log"), 'a')
+        self._file = open(os.path.join(path, "openMotor.log"), 'a', encoding='utf-8')
 
     def log(self, message):
         self._write('LOG', message)

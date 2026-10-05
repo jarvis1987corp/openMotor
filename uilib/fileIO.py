@@ -4,6 +4,7 @@ import os
 from PyQt6.QtWidgets import QApplication
 import yaml
 import platformdirs
+from motorlib.localization import QT_TRANSLATE_NOOP
 
 from .defaults import DEFAULT_PREFERENCES, DEFAULT_PROPELLANTS, KNSU_PROPS
 from .logger import logger
@@ -38,10 +39,10 @@ def loadFile(path, dataType):
         fileData = yaml.load(readLocation, Loader=yaml.Loader)
 
         if 'data' not in fileData or 'type' not in fileData or 'version' not in fileData:
-            raise ValueError('File did not contain the required fields. It may be corrupted or from an old version.')
+            raise ValueError(QT_TRANSLATE_NOOP('FileIO', 'File did not contain the required fields. It may be corrupted or from an old version.'))
 
         if fileData['type'] != dataType:
-            raise TypeError('Loaded data type did not match expected type.')
+            raise TypeError(QT_TRANSLATE_NOOP('FileIO', 'Loaded data type did not match expected type.'))
 
         if fileData['version'] == appVersion: # Check if the file is from the current version
             return fileData['data'] # If so, the data is current and can be returned
@@ -50,7 +51,7 @@ def loadFile(path, dataType):
         if futureVersion(fileData['version'], appVersion):
             new = '.'.join(str(num) for num in fileData['version'])
             old = '.'.join(str(num) for num in appVersion)
-            raise ValueError("Data is from a future version (" + new + " vs " + old + ") and can't be loaded.")
+            raise ValueError(QT_TRANSLATE_NOOP('FileIO', "Data is from a future version ({} vs {}) and can't be loaded.").format(new, old))
 
         # Otherwise it is from a past version and will be migrated
         return doMigration(fileData)['data']

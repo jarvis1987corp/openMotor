@@ -1,0 +1,3 @@
+# Install into the locked application environment without changing uv.lock.
+PyInstaller==6.22.3
+pyinstaller-hooks-contrib==2026.8

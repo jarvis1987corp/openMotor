@@ -19,6 +19,23 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
+    <layout class="QHBoxLayout" name="languageLayout">
+     <item>
+      <widget class="QLabel" name="labelLanguage">
+       <property name="text">
+        <string>Language:</string>
+       </property>
+       <property name="buddy">
+        <cstring>comboBoxLanguage</cstring>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="comboBoxLanguage"/>
+     </item>
+    </layout>
+   </item>
+   <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
       <number>0</number>

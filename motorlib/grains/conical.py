@@ -1,5 +1,7 @@
 """BATES submodule"""
 
+from ..localization import QT_TRANSLATE_NOOP
+
 from math import atan, cos, tan
 
 from ..grain import Grain
@@ -13,9 +15,9 @@ class ConicalGrain(Grain):
     geomName = "Conical"
     def __init__(self):
         super().__init__()
-        self.props['forwardCoreDiameter'] = FloatProperty('Forward Core Diameter', 'm', 0, maximumRefDiameter)
-        self.props['aftCoreDiameter'] = FloatProperty('Aft Core Diameter', 'm', 0, maximumRefDiameter)
-        self.props['inhibitedEnds'] = EnumProperty('Inhibited ends', ['Neither', 'Top', 'Bottom', 'Both'])
+        self.props['forwardCoreDiameter'] = FloatProperty(QT_TRANSLATE_NOOP('MotorProperties', 'Forward Core Diameter'), 'm', 0, maximumRefDiameter)
+        self.props['aftCoreDiameter'] = FloatProperty(QT_TRANSLATE_NOOP('MotorProperties', 'Aft Core Diameter'), 'm', 0, maximumRefDiameter)
+        self.props['inhibitedEnds'] = EnumProperty(QT_TRANSLATE_NOOP('MotorProperties', 'Inhibited ends'), ['Neither', 'Top', 'Bottom', 'Both'])
 
     def isCoreInverted(self):
         """A simple helper that returns 'true' if the core's foward diameter is larger than its aft diameter"""
@@ -185,7 +187,7 @@ class ConicalGrain(Grain):
 
     def getDetailsString(self, lengthUnit='m'):
         """Returns a short string describing the grain, formatted using the units that is passed in"""
-        return 'Length: {}'.format(self.props['length'].dispFormat(lengthUnit))
+        return QT_TRANSLATE_NOOP('GrainDetails', 'Length: {}').format(self.props['length'].dispFormat(lengthUnit))
 
     def simulationSetup(self, config):
         """Do anything needed to prepare this grain for simulation"""
@@ -194,9 +196,9 @@ class ConicalGrain(Grain):
     def getGeometryErrors(self):
         errors = super().getGeometryErrors()
         if self.props['aftCoreDiameter'].getValue() == self.props['forwardCoreDiameter'].getValue():
-            errors.append(SimAlert(SimAlertLevel.ERROR, SimAlertType.GEOMETRY, 'Core diameters cannot be the same, use a BATES for this case.'))
+            errors.append(SimAlert(SimAlertLevel.ERROR, SimAlertType.GEOMETRY, QT_TRANSLATE_NOOP('SimulationAlerts', 'Core diameters cannot be the same, use a BATES for this case.')))
         if self.props['aftCoreDiameter'].getValue() > self.props['diameter'].getValue():
-            errors.append(SimAlert(SimAlertLevel.ERROR, SimAlertType.GEOMETRY, 'Aft core diameter cannot be larger than grain diameter.'))
+            errors.append(SimAlert(SimAlertLevel.ERROR, SimAlertType.GEOMETRY, QT_TRANSLATE_NOOP('SimulationAlerts', 'Aft core diameter cannot be larger than grain diameter.')))
         if self.props['forwardCoreDiameter'].getValue() > self.props['diameter'].getValue():
-            errors.append(SimAlert(SimAlertLevel.ERROR, SimAlertType.GEOMETRY, 'Forward core diameter cannot be larger than grain diameter.'))
+            errors.append(SimAlert(SimAlertLevel.ERROR, SimAlertType.GEOMETRY, QT_TRANSLATE_NOOP('SimulationAlerts', 'Forward core diameter cannot be larger than grain diameter.')))
         return errors

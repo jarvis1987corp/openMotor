@@ -1,5 +1,7 @@
-from PyQt6.QtCore import QObject
+from PyQt6.QtCore import QCoreApplication, QObject
 from PyQt6.QtWidgets import QFileDialog, QApplication
+from .localization import display_text
+from motorlib.localization import QT_TRANSLATE_NOOP
 
 class Converter(QObject):
     def __init__(self, manager, name, description, fileTypes):
@@ -11,7 +13,7 @@ class Converter(QObject):
         self.menu = None
 
     def getFileTypeString(self):
-        return ";;".join([self.fileTypes[key] + " (*" + key + ")" for key in self.fileTypes.keys()])
+        return ";;".join([display_text(self.fileTypes[key]) + " (*" + key + ")" for key in self.fileTypes.keys()])
 
     def showFileSelector(self):
         pass
@@ -24,12 +26,12 @@ class Exporter(Converter):
     def __init__(self, manager, name, description, fileTypes, confirmOverwrite=True):
         super().__init__(manager, name, description, fileTypes)
         self.requirements = []
-        self.reqNotMet = "Requirement not met!"
+        self.reqNotMet = QT_TRANSLATE_NOOP('Converters', "Requirement not met!")
         self.confirmOverwrite = confirmOverwrite
 
     def showFileSelector(self):
         """Open a dialog to pick the file to save to"""
-        title = 'Export {}'.format(self.name)
+        title = QCoreApplication.translate('Converter', 'Export {}').format(display_text(self.name))
         types = self.getFileTypeString()
         if not self.confirmOverwrite:
             path = QFileDialog.getSaveFileName(None, title, '', types, options=QFileDialog.Option.DontConfirmOverwrite)[0]
@@ -54,9 +56,9 @@ class Exporter(Converter):
             try:
                 self.doConversion(path, config)
             except Exception as error:
-                QApplication.instance().outputException(error, "Export to '{}' failed:".format(path))
+                QApplication.instance().outputException(error, QCoreApplication.translate('Converter', "Export to '{}' failed:").format(path))
         else:
-            self.manager.app.outputMessage(self.reqNotMet)
+            self.manager.app.outputMessage(display_text(self.reqNotMet))
 
     def doConversion(self, path, config):
         pass
@@ -73,7 +75,7 @@ class Importer(Converter):
     def showFileSelector(self):
         """Open a dialog to pick the file to load"""
         if self.manager.unsavedCheck():
-            path = QFileDialog.getOpenFileName(None, 'Import {}'.format(self.name), '', self.getFileTypeString())[0]
+            path = QFileDialog.getOpenFileName(None, QCoreApplication.translate('Converter', 'Import {}').format(display_text(self.name)), '', self.getFileTypeString())[0]
             if path != '':
                 return path
         return None
@@ -88,4 +90,4 @@ class Importer(Converter):
         try:
             self.doConversion(path)
         except Exception as error:
-            QApplication.instance().outputException(error, "Import of '{}' failed:".format(path))
+            QApplication.instance().outputException(error, QCoreApplication.translate('Converter', "Import of '{}' failed:").format(path))

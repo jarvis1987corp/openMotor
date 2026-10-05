@@ -1,14 +1,17 @@
 from PyQt6.QtWidgets import QWidget
+from PyQt6.QtCore import QEvent
 
 import motorlib
 
 from ..views.PropellantPreview_ui import Ui_PropellantPreview
+from ..localization import update_alert_list
 
 class PropellantPreviewWidget(QWidget):
     def __init__(self):
         super().__init__()
         self.ui = Ui_PropellantPreview()
         self.ui.setupUi(self)
+        self.alerts = []
 
     def setPreferences(self, pref):
         self.ui.tabBurnRate.setPreferences(pref)
@@ -19,8 +22,8 @@ class PropellantPreviewWidget(QWidget):
         self.ui.tabBurnRate.cleanup()
         self.ui.tabPressure.cleanup()
         alerts = propellant.getErrors()
-        for err in alerts:
-            self.ui.tabAlerts.addItem(err.description)
+        self.alerts = alerts
+        update_alert_list(self.ui.tabAlerts, alerts)
 
         for alert in alerts:
             if alert.level == motorlib.simResult.SimAlertLevel.ERROR:
@@ -41,6 +44,13 @@ class PropellantPreviewWidget(QWidget):
         self.ui.tabPressure.showGraph(pressureData)
 
     def cleanup(self):
+        self.alerts = []
         self.ui.tabAlerts.clear()
         self.ui.tabBurnRate.cleanup()
         self.ui.tabPressure.cleanup()
+
+    def changeEvent(self, event):
+        if event.type() == QEvent.Type.LanguageChange and hasattr(self, 'alerts'):
+            self.ui.retranslateUi(self)
+            update_alert_list(self.ui.tabAlerts, self.alerts)
+        super().changeEvent(event)

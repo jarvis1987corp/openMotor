@@ -35,6 +35,7 @@ setup(
             compiler_directives={'language_level': 3}
             ),
     packages=find_packages(),
+    package_data={'uilib': ['translations/*.ts', 'translations/*.qm', 'translations/*.md']},
     url='https://github.com/reilleya/openMotor',
     description='An open-source internal ballistics simulator for rocket motor experimenters',
     long_description=open('README.md').read(),

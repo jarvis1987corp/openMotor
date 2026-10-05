@@ -1,0 +1,18 @@
+{
+  "source": "Stage-one snapshot before full UI localization; test/data/regression/simple/motor.ric",
+  "eng_config": {
+    "diameter": 0.08305816611633224,
+    "length": 0.27940055880111764,
+    "hardwareMass": 1.25,
+    "designation": "Reference",
+    "manufacturer": "Test",
+    "append": "Overwrite"
+  },
+  "sha256": {
+    "reference.ric": "ad03f233686bb62d861d62ba789f3e5a69e420bdb5e4d89cabccecbd66811387",
+    "reference.csv": "6f85eb02c48fbbec00472d97467143437ee5a06d2a8e9d5b1d22e3e6128e742b",
+    "reference.eng": "e7796b6bd8bbed18d4f33adb6f18eadc12fde141e78b8b992de099280320f11e",
+    "reference.bsx": "72f03ac7ca2694cba2b9b29b9f32614bae7ccbbdb5fec772846014c9ba0beb75"
+  },
+  "channels_sha256": "8fd6777cf7b99d158dc173c5d783f04087d43c6197d16400d192c622c4fc6a99"
+}

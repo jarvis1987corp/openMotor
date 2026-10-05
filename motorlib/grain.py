@@ -3,6 +3,8 @@ This module includes the base classes from which all grain classes should inheri
 should be instantiated directly.
 """
 
+from .localization import QT_TRANSLATE_NOOP
+
 from abc import abstractmethod
 from typing import Tuple, List, Union
 
@@ -32,13 +34,13 @@ class Grain(PropertyCollection):
     def __init__(self) -> None:
         super().__init__()
         self.props["diameter"] = FloatProperty(
-            dispName="Diameter",
+            dispName=QT_TRANSLATE_NOOP('MotorProperties', "Diameter"),
             unit="m",
             minValue=0,
             maxValue=maximumRefDiameter,
         )
         self.props["length"] = FloatProperty(
-            dispName="Length",
+            dispName=QT_TRANSLATE_NOOP('MotorProperties', "Length"),
             unit="m",
             minValue=0,
             maxValue=maximumRefLength,
@@ -126,7 +128,7 @@ class Grain(PropertyCollection):
 
     def getDetailsString(self, lengthUnit: str = "m") -> str:
         """Returns a short string describing the grain, formatted using the units that is passed in."""
-        return "Length: {}".format(self.props["length"].dispFormat(lengthUnit))
+        return QT_TRANSLATE_NOOP('GrainDetails', "Length: {}").format(self.props["length"].dispFormat(lengthUnit))
 
     @abstractmethod
     def simulationSetup(self, config):
@@ -144,13 +146,13 @@ class Grain(PropertyCollection):
         if self.props["diameter"].getValue() == 0:
             errors.append(
                 SimAlert(
-                    SimAlertLevel.ERROR, SimAlertType.GEOMETRY, "Diameter must not be 0"
+                    SimAlertLevel.ERROR, SimAlertType.GEOMETRY, QT_TRANSLATE_NOOP('SimulationAlerts', "Diameter must not be 0")
                 )
             )
         if self.props["length"].getValue() == 0:
             errors.append(
                 SimAlert(
-                    SimAlertLevel.ERROR, SimAlertType.GEOMETRY, "Length must not be 0"
+                    SimAlertLevel.ERROR, SimAlertType.GEOMETRY, QT_TRANSLATE_NOOP('SimulationAlerts', "Length must not be 0")
                 )
             )
         return errors
@@ -182,7 +184,7 @@ class PerforatedGrain(Grain):
     def __init__(self) -> None:
         super().__init__()
         self.props["inhibitedEnds"] = EnumProperty(
-            "Inhibited ends", ["Neither", "Top", "Bottom", "Both"]
+            QT_TRANSLATE_NOOP('MotorProperties', "Inhibited ends"), ["Neither", "Top", "Bottom", "Both"]
         )
         self.wallWeb: float = 0  # Max distance from the core to the wall
 
@@ -196,7 +198,7 @@ class PerforatedGrain(Grain):
         if self.props["inhibitedEnds"].getValue() == "Both":
             return (0, self.props["length"].getValue())
         # The enum should prevent this from even being raised, but to cover the case where it somehow gets set wrong
-        raise ValueError("Invalid number of faces inhibited")
+        raise ValueError(QT_TRANSLATE_NOOP('ModelErrors', "Invalid number of faces inhibited"))
 
     @abstractmethod
     def getCorePerimeter(self, regDist: float) -> float:
@@ -369,7 +371,7 @@ class FmmGrain(PerforatedGrain):
         Takes in the dimension of both maps.
         """
         if mapDim < 64:  # TODO convert int value into meaningful constant
-            raise ValueError("Map dimension must be 64 or larger to get good results")
+            raise ValueError(QT_TRANSLATE_NOOP('ModelErrors', "Map dimension must be 64 or larger to get good results"))
         self.mapDim = mapDim
         self.mapX, self.mapY = np.meshgrid(
             np.linspace(-1, 1, self.mapDim), np.linspace(-1, 1, self.mapDim)
@@ -428,7 +430,7 @@ class FmmGrain(PerforatedGrain):
         if index >= len(self.faceArea) - 1:
             return 0  # Past burnout
         if not self.faceAreaFunc:
-            raise ValueError("faceAreaFunc is missing")
+            raise ValueError(QT_TRANSLATE_NOOP('ModelErrors', "faceAreaFunc is missing"))
         return self.faceAreaFunc(mapDist)
 
     def getFaceImage(self, mapDim: int) -> np.ma.MaskedArray:

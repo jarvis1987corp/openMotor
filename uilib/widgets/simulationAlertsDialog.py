@@ -1,14 +1,15 @@
-from PyQt6.QtWidgets import QDialog, QTableWidgetItem, QHeaderView, QApplication
-
-from motorlib.simResult import alertLevelNames, alertTypeNames
+from PyQt6.QtWidgets import QDialog, QHeaderView, QApplication
+from PyQt6.QtCore import QEvent
 
 from ..views.SimulationAlertsDialog_ui import Ui_SimAlertsDialog
+from ..localization import update_alert_table
 
 class SimulationAlertsDialog(QDialog):
     def __init__(self):
         QDialog.__init__(self)
         self.ui = Ui_SimAlertsDialog()
         self.ui.setupUi(self)
+        self.alerts = []
 
         self.setWindowIcon(QApplication.instance().icon)
 
@@ -21,14 +22,16 @@ class SimulationAlertsDialog(QDialog):
         self.hide()
 
     def displayAlerts(self, simRes):
+        self.alerts = simRes.alerts
         self.ui.tableWidgetAlerts.setRowCount(0) # Clear the table
         if len(simRes.alerts) == 0:
             return
 
-        self.ui.tableWidgetAlerts.setRowCount(len(simRes.alerts))
-        for row, alert in enumerate(simRes.alerts):
-            self.ui.tableWidgetAlerts.setItem(row, 0, QTableWidgetItem(alertLevelNames[alert.level]))
-            self.ui.tableWidgetAlerts.setItem(row, 1, QTableWidgetItem(alertTypeNames[alert.type]))
-            self.ui.tableWidgetAlerts.setItem(row, 2, QTableWidgetItem(alert.location))
-            self.ui.tableWidgetAlerts.setItem(row, 3, QTableWidgetItem(alert.description))
+        update_alert_table(self.ui.tableWidgetAlerts, simRes.alerts)
         self.show()
+
+    def changeEvent(self, event):
+        if event.type() == QEvent.Type.LanguageChange and hasattr(self, 'alerts'):
+            self.ui.retranslateUi(self)
+            update_alert_table(self.ui.tableWidgetAlerts, self.alerts)
+        super().changeEvent(event)

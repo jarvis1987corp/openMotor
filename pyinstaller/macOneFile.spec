@@ -6,10 +6,18 @@ from uilib.fileIO import appVersionStr
 
 block_cipher = None
 
+from os.path import join
+from PyQt6.QtCore import QLibraryInfo
+
+translation_datas = [
+    ('../uilib/translations/*.qm', 'uilib/translations'),
+    (join(QLibraryInfo.path(QLibraryInfo.LibraryPath.TranslationsPath), 'qtbase_ru.qm'), 'uilib/translations'),
+]
+
 a = Analysis(['../main.py'],
              pathex=['../'],
              binaries=[],
-             datas=[('../resources/oMFile256.icns', '.')],
+             datas=[('../resources/oMFile256.icns', '.')] + translation_datas,
              hiddenimports=['pywt._extensions._cwt'],
              hookspath=[],
              runtime_hooks=[],

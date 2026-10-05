@@ -1,3 +1,4 @@
+from motorlib.localization import QT_TRANSLATE_NOOP
 import numpy as np
 from ._find_perimeter_cy import _get_perimeter
 from collections import deque
@@ -74,9 +75,9 @@ def find_perimeter(image, level,
     0.7071067811865476
     """
     if image.shape[0] < 2 or image.shape[1] < 2:
-        raise ValueError("Input array must be at least 2x2.")
+        raise ValueError(QT_TRANSLATE_NOOP('ModelErrors', "Input array must be at least 2x2."))
     if image.ndim != 2:
-        raise ValueError('Only 2D arrays are supported.')
+        raise ValueError(QT_TRANSLATE_NOOP('ModelErrors', 'Only 2D arrays are supported.'))
     (perimeter,segments) = _get_perimeter(image, float(level), fully_connected == 'high', including_contours)
     contours = []
     if including_contours:

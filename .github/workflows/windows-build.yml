@@ -1,0 +1,92 @@
+name: Windows Standalone Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [staging, main, master, design-assistant-mvp]
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    runs-on: windows-2022
+    timeout-minutes: 45
+    env:
+      QT_QPA_PLATFORM: offscreen
+      PYTHONUTF8: "1"
+      PYTHONIOENCODING: utf-8
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          architecture: x64
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Install locked dependencies and build tools
+        shell: pwsh
+        run: |
+          uv sync --frozen --python 3.12 --no-install-project
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          uv pip install --python .venv\Scripts\python.exe -r pyinstaller\requirements-build.txt
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Test and build standalone onedir
+        shell: pwsh
+        run: |
+          $env:PYTHONPATH = (Get-Location).Path
+          New-Item -ItemType Directory -Force build | Out-Null
+          & .venv\Scripts\python.exe scripts\build_windows.py --mode onedir *>&1 | Tee-Object build\windows-build.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Build frozen GUI validation executable
+        shell: pwsh
+        run: |
+          & .venv\Scripts\python.exe -m PyInstaller --noconfirm --clean --distpath dist\windows\probe --workpath build\windows\probe pyinstaller\packagingProbe.spec
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Validate frozen application and Design Assistant
+        shell: pwsh
+        run: |
+          $probe = (Resolve-Path dist\windows\probe\openMotor-check\openMotor-check.exe).Path
+          $qa = Join-Path (Get-Location) "build\проверка Windows"
+          New-Item -ItemType Directory -Force $qa | Out-Null
+          $project = Join-Path $qa "исходный двигатель.ric"
+          Copy-Item test\data\regression\simple\motor.ric $project
+          Push-Location $qa
+          try {
+            foreach ($phase in @("first", "restart", "english")) {
+              & $probe --data-dir $qa --project $project --phase $phase
+              if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            }
+          } finally {
+            Pop-Location
+          }
+
+      - name: Upload runnable Windows distribution
+        uses: actions/upload-artifact@v4
+        with:
+          name: openMotor-Windows-x64
+          path: dist/windows/onedir/openMotor/
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload build and validation reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: openMotor-Windows-validation
+          path: |
+            dist/windows/build-info.json
+            build/windows-build.log
+            build/проверка Windows/report-*.json
+          if-no-files-found: warn
+          retention-days: 30

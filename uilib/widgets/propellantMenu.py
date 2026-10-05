@@ -7,8 +7,9 @@ import motorlib.propellant
 
 from ..views.PropMenu_ui import Ui_PropellantDialog
 from ..logger import logger
+from ..localization import TranslatedForm
 
-class PropellantMenu(QDialog):
+class PropellantMenu(TranslatedForm, QDialog):
 
     propellantEdited = pyqtSignal(dict)
     closed = pyqtSignal()
@@ -56,6 +57,7 @@ class PropellantMenu(QDialog):
 
     def copyProp(self):
         propProperties = self.manager.propellants[self.ui.listWidgetPropellants.currentRow()].getProperties()
+        # Names are user data and also library identities; do not translate them.
         propProperties['name'] = self.manager.getUniquePropellantName('{} (Copy)'.format(propProperties['name']))
         newProp = motorlib.propellant.Propellant(propProperties)
         self.addNewPropellantAndEdit(newProp)
@@ -77,7 +79,7 @@ class PropellantMenu(QDialog):
 
     def deleteProp(self):
         propellantName = self.manager.propellants[self.ui.listWidgetPropellants.currentRow()].getProperty('name')
-        warning = 'Are you sure you would like to delete the propellant "{}"? This action cannot be undone.'
+        warning = self.tr('Are you sure you would like to delete the propellant "{}"? This action cannot be undone.')
         if not QApplication.instance().promptYesNo(warning.format(propellantName)):
             return
 
@@ -136,8 +138,8 @@ class PropellantMenu(QDialog):
 
         msg = QMessageBox()
         msg.setWindowFlags(FLAGS_NO_ICON);
-        msg.setText("Close without saving current propellant?")
-        msg.setWindowTitle("Close without saving?")
+        msg.setText(self.tr("Close without saving current propellant?"))
+        msg.setWindowTitle(self.tr("Close without saving?"))
         msg.setStandardButtons(
             QMessageBox.StandardButton.Save
             | QMessageBox.StandardButton.Discard

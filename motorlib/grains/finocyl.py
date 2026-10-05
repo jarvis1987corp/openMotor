@@ -1,5 +1,7 @@
 """Finocyl grain submodule"""
 
+from ..localization import QT_TRANSLATE_NOOP
+
 import numpy as np
 
 from ..grain import FmmGrain
@@ -13,11 +15,11 @@ class Finocyl(FmmGrain):
     geomName = 'Finocyl'
     def __init__(self):
         super().__init__()
-        self.props['numFins'] = IntProperty('Number of fins', '', 0, 64)
-        self.props['finWidth'] = FloatProperty('Fin width', 'm', 0, maximumRefDiameter)
-        self.props['finLength'] = FloatProperty('Fin length', 'm', 0, maximumRefDiameter)
-        self.props['coreDiameter'] = FloatProperty('Core diameter', 'm', 0, maximumRefDiameter)
-        self.props['invertedFins'] = BooleanProperty('Inverted fins')
+        self.props['numFins'] = IntProperty(QT_TRANSLATE_NOOP('MotorProperties', 'Number of fins'), '', 0, 64)
+        self.props['finWidth'] = FloatProperty(QT_TRANSLATE_NOOP('MotorProperties', 'Fin width'), 'm', 0, maximumRefDiameter)
+        self.props['finLength'] = FloatProperty(QT_TRANSLATE_NOOP('MotorProperties', 'Fin length'), 'm', 0, maximumRefDiameter)
+        self.props['coreDiameter'] = FloatProperty(QT_TRANSLATE_NOOP('MotorProperties', 'Core diameter'), 'm', 0, maximumRefDiameter)
+        self.props['invertedFins'] = BooleanProperty(QT_TRANSLATE_NOOP('MotorProperties', 'Inverted fins'))
 
     def generateCoreMap(self):
         coreRadius = self.normalize(self.props['coreDiameter'].getValue()) / 2
@@ -48,22 +50,22 @@ class Finocyl(FmmGrain):
             self.coreMap[np.logical_and(vect, ends)] = invertedFins
 
     def getDetailsString(self, lengthUnit='m'):
-        return 'Length: {}, Core: {}, Fins: {}'.format(self.props['length'].dispFormat(lengthUnit),
+        return QT_TRANSLATE_NOOP('GrainDetails', 'Length: {}, Core: {}, Fins: {}').format(self.props['length'].dispFormat(lengthUnit),
                                                        self.props['coreDiameter'].dispFormat(lengthUnit),
                                                        self.props['numFins'].getValue())
 
     def getGeometryErrors(self):
         errors = super().getGeometryErrors()
         if self.props['coreDiameter'].getValue() == 0:
-            errors.append(SimAlert(SimAlertLevel.ERROR, SimAlertType.GEOMETRY, 'Core diameter must not be 0'))
+            errors.append(SimAlert(SimAlertLevel.ERROR, SimAlertType.GEOMETRY, QT_TRANSLATE_NOOP('SimulationAlerts', 'Core diameter must not be 0')))
         if self.props['coreDiameter'].getValue() >= self.props['diameter'].getValue():
-            aText = 'Core diameter must be less than or equal to grain diameter'
+            aText = QT_TRANSLATE_NOOP('SimulationAlerts', 'Core diameter must be less than or equal to grain diameter')
             errors.append(SimAlert(SimAlertLevel.ERROR, SimAlertType.GEOMETRY, aText))
 
         if self.props['finLength'].getValue() == 0:
-            errors.append(SimAlert(SimAlertLevel.ERROR, SimAlertType.GEOMETRY, 'Fin length must not be 0'))
+            errors.append(SimAlert(SimAlertLevel.ERROR, SimAlertType.GEOMETRY, QT_TRANSLATE_NOOP('SimulationAlerts', 'Fin length must not be 0')))
         if self.props['finLength'].getValue() * 2 > self.props['diameter'].getValue():
-            aText = 'Fin length should be less than or equal to grain radius'
+            aText = QT_TRANSLATE_NOOP('SimulationAlerts', 'Fin length should be less than or equal to grain radius')
             errors.append(SimAlert(SimAlertLevel.WARNING, SimAlertType.GEOMETRY, aText))
 
         if self.props['invertedFins'].getValue():
@@ -75,16 +77,16 @@ class Finocyl(FmmGrain):
                 halfWidth = self.props['finWidth'].getValue() / 2
                 tipRadius = (lengthPastCenter ** 2 + halfWidth ** 2) ** 0.5
                 if tipRadius > coreRadius and self.props['numFins'].getValue() > 0:
-                    aText = 'Fin tips outside of core'
+                    aText = QT_TRANSLATE_NOOP('SimulationAlerts', 'Fin tips outside of core')
                     errors.append(SimAlert(SimAlertLevel.ERROR, SimAlertType.GEOMETRY, aText))
         else:
             coreWidth = self.props['coreDiameter'].getValue() + (2 * self.props['finLength'].getValue())
             if coreWidth > self.props['diameter'].getValue():
-                aText = 'Core radius plus fin length should be less than or equal to grain radius'
+                aText = QT_TRANSLATE_NOOP('SimulationAlerts', 'Core radius plus fin length should be less than or equal to grain radius')
                 errors.append(SimAlert(SimAlertLevel.WARNING, SimAlertType.GEOMETRY, aText))
 
         if self.props['finWidth'].getValue() == 0:
-            errors.append(SimAlert(SimAlertLevel.ERROR, SimAlertType.GEOMETRY, 'Fin width must not be 0'))
+            errors.append(SimAlert(SimAlertLevel.ERROR, SimAlertType.GEOMETRY, QT_TRANSLATE_NOOP('SimulationAlerts', 'Fin width must not be 0')))
         if self.props['numFins'].getValue() > 1:
             radius = self.props['coreDiameter'].getValue() / 2
             finLength = self.props['finLength'].getValue()
@@ -93,6 +95,6 @@ class Finocyl(FmmGrain):
             apothem = radius - finLength if invertedFins else radius + finLength
             sideLength = 2 * apothem * np.tan(np.pi / self.props['numFins'].getValue())
             if sideLength < self.props['finWidth'].getValue():
-                errors.append(SimAlert(level, SimAlertType.GEOMETRY, 'Fin tips intersect'))
+                errors.append(SimAlert(level, SimAlertType.GEOMETRY, QT_TRANSLATE_NOOP('SimulationAlerts', 'Fin tips intersect')))
 
         return errors

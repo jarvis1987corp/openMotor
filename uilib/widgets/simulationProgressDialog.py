@@ -2,9 +2,10 @@ from PyQt6.QtWidgets import QDialog, QApplication
 from PyQt6.QtCore import pyqtSignal
 
 from ..views.SimulatingDialog_ui import Ui_SimProgressDialog
+from ..localization import TranslatedForm
 
 
-class SimulationProgressDialog(QDialog):
+class SimulationProgressDialog(TranslatedForm, QDialog):
 
     simulationCanceled = pyqtSignal()
 

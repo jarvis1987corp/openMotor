@@ -1,7 +1,8 @@
 from PyQt6.QtWidgets import QGroupBox, QCheckBox, QRadioButton, QVBoxLayout
-from PyQt6.QtCore import pyqtSignal, Qt
+from PyQt6.QtCore import QEvent, pyqtSignal, Qt
 
 import motorlib
+from ..localization import display_text
 
 class ChannelSelector(QGroupBox):
 
@@ -10,6 +11,7 @@ class ChannelSelector(QGroupBox):
     def __init__(self, parent):
         super().__init__(parent)
         self.checks = {}
+        self.channelNames = {}
         # Populate list of checks to toggle channels
         self.setLayout(QVBoxLayout())
 
@@ -19,11 +21,12 @@ class ChannelSelector(QGroupBox):
         for channel in simres.channels:
             if channel not in exclude:
                 if multiselect:
-                    check = QCheckBox(simres.channels[channel].name)
+                    check = QCheckBox(display_text(simres.channels[channel].name))
                 else:
-                    check = QRadioButton(simres.channels[channel].name)
+                    check = QRadioButton(display_text(simres.channels[channel].name))
                 self.layout().addWidget(check)
                 self.checks[channel] = check
+                self.channelNames[channel] = simres.channels[channel].name
                 if default is not None:
                     if multiselect:
                         if channel in default:
@@ -51,7 +54,15 @@ class ChannelSelector(QGroupBox):
     def resetChecks(self):
         for check in self.checks:
             self.layout().removeWidget(self.checks[check])
+            self.checks[check].deleteLater()
         self.checks = {}
+        self.channelNames = {}
+
+    def changeEvent(self, event):
+        if event.type() == QEvent.Type.LanguageChange:
+            for key, check in getattr(self, 'checks', {}).items():
+                check.setText(display_text(self.channelNames[key]))
+        super().changeEvent(event)
 
     def unselect(self, channels):
         for channel in channels:

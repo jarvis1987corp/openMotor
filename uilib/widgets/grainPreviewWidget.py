@@ -1,11 +1,12 @@
 from threading import Thread
 
 from PyQt6.QtWidgets import QWidget
-from PyQt6.QtCore import pyqtSignal
+from PyQt6.QtCore import QEvent, pyqtSignal
 
 import motorlib
 
 from ..views.GrainPreview_ui import Ui_GrainPreview
+from ..localization import update_alert_list
 
 class GrainPreviewWidget(QWidget):
 
@@ -15,6 +16,7 @@ class GrainPreviewWidget(QWidget):
         super().__init__()
         self.ui = Ui_GrainPreview()
         self.ui.setupUi(self)
+        self.alerts = []
 
         self.ui.tabFace.setupImagePlot()
         self.ui.tabRegression.setupImagePlot()
@@ -29,10 +31,9 @@ class GrainPreviewWidget(QWidget):
 
     def loadGrain(self, grain):
         geomAlerts = grain.getGeometryErrors()
+        self.alerts = geomAlerts
 
-        self.ui.tabAlerts.clear()
-        for err in geomAlerts:
-            self.ui.tabAlerts.addItem(err.description)
+        update_alert_list(self.ui.tabAlerts, geomAlerts)
 
         for alert in geomAlerts:
             if alert.level == motorlib.simResult.SimAlertLevel.ERROR:
@@ -80,9 +81,16 @@ class GrainPreviewWidget(QWidget):
             self.lastNonAlertTab = tabIndex
 
     def cleanup(self):
+        self.alerts = []
         self.lastNonAlertTab = 1
         self.ui.tabAlerts.clear()
         self.ui.tabRegression.cleanup()
         self.ui.tabFace.cleanup()
         self.ui.tabAreaGraph.cleanup()
         self.ui.tabAreaGraph.resetGraphBounds()
+
+    def changeEvent(self, event):
+        if event.type() == QEvent.Type.LanguageChange and hasattr(self, 'alerts'):
+            self.ui.retranslateUi(self)
+            update_alert_list(self.ui.tabAlerts, self.alerts)
+        super().changeEvent(event)

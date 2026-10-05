@@ -1,6 +1,8 @@
 """This module contains the classes that are returned from a simulation, including the main results class and
 the channels and components that it is comprised of."""
 
+from .localization import QT_TRANSLATE_NOOP
+
 from typing import List
 import math
 from enum import Enum
@@ -27,15 +29,15 @@ class SimAlertType(Enum):
 
 
 alertLevelNames = {
-    SimAlertLevel.ERROR: "Error",
-    SimAlertLevel.WARNING: "Warning",
-    SimAlertLevel.MESSAGE: "Message",
+    SimAlertLevel.ERROR: QT_TRANSLATE_NOOP('SimulationAlerts', "Error"),
+    SimAlertLevel.WARNING: QT_TRANSLATE_NOOP('SimulationAlerts', "Warning"),
+    SimAlertLevel.MESSAGE: QT_TRANSLATE_NOOP('SimulationAlerts', "Message"),
 }
 
 alertTypeNames = {
-    SimAlertType.GEOMETRY: "Geometry",
-    SimAlertType.CONSTRAINT: "Constraint",
-    SimAlertType.VALUE: "Value",
+    SimAlertType.GEOMETRY: QT_TRANSLATE_NOOP('SimulationAlerts', "Geometry"),
+    SimAlertType.CONSTRAINT: QT_TRANSLATE_NOOP('SimulationAlerts', "Constraint"),
+    SimAlertType.VALUE: QT_TRANSLATE_NOOP('SimulationAlerts', "Value"),
 }
 
 
@@ -60,7 +62,7 @@ class LogChannel:
 
     def __init__(self, name, valueType, unit):
         if valueType not in (int, float, list, tuple):
-            raise TypeError("Value type not in allowed set")
+            raise TypeError(QT_TRANSLATE_NOOP('ModelErrors', "Value type not in allowed set"))
         self.name = name
         self.unit = unit
         self.valueType = valueType
@@ -91,7 +93,7 @@ class LogChannel:
     def getAverage(self):
         """Returns the average of the datapoints."""
         if self.valueType in (list, tuple):
-            raise NotImplementedError("Average not supported for list types")
+            raise NotImplementedError(QT_TRANSLATE_NOOP('ModelErrors', "Average not supported for list types"))
         return sum(self.data) / len(self.data)
 
     def getMax(self):
@@ -133,19 +135,19 @@ class SimulationResult:
         self.success = False
 
         self.channels = {
-            "time": LogChannel("Time", float, "s"),
-            "kn": LogChannel("Kn", float, ""),
-            "pressure": LogChannel("Chamber Pressure", float, "Pa"),
-            "force": LogChannel("Thrust", float, "N"),
-            "mass": LogChannel("Propellant Mass", tuple, "kg"),
-            "volumeLoading": LogChannel("Volume Loading", float, "%"),
-            "massFlow": LogChannel("Mass Flow", tuple, "kg/s"),
-            "massFlux": LogChannel("Mass Flux", tuple, "kg/(m^2*s)"),
-            "regression": LogChannel("Regression Depth", tuple, "m"),
-            "web": LogChannel("Web", tuple, "m"),
-            "exitPressure": LogChannel("Nozzle Exit Pressure", float, "Pa"),
-            "dThroat": LogChannel("Change in Throat Diameter", float, "m"),
-            "machNumber": LogChannel("Core Mach Number", tuple, ""),
+            "time": LogChannel(QT_TRANSLATE_NOOP('ResultChannels', "Time"), float, "s"),
+            "kn": LogChannel(QT_TRANSLATE_NOOP('ResultChannels', "Kn"), float, ""),
+            "pressure": LogChannel(QT_TRANSLATE_NOOP('ResultChannels', "Chamber Pressure"), float, "Pa"),
+            "force": LogChannel(QT_TRANSLATE_NOOP('ResultChannels', "Thrust"), float, "N"),
+            "mass": LogChannel(QT_TRANSLATE_NOOP('ResultChannels', "Propellant Mass"), tuple, "kg"),
+            "volumeLoading": LogChannel(QT_TRANSLATE_NOOP('ResultChannels', "Volume Loading"), float, "%"),
+            "massFlow": LogChannel(QT_TRANSLATE_NOOP('ResultChannels', "Mass Flow"), tuple, "kg/s"),
+            "massFlux": LogChannel(QT_TRANSLATE_NOOP('ResultChannels', "Mass Flux"), tuple, "kg/(m^2*s)"),
+            "regression": LogChannel(QT_TRANSLATE_NOOP('ResultChannels', "Regression Depth"), tuple, "m"),
+            "web": LogChannel(QT_TRANSLATE_NOOP('ResultChannels', "Web"), tuple, "m"),
+            "exitPressure": LogChannel(QT_TRANSLATE_NOOP('ResultChannels', "Nozzle Exit Pressure"), float, "Pa"),
+            "dThroat": LogChannel(QT_TRANSLATE_NOOP('ResultChannels', "Change in Throat Diameter"), float, "m"),
+            "machNumber": LogChannel(QT_TRANSLATE_NOOP('ResultChannels', "Core Mach Number"), tuple, ""),
         }
 
     def addAlert(self, alert):

@@ -2,12 +2,13 @@ import math
 
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLineEdit, QCheckBox
 from PyQt6.QtWidgets import QDoubleSpinBox, QSpinBox, QComboBox
-from PyQt6.QtCore import pyqtSignal, Qt
+from PyQt6.QtCore import QEvent, QSignalBlocker, pyqtSignal, Qt
 
 import motorlib
 
 from .polygonEditor import PolygonEditor
 from .tabularEditor import TabularEditor
+from ..localization import enum_label
 
 class PropertyEditor(QWidget):
 
@@ -67,9 +68,10 @@ class PropertyEditor(QWidget):
         elif isinstance(prop, motorlib.properties.EnumProperty):
             self.editor = QComboBox()
 
-            self.editor.addItems(self.prop.values)
-            self.editor.setCurrentText(self.prop.value)
-            self.editor.currentTextChanged.connect(self.valueChanged.emit)
+            for value in self.prop.values:
+                self.editor.addItem(enum_label(value), value)
+            self.editor.setCurrentIndex(self.editor.findData(self.prop.value))
+            self.editor.currentIndexChanged.connect(self.valueChanged.emit)
 
             self.layout().addWidget(self.editor)
 
@@ -106,7 +108,7 @@ class PropertyEditor(QWidget):
             return self.editor.isChecked()
 
         if isinstance(self.prop, motorlib.properties.EnumProperty):
-            return self.editor.currentText()
+            return self.editor.currentData()
 
         if isinstance(self.prop, motorlib.properties.PolygonProperty):
             return self.editor.points
@@ -115,3 +117,11 @@ class PropertyEditor(QWidget):
             return self.editor.getTabs()
 
         return None
+
+    def changeEvent(self, event):
+        if event.type() == QEvent.Type.LanguageChange and hasattr(self, 'editor'):
+            if isinstance(self.prop, motorlib.properties.EnumProperty):
+                with QSignalBlocker(self.editor):
+                    for index in range(self.editor.count()):
+                        self.editor.setItemText(index, enum_label(self.editor.itemData(index)))
+        super().changeEvent(event)

@@ -2,16 +2,18 @@ from math import radians, tan
 
 from PyQt6.QtWidgets import QWidget, QApplication, QGraphicsScene, QGraphicsPolygonItem
 from PyQt6.QtGui import QPolygonF, QBrush
-from PyQt6.QtCore import QPointF, Qt, QTimer
+from PyQt6.QtCore import QEvent, QPointF, Qt, QTimer
 
 import motorlib
 from ..views.NozzlePreview_ui import Ui_NozzlePreview
+from ..localization import update_alert_list
 
 class NozzlePreviewWidget(QWidget):
     def __init__(self):
         super().__init__()
         self.ui = Ui_NozzlePreview()
         self.ui.setupUi(self)
+        self.alerts = []
 
         self.brush = QBrush()
 
@@ -32,10 +34,9 @@ class NozzlePreviewWidget(QWidget):
 
     def loadNozzle(self, nozzle):
         geomAlerts = nozzle.getGeometryErrors()
+        self.alerts = geomAlerts
 
-        self.ui.tabAlerts.clear()
-        for err in geomAlerts:
-            self.ui.tabAlerts.addItem(err.description)
+        update_alert_list(self.ui.tabAlerts, geomAlerts)
 
         self.upper.setPolygon(QPolygonF([]))
         self.lower.setPolygon(QPolygonF([]))
@@ -103,3 +104,9 @@ class NozzlePreviewWidget(QWidget):
     def rescale(self):
         self.scene.setSceneRect(self.scene.itemsBoundingRect())
         self.ui.tabCrossSection.fitInView(self.scene.sceneRect(), Qt.AspectRatioMode.KeepAspectRatio)
+
+    def changeEvent(self, event):
+        if event.type() == QEvent.Type.LanguageChange and hasattr(self, 'alerts'):
+            self.ui.retranslateUi(self)
+            update_alert_list(self.ui.tabAlerts, self.alerts)
+        super().changeEvent(event)

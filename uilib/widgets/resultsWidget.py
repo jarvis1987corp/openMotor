@@ -1,13 +1,15 @@
 from PyQt6.QtWidgets import QWidget, QHeaderView, QLabel, QTableWidgetItem
+from PyQt6.QtCore import QEvent, QTimer
 import numpy as np
 
 import motorlib
-from motorlib.simResult import singleValueChannels, multiValueChannels, alertLevelNames, alertTypeNames
+from motorlib.simResult import singleValueChannels, multiValueChannels
 from motorlib.constants import standardGravity
 
 from .grainImageWidget import GrainImageWidget
 
 from ..views.ResultsWidget_ui import Ui_ResultsWidget
+from ..localization import update_alert_table
 
 class ResultsWidget(QWidget):
     # These channels are extracted from the simResult and put into the grain table in this order that should match
@@ -24,9 +26,9 @@ class ResultsWidget(QWidget):
 
         excludes = ['kn', 'pressure', 'force', 'mass', 'massFlow', 'massFlux', 'exitPressure', 'dThroat', 'volumeLoading', 'machNumber']
         self.ui.channelSelectorX.setupChecks(False, default='time', exclude=excludes)
-        self.ui.channelSelectorX.setTitle('X Axis')
+        self.ui.channelSelectorX.setTitle(self.tr('X Axis'))
         self.ui.channelSelectorY.setupChecks(True, default=['kn', 'pressure', 'force'], exclude=['time'])
-        self.ui.channelSelectorY.setTitle('Y Axis')
+        self.ui.channelSelectorY.setTitle(self.tr('Y Axis'))
         self.ui.channelSelectorX.checksChanged.connect(self.xSelectionChanged)
         self.ui.channelSelectorY.checksChanged.connect(self.drawGraphs)
         self.ui.grainSelector.checksChanged.connect(self.drawGraphs)
@@ -43,6 +45,14 @@ class ResultsWidget(QWidget):
         self.grainImageWidgets = []
         self.grainImages = []
         self.grainLabels = []
+        QTimer.singleShot(0, self.updateControlWidth)
+
+    def updateControlWidth(self):
+        # Long channel translations must fit when horizontal scrolling is off.
+        controls = self.ui.scrollAreaGraphControls
+        width = controls.widget().minimumSizeHint().width()
+        width += 2 * controls.frameWidth() + controls.verticalScrollBar().sizeHint().width()
+        controls.setMinimumWidth(max(220, width))
 
     def setPreferences(self, pref):
         self.preferences = pref
@@ -66,6 +76,7 @@ class ResultsWidget(QWidget):
         self.cleanupGrainTab()
         self.ui.horizontalSliderTime.setMaximum(len(simResult.channels['time'].getData()) - 1)
         self.ui.tableWidgetGrains.setColumnCount(len(simResult.motor.grains))
+        self.updateGrainHeaders()
         for _ in range(len(self.grainImageWidgets)):
             del self.grainImageWidgets[-1]
         for gid, grain in enumerate(simResult.motor.grains):
@@ -77,17 +88,38 @@ class ResultsWidget(QWidget):
             else:
                 self.grainImages.append(None)
             for fid, field in enumerate(self.grainTableFields):
-                self.grainLabels[gid][field] = QLabel(field)
+                self.grainLabels[gid][field] = QLabel('-')
                 self.ui.tableWidgetGrains.setCellWidget(1 + fid, gid, self.grainLabels[gid][field])
         self.updateGrainTab()
 
-        self.ui.tableWidgetAlerts.setRowCount(0) # Clear the table
-        self.ui.tableWidgetAlerts.setRowCount(len(simResult.alerts))
-        for row, alert in enumerate(simResult.alerts):
-            self.ui.tableWidgetAlerts.setItem(row, 0, QTableWidgetItem(alertLevelNames[alert.level]))
-            self.ui.tableWidgetAlerts.setItem(row, 1, QTableWidgetItem(alertTypeNames[alert.type]))
-            self.ui.tableWidgetAlerts.setItem(row, 2, QTableWidgetItem(alert.location))
-            self.ui.tableWidgetAlerts.setItem(row, 3, QTableWidgetItem(alert.description))
+        update_alert_table(self.ui.tableWidgetAlerts, simResult.alerts)
+
+    def updateGrainHeaders(self):
+        if self.simResult is not None:
+            for column in range(len(self.simResult.motor.grains)):
+                text = self.tr('Grain {}').format(column + 1)
+                item = self.ui.tableWidgetGrains.horizontalHeaderItem(column)
+                if item is None:
+                    self.ui.tableWidgetGrains.setHorizontalHeaderItem(column, QTableWidgetItem(text))
+                else:
+                    item.setText(text)
+
+    def changeEvent(self, event):
+        if event.type() == QEvent.Type.LanguageChange and hasattr(self, 'simResult'):
+            names = ('labelTimeProgress', 'labelTimeRemaining', 'labelImpulseProgress', 'labelImpulseRemaining',
+                     'labelMassProgress', 'labelMassRemaining', 'labelISPProgress', 'labelISPRemaining')
+            values = {name: getattr(self.ui, name).text() for name in names}
+            self.ui.retranslateUi(self)
+            for name, value in values.items():
+                getattr(self.ui, name).setText(value)
+            self.ui.channelSelectorX.setTitle(self.tr('X Axis'))
+            self.ui.channelSelectorY.setTitle(self.tr('Y Axis'))
+            self.updateGrainHeaders()
+            if self.simResult is not None:
+                update_alert_table(self.ui.tableWidgetAlerts, self.simResult.alerts)
+            # Child selectors receive LanguageChange after this form.
+            QTimer.singleShot(0, self.updateControlWidth)
+        super().changeEvent(event)
 
     def xSelectionChanged(self):
         if self.ui.channelSelectorX.getSelectedChannels()[0] in multiValueChannels:
