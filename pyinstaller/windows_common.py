@@ -50,7 +50,7 @@ def analysis(entry=None):
         hiddenimports=["designassistant", "uilib.designassistant.window", "uilib.designassistant.controller"],
         hookspath=[],
         hooksconfig={"matplotlib": {"backends": ["Qt5Agg"]}},
-        runtime_hooks=[],
+        runtime_hooks=[str(ROOT / "pyinstaller/runtime_utf8.py")],
         excludes=[],
         noarchive=False,
     )

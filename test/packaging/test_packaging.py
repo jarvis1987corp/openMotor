@@ -1,8 +1,10 @@
 """Check the native build inputs without requiring a Windows host."""
 
 import importlib.util
+import io
 import json
 import os
+import runpy
 import subprocess
 import sys
 import tempfile
@@ -120,6 +122,31 @@ class PackagingTests(unittest.TestCase):
         self.assertIn("designassistant", imports)
         self.assertIn("uilib.designassistant.window", imports)
         self.assertIn("uilib.designassistant.controller", imports)
+        self.assertIn(str(ROOT / "pyinstaller/runtime_utf8.py"), analysis.call_args.kwargs["runtime_hooks"])
+
+    def test_frozen_console_hook_handles_cyrillic_and_absent_streams(self):
+        output, errors = io.BytesIO(), io.BytesIO()
+        stdout = io.TextIOWrapper(output, encoding="cp1252")
+        stderr = io.TextIOWrapper(errors, encoding="cp1252")
+        hook = ROOT / "pyinstaller/runtime_utf8.py"
+        with (
+            patch.object(sys, "platform", "win32"),
+            patch.object(sys, "stdout", stdout),
+            patch.object(sys, "stderr", stderr),
+        ):
+            runpy.run_path(str(hook))
+            print("двигатель №1.ric")
+            print("Ошибка — путь", file=sys.stderr)
+            stdout.flush()
+            stderr.flush()
+        self.assertIn("двигатель №1.ric", output.getvalue().decode("utf-8"))
+        self.assertIn("Ошибка — путь", errors.getvalue().decode("utf-8"))
+        with (
+            patch.object(sys, "platform", "win32"),
+            patch.object(sys, "stdout", None),
+            patch.object(sys, "stderr", None),
+        ):
+            runpy.run_path(str(hook))
 
     def test_windows_workflow_delivers_folder_as_downloadable_zip(self):
         import yaml
