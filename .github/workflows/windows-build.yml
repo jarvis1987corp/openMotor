@@ -97,7 +97,7 @@ jobs:
                 $tail = Get-Content $phaseLog -Raw
                 if ($tail.Length -gt 3800) { $tail = $tail.Substring($tail.Length - 3800) }
                 $annotation = $tail.Replace('%', '%25').Replace("`r", '%0D').Replace("`n", '%0A')
-                Write-Output "::error title=Frozen application $phase::$annotation"
+                Write-Output "::error title=Frozen application ${phase}::$annotation"
                 exit $probeExitCode
               }
             }
