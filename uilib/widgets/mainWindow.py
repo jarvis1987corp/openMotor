@@ -139,6 +139,7 @@ class Window(QMainWindow):
                 self,
                 source_name=manager.fileName or "",
                 open_candidate=self.openDesignCandidate,
+                library_entries=[propellant.getProperties() for propellant in self.app.propellantManager.propellants],
             )
             self.designAssistant.setWindowIcon(self.app.icon)
             self.designAssistant.closed.connect(self._designClosed)

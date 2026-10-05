@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
+<?xml version='1.0' encoding='utf-8'?>
 <TS version="2.1" language="ru_RU" sourcelanguage="en">
     <context>
         <name>AboutDialog</name>
@@ -273,6 +272,645 @@ The rest of the motor will be imported.</source>
     <context>
         <name>DesignAssistant</name>
         <message>
+            <location filename="../designassistant/smart_messages.py" line="6" />
+            <source>Warnings</source>
+            <translation>Предупреждения</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="7" />
+            <source>Applies to grain diameter and nozzle exit. Casing wall thickness and hardware are not modelled.</source>
+            <translation>Ограничивает диаметр шашки и выходного сечения сопла. Толщина стенки корпуса и масса конструкции не моделируются.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="11" />
+            <source>Propellant mass excludes casing and nozzle hardware.</source>
+            <translation>Масса топлива не включает корпус и конструкцию сопла.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="12" />
+            <source>1. Project limits (required)</source>
+            <translation>1. Ограничения проекта (обязательно)</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="13" />
+            <source>2. Targets (enable at least one)</source>
+            <translation>2. Требуемые характеристики (выберите хотя бы одну)</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="14" />
+            <source>3. Allowed options</source>
+            <translation>3. Допустимые варианты</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="15" />
+            <source>4. Search quality</source>
+            <translation>4. Качество поиска</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="16" />
+            <source>A proposal must match its issued assignments.</source>
+            <translation>Предложение должно соответствовать выданным значениям параметров.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="17" />
+            <source>A selected geometry requires parameters absent from the baseline.</source>
+            <translation>Для выбранной геометрии нужны параметры, отсутствующие в исходном двигателе.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="18" />
+            <source>A target value lies outside its allowed constraint range.</source>
+            <translation>Целевое значение выходит за допустимый диапазон ограничения.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="19" />
+            <source>Actual</source>
+            <translation>Фактическое значение</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/presentation.py" line="84" />
+            <location filename="../designassistant/smart_messages.py" line="20" />
+            <source>Add at least one target before starting the search.</source>
+            <translation>Перед началом поиска добавьте хотя бы одну цель.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/presentation.py" line="159" />
+            <location filename="../designassistant/smart_messages.py" line="21" />
+            <source>All Candidates</source>
+            <translation>Все кандидаты</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="22" />
+            <source>All active targets are within their specified tolerance.</source>
+            <translation>Все выбранные цели достигнуты в пределах заданных допусков.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="23" />
+            <source>Allow all existing library entries</source>
+            <translation>Разрешить все существующие записи библиотеки</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="24" />
+            <source>Allowed geometries must be unique.</source>
+            <translation>Допустимые геометрии не должны повторяться.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="25" />
+            <source>Allowed library entries must be unique.</source>
+            <translation>Допустимые записи библиотеки не должны повторяться.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="26" />
+            <source>Alternate geometries use the same grain count and only parameters already present in the baseline.</source>
+            <translation>Другие геометрии используют то же количество шашек и только параметры, уже имеющиеся в исходном двигателе.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="30" />
+            <source>An allowed propellant is not present in the existing library.</source>
+            <translation>Выбранное топливо отсутствует в существующей библиотеке.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="31" />
+            <source>An existing library entry contains values rejected by the engine.</source>
+            <translation>Существующая запись библиотеки содержит значения, отклонённые движком.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="32" />
+            <source>Balanced</source>
+            <translation>Сбалансированный</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="33" />
+            <source>Baseline geometry contains a nonfinite numeric property.</source>
+            <translation>Геометрия исходного двигателя содержит нечисловое или бесконечное значение.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="34" />
+            <source>Baseline: {name}. Grain count and simulation settings remain fixed; options use existing library entries.</source>
+            <translation>Исходный двигатель: {name}. Количество шашек и настройки симуляции фиксированы; варианты используют существующие записи библиотеки.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/presentation.py" line="122" />
+            <location filename="../designassistant/smart_messages.py" line="38" />
+            <source>Candidate Details</source>
+            <translation>Подробности кандидата</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="39" />
+            <source>Candidate budget must be between 1 and 10000.</source>
+            <translation>Бюджет поиска должен быть от 1 до 10000 кандидатов.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="40" />
+            <source>Candidate was never asked, or already completed.</source>
+            <translation>Кандидат не был запрошен или уже обработан.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="41" />
+            <source>Cannot Compare Candidates</source>
+            <translation>Невозможно сравнить кандидатов</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/presentation.py" line="162" />
+            <location filename="../designassistant/smart_messages.py" line="42" />
+            <source>Cannot Open Candidate</source>
+            <translation>Не удалось открыть кандидата</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/presentation.py" line="161" />
+            <location filename="../designassistant/smart_messages.py" line="43" />
+            <source>Cannot Start Search</source>
+            <translation>Не удалось начать поиск</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/presentation.py" line="123" />
+            <location filename="../designassistant/smart_messages.py" line="44" />
+            <source>Close</source>
+            <translation>Закрыть</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="45" />
+            <source>Closest target: {metric}; normalized deviation: {deviation}.</source>
+            <translation>Ближайшая цель: {metric}; нормализованное отклонение: {deviation}.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="46" />
+            <source>Compare</source>
+            <translation>Сравнить</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="47" />
+            <source>Compare Candidates</source>
+            <translation>Сравнение кандидатов</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="48" />
+            <source>Constraints for the same metric contradict each other.</source>
+            <translation>Ограничения одной метрики противоречат друг другу.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/presentation.py" line="178" />
+            <location filename="../designassistant/smart_messages.py" line="49" />
+            <source>Current candidate: %p%</source>
+            <translation>Текущий кандидат: %p%</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="50" />
+            <source>Custom budget</source>
+            <translation>Свой бюджет</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/presentation.py" line="115" />
+            <location filename="../designassistant/smart_messages.py" line="51" />
+            <source>Design Assistant</source>
+            <translation>Помощник проектирования</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="52" />
+            <source>Deviation</source>
+            <translation>Отклонение</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/presentation.py" line="131" />
+            <location filename="../designassistant/smart_messages.py" line="53" />
+            <source>Diagnostics</source>
+            <translation>Диагностика</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/presentation.py" line="149" />
+            <location filename="../designassistant/smart_messages.py" line="54" />
+            <source>ERROR always rejects a candidate. WARNING is retained in diagnostics.</source>
+            <translation>Ошибка (ERROR) всегда исключает кандидата. Предупреждение (WARNING) сохраняется в диагностике.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="55" />
+            <source>Enable at least one target: burn time, total impulse or average thrust.</source>
+            <translation>Выберите хотя бы одну цель: время горения, суммарный импульс или среднюю тягу.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="56" />
+            <source>Enter a positive maximum outer diameter.</source>
+            <translation>Укажите положительный максимальный наружный диаметр.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="57" />
+            <source>Existing grain geometries</source>
+            <translation>Существующие геометрии шашек</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="58" />
+            <source>Existing motor simulation limits also apply. ERROR always rejects a candidate.</source>
+            <translation>Также действуют ограничения симуляции исходного двигателя. ERROR всегда исключает кандидата.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="61" />
+            <source>Existing propellant library</source>
+            <translation>Существующая библиотека топлива</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="62" />
+            <source>Exploration</source>
+            <translation>Исследование пространства</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/presentation.py" line="160" />
+            <location filename="../designassistant/smart_messages.py" line="63" />
+            <source>Filter results…</source>
+            <translation>Фильтр результатов…</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="64" />
+            <source>Final Ranking</source>
+            <translation>Итоговое ранжирование</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="65" />
+            <source>Finalist Recheck</source>
+            <translation>Повторная проверка лучших вариантов</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="66" />
+            <source>Geometry</source>
+            <translation>Геометрия</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/presentation.py" line="152" />
+            <location filename="../designassistant/smart_messages.py" line="67" />
+            <source>Grid Search</source>
+            <translation>Перебор по сетке</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/presentation.py" line="167" />
+            <location filename="../designassistant/smart_messages.py" line="68" />
+            <source>Grid contains {count} candidates; this run is limited to {budget}.</source>
+            <translation>Сетка содержит {count} кандидатов; лимит текущего поиска — {budget}.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="69" />
+            <source>Increase the candidate budget or select fewer library and geometry options.</source>
+            <translation>Увеличьте бюджет поиска или уменьшите количество записей библиотеки и геометрий.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="70" />
+            <source>Initial values must lie inside the search space.</source>
+            <translation>Начальные значения должны находиться в пределах пространства поиска.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="71" />
+            <source>Keep current grain types</source>
+            <translation>Сохранить текущие типы шашек</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="72" />
+            <source>Library Entry</source>
+            <translation>Запись библиотеки</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="73" />
+            <source>Library entries require an unchanged snapshot and its stable digest.</source>
+            <translation>Для записи библиотеки нужен неизменный снимок и его стабильный хеш.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="74" />
+            <source>Library entry names must match their existing snapshot.</source>
+            <translation>Имя записи библиотеки должно соответствовать её существующему снимку.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="75" />
+            <source>Manual</source>
+            <translation>Ручной</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/presentation.py" line="157" />
+            <location filename="../designassistant/smart_messages.py" line="76" />
+            <source>Maximum candidates for either strategy (1–10000).</source>
+            <translation>Максимальное число кандидатов для любой стратегии (1–10000).</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="77" />
+            <source>Maximum outer diameter (required)</source>
+            <translation>Максимальный наружный диаметр (обязательно)</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="78" />
+            <source>Metric / Requirement</source>
+            <translation>Метрика / требование</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="79" />
+            <source>Mode</source>
+            <translation>Режим</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="80" />
+            <source>No admissible candidates yet. Review targets, limits or allowed options.</source>
+            <translation>Допустимых кандидатов пока нет. Проверьте цели, ограничения и допустимые варианты.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/presentation.py" line="179" />
+            <location filename="../designassistant/smart_messages.py" line="81" />
+            <source>No candidate running</source>
+            <translation>Нет активного кандидата</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/presentation.py" line="126" />
+            <location filename="../designassistant/smart_messages.py" line="82" />
+            <source>No diagnostics.</source>
+            <translation>Диагностических сообщений нет.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="83" />
+            <source>Only admissible ranked candidates can be compared.</source>
+            <translation>Сравнивать можно только допустимых кандидатов из рейтинга.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="84" />
+            <source>Optional constraints</source>
+            <translation>Дополнительные ограничения</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="85" />
+            <source>Parameters</source>
+            <translation>Параметры</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/presentation.py" line="173" />
+            <location filename="../designassistant/smart_messages.py" line="86" />
+            <source>Processed: {processed}/{total}   Feasible: {feasible}   Rejected: {rejected}   Errors: {errors}</source>
+            <translation>Обработано: {processed}/{total}   Допустимых: {feasible}   Отклонённых: {rejected}   Ошибок: {errors}</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/presentation.py" line="120" />
+            <location filename="../designassistant/smart_messages.py" line="90" />
+            <source>Progress</source>
+            <translation>Ход поиска</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="91" />
+            <source>Quality</source>
+            <translation>Качество</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="92" />
+            <source>Quick</source>
+            <translation>Быстрый</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/presentation.py" line="153" />
+            <location filename="../designassistant/smart_messages.py" line="93" />
+            <source>Random Search</source>
+            <translation>Случайная выборка</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/presentation.py" line="83" />
+            <location filename="../designassistant/smart_messages.py" line="94" />
+            <source>Random seed must be an integer.</source>
+            <translation>Начальное значение генератора случайных чисел должно быть целым.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="95" />
+            <source>Rank {rank}: {name}</source>
+            <translation>Место {rank}: {name}</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="96" />
+            <source>Ranking Explanation</source>
+            <translation>Объяснение рейтинга</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="97" />
+            <source>Rechecked with unchanged simulation settings.</source>
+            <translation>Повторно проверен с неизменными настройками симуляции.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="98" />
+            <source>Refinement</source>
+            <translation>Уточнение поиска</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/presentation.py" line="150" />
+            <location filename="../designassistant/smart_messages.py" line="99" />
+            <source>Reject candidates with WARNING alerts</source>
+            <translation>Отклонять кандидатов с предупреждениями (WARNING)</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/presentation.py" line="121" />
+            <location filename="../designassistant/smart_messages.py" line="100" />
+            <source>Results</source>
+            <translation>Результаты</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="101" />
+            <source>Run Smart Design</source>
+            <translation>Начать подбор</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/presentation.py" line="124" />
+            <location filename="../designassistant/smart_messages.py" line="102" />
+            <source>Score: {score}</source>
+            <translation>Оценка: {score}</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/presentation.py" line="163" />
+            <location filename="../designassistant/smart_messages.py" line="103" />
+            <source>Search Failed</source>
+            <translation>Сбой поиска</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/presentation.py" line="177" />
+            <location filename="../designassistant/smart_messages.py" line="104" />
+            <source>Search: %v/%m</source>
+            <translation>Поиск: %v/%m</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="105" />
+            <source>Seed and budget must be integers; budget must be nonnegative.</source>
+            <translation>Начальное значение генератора и бюджет должны быть целыми числами; бюджет не должен быть отрицательным.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="106" />
+            <source>Seed and budget must be integers; budget must be positive.</source>
+            <translation>Начальное значение генератора и бюджет должны быть целыми числами; бюджет должен быть положительным.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="107" />
+            <source>Select 2–5 distinct ranked candidates to compare.</source>
+            <translation>Выберите от 2 до 5 разных кандидатов из рейтинга для сравнения.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/presentation.py" line="82" />
+            <location filename="../designassistant/smart_messages.py" line="108" />
+            <source>Select a search strategy and a budget between 1 and 10000.</source>
+            <translation>Выберите стратегию поиска и лимит кандидатов от 1 до 10000.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="109" />
+            <source>Select at least one compatible grain geometry.</source>
+            <translation>Выберите хотя бы одну совместимую геометрию шашки.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="110" />
+            <source>Select at least one existing propellant library entry.</source>
+            <translation>Выберите хотя бы одну существующую запись библиотеки топлива.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="111" />
+            <source>Selection</source>
+            <translation>Отбор областей</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="112" />
+            <source>Set a diameter limit and one or more targets, choose existing options, then run Smart Design.</source>
+            <translation>Задайте предел диаметра и хотя бы одну цель, выберите существующие варианты и начните подбор.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="116" />
+            <source>Smallest normalized constraint margin: {metric}; margin: {margin}.</source>
+            <translation>Минимальный нормализованный запас по ограничению: {metric}; запас: {margin}.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="117" />
+            <source>Smart Design</source>
+            <translation>Умный подбор</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="118" />
+            <source>Smart Design must use the unchanged current baseline.</source>
+            <translation>Умный подбор должен использовать неизменный исходный двигатель.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="119" />
+            <source>Smart Design requires validated project requirements.</source>
+            <translation>Для умного подбора нужны проверенные требования проекта.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="120" />
+            <source>Smart Design target values must be positive.</source>
+            <translation>Целевые значения умного подбора должны быть положительными.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="121" />
+            <source>Smart result identifiers must agree.</source>
+            <translation>Идентификаторы результатов умного подбора должны совпадать.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="122" />
+            <source>Stage: {stage}   Best score: {score}   Elapsed: {seconds} s</source>
+            <translation>Этап: {stage}   Лучшая оценка: {score}   Прошло: {seconds} s</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/presentation.py" line="125" />
+            <location filename="../designassistant/smart_messages.py" line="123" />
+            <source>Summary Metrics</source>
+            <translation>Основные характеристики</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="124" />
+            <source>Target Deviations</source>
+            <translation>Отклонения от целей</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/presentation.py" line="138" />
+            <location filename="../designassistant/smart_messages.py" line="125" />
+            <source>Target Value</source>
+            <translation>Целевое значение</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="126" />
+            <source>The baseline must contain at least one grain.</source>
+            <translation>Исходный двигатель должен содержать хотя бы одну шашку.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="127" />
+            <source>The diameter limit is outside the engine property bounds.</source>
+            <translation>Предел диаметра выходит за допустимые границы свойства движка.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/presentation.py" line="158" />
+            <location filename="../designassistant/smart_messages.py" line="128" />
+            <source>The same baseline, requirements and seed reproduce a random search.</source>
+            <translation>Одинаковые исходный двигатель, требования и начальное значение воспроизводят случайный поиск.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/presentation.py" line="86" />
+            <location filename="../designassistant/smart_messages.py" line="129" />
+            <source>This candidate has no valid simulation and cannot be opened.</source>
+            <translation>Кандидата нельзя открыть: для него нет корректной симуляции.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="130" />
+            <source>Thorough</source>
+            <translation>Тщательный</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="131" />
+            <source>Tolerance</source>
+            <translation>Допуск</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="132" />
+            <source>Top N</source>
+            <translation>Лучшие N</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="133" />
+            <source>Top N must be between 1 and 100.</source>
+            <translation>Количество лучших вариантов должно быть от 1 до 100.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="134" />
+            <source>Top N must be positive.</source>
+            <translation>Количество лучших вариантов должно быть положительным.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="135" />
+            <source>Top {shown} of {count} admissible designs. Lower scores mean closer target agreement.</source>
+            <translation>Лучшие {shown} из {count} допустимых вариантов. Чем ниже оценка, тем ближе результат к заданным целям.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/presentation.py" line="172" />
+            <location filename="../designassistant/smart_messages.py" line="138" />
+            <source>Unsaved motor</source>
+            <translation>Несохранённый двигатель</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="139" />
+            <source>Up to {count} simulations, including finalist rechecks. Engine accuracy stays fixed.</source>
+            <translation>До {count} симуляций, включая повторную проверку лучших вариантов. Точность движка не изменяется.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/presentation.py" line="116" />
+            <location filename="../designassistant/smart_messages.py" line="142" />
+            <source>Variables</source>
+            <translation>Переменные</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/presentation.py" line="151" />
+            <location filename="../designassistant/smart_messages.py" line="143" />
+            <source>Warnings are accepted unless this constraint is enabled.</source>
+            <translation>Предупреждения допускаются, если это ограничение выключено.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/presentation.py" line="139" />
+            <location filename="../designassistant/smart_messages.py" line="144" />
+            <source>Weight</source>
+            <translation>Вес</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="145" />
+            <source>Weighted trade-off between {count} targets.</source>
+            <translation>Взвешенный компромисс между {count} целями.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="146" />
+            <source>tell requires a CandidateEvaluation.</source>
+            <translation>Для tell нужен объект CandidateEvaluation.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/smart_messages.py" line="147" />
+            <source>{metric}: target {target}; actual {actual}; deviation {deviation}; contribution {contribution}.</source>
+            <translation>{metric}: цель {target}; результат {actual}; отклонение {deviation}; вклад в оценку {contribution}.</translation>
+        </message>
+        <message>
             <location filename="../designassistant/presentation.py" line="27" />
             <source>Feasible</source>
             <translation>Допустимый</translation>
@@ -523,29 +1161,9 @@ The rest of the motor will be imported.</source>
             <translation>Поиск уже выполняется.</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="82" />
-            <source>Select a search strategy and a budget between 1 and 10000.</source>
-            <translation>Выберите стратегию поиска и лимит кандидатов от 1 до 10000.</translation>
-        </message>
-        <message>
-            <location filename="../designassistant/presentation.py" line="83" />
-            <source>Random seed must be an integer.</source>
-            <translation>Начальное значение генератора случайных чисел должно быть целым.</translation>
-        </message>
-        <message>
-            <location filename="../designassistant/presentation.py" line="84" />
-            <source>Add at least one target before starting the search.</source>
-            <translation>Перед началом поиска добавьте хотя бы одну цель.</translation>
-        </message>
-        <message>
             <location filename="../designassistant/presentation.py" line="85" />
             <source>Stop the search before opening a candidate.</source>
             <translation>Перед открытием кандидата остановите поиск.</translation>
-        </message>
-        <message>
-            <location filename="../designassistant/presentation.py" line="86" />
-            <source>This candidate has no valid simulation and cannot be opened.</source>
-            <translation>Кандидата нельзя открыть: для него нет корректной симуляции.</translation>
         </message>
         <message>
             <location filename="../designassistant/presentation.py" line="92" />
@@ -573,16 +1191,6 @@ The rest of the motor will be imported.</source>
             <translation>Характеристика имеет неконечное значение: {metric}</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="115" />
-            <source>Design Assistant</source>
-            <translation>Помощник проектирования</translation>
-        </message>
-        <message>
-            <location filename="../designassistant/presentation.py" line="116" />
-            <source>Variables</source>
-            <translation>Переменные</translation>
-        </message>
-        <message>
             <location filename="../designassistant/presentation.py" line="117" />
             <source>Targets</source>
             <translation>Цели</translation>
@@ -596,41 +1204,6 @@ The rest of the motor will be imported.</source>
             <location filename="../designassistant/presentation.py" line="119" />
             <source>Search Settings</source>
             <translation>Настройки поиска</translation>
-        </message>
-        <message>
-            <location filename="../designassistant/presentation.py" line="120" />
-            <source>Progress</source>
-            <translation>Ход поиска</translation>
-        </message>
-        <message>
-            <location filename="../designassistant/presentation.py" line="121" />
-            <source>Results</source>
-            <translation>Результаты</translation>
-        </message>
-        <message>
-            <location filename="../designassistant/presentation.py" line="122" />
-            <source>Candidate Details</source>
-            <translation>Подробности кандидата</translation>
-        </message>
-        <message>
-            <location filename="../designassistant/presentation.py" line="123" />
-            <source>Close</source>
-            <translation>Закрыть</translation>
-        </message>
-        <message>
-            <location filename="../designassistant/presentation.py" line="124" />
-            <source>Score: {score}</source>
-            <translation>Оценка: {score}</translation>
-        </message>
-        <message>
-            <location filename="../designassistant/presentation.py" line="125" />
-            <source>Summary Metrics</source>
-            <translation>Основные характеристики</translation>
-        </message>
-        <message>
-            <location filename="../designassistant/presentation.py" line="126" />
-            <source>No diagnostics.</source>
-            <translation>Диагностических сообщений нет.</translation>
         </message>
         <message>
             <location filename="../designassistant/presentation.py" line="127" />
@@ -651,11 +1224,6 @@ The rest of the motor will be imported.</source>
             <location filename="../designassistant/presentation.py" line="130" />
             <source>Status</source>
             <translation>Статус</translation>
-        </message>
-        <message>
-            <location filename="../designassistant/presentation.py" line="131" />
-            <source>Diagnostics</source>
-            <translation>Диагностика</translation>
         </message>
         <message>
             <location filename="../designassistant/presentation.py" line="132" />
@@ -686,16 +1254,6 @@ The rest of the motor will be imported.</source>
             <location filename="../designassistant/presentation.py" line="137" />
             <source>Metric</source>
             <translation>Характеристика</translation>
-        </message>
-        <message>
-            <location filename="../designassistant/presentation.py" line="138" />
-            <source>Target Value</source>
-            <translation>Целевое значение</translation>
-        </message>
-        <message>
-            <location filename="../designassistant/presentation.py" line="139" />
-            <source>Weight</source>
-            <translation>Вес</translation>
         </message>
         <message>
             <location filename="../designassistant/presentation.py" line="140" />
@@ -743,31 +1301,6 @@ The rest of the motor will be imported.</source>
             <translation>Открыть в редакторе двигателя</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="149" />
-            <source>ERROR always rejects a candidate. WARNING is retained in diagnostics.</source>
-            <translation>Ошибка (ERROR) всегда исключает кандидата. Предупреждение (WARNING) сохраняется в диагностике.</translation>
-        </message>
-        <message>
-            <location filename="../designassistant/presentation.py" line="150" />
-            <source>Reject candidates with WARNING alerts</source>
-            <translation>Отклонять кандидатов с предупреждениями (WARNING)</translation>
-        </message>
-        <message>
-            <location filename="../designassistant/presentation.py" line="151" />
-            <source>Warnings are accepted unless this constraint is enabled.</source>
-            <translation>Предупреждения допускаются, если это ограничение выключено.</translation>
-        </message>
-        <message>
-            <location filename="../designassistant/presentation.py" line="152" />
-            <source>Grid Search</source>
-            <translation>Перебор по сетке</translation>
-        </message>
-        <message>
-            <location filename="../designassistant/presentation.py" line="153" />
-            <source>Random Search</source>
-            <translation>Случайная выборка</translation>
-        </message>
-        <message>
             <location filename="../designassistant/presentation.py" line="154" />
             <source>Strategy</source>
             <translation>Стратегия</translation>
@@ -781,41 +1314,6 @@ The rest of the motor will be imported.</source>
             <location filename="../designassistant/presentation.py" line="156" />
             <source>Random Seed</source>
             <translation>Начальное значение генератора</translation>
-        </message>
-        <message>
-            <location filename="../designassistant/presentation.py" line="157" />
-            <source>Maximum candidates for either strategy (1–10000).</source>
-            <translation>Максимальное число кандидатов для любой стратегии (1–10000).</translation>
-        </message>
-        <message>
-            <location filename="../designassistant/presentation.py" line="158" />
-            <source>The same baseline, requirements and seed reproduce a random search.</source>
-            <translation>Одинаковые исходный двигатель, требования и начальное значение воспроизводят случайный поиск.</translation>
-        </message>
-        <message>
-            <location filename="../designassistant/presentation.py" line="159" />
-            <source>All Candidates</source>
-            <translation>Все кандидаты</translation>
-        </message>
-        <message>
-            <location filename="../designassistant/presentation.py" line="160" />
-            <source>Filter results…</source>
-            <translation>Фильтр результатов…</translation>
-        </message>
-        <message>
-            <location filename="../designassistant/presentation.py" line="161" />
-            <source>Cannot Start Search</source>
-            <translation>Не удалось начать поиск</translation>
-        </message>
-        <message>
-            <location filename="../designassistant/presentation.py" line="162" />
-            <source>Cannot Open Candidate</source>
-            <translation>Не удалось открыть кандидата</translation>
-        </message>
-        <message>
-            <location filename="../designassistant/presentation.py" line="163" />
-            <source>Search Failed</source>
-            <translation>Сбой поиска</translation>
         </message>
         <message>
             <location filename="../designassistant/presentation.py" line="164" />
@@ -833,39 +1331,9 @@ The rest of the motor will be imported.</source>
             <translation>Шашка {index} ({geometry}) — {parameter}</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="167" />
-            <source>Grid contains {count} candidates; this run is limited to {budget}.</source>
-            <translation>Сетка содержит {count} кандидатов; лимит текущего поиска — {budget}.</translation>
-        </message>
-        <message>
             <location filename="../designassistant/presentation.py" line="168" />
             <source>Baseline: {name}. Grain types, grain count, propellant and simulation settings remain fixed.</source>
             <translation>Исходный двигатель: {name}. Типы и количество шашек, топливо и настройки симуляции фиксированы.</translation>
-        </message>
-        <message>
-            <location filename="../designassistant/presentation.py" line="172" />
-            <source>Unsaved motor</source>
-            <translation>Несохранённый двигатель</translation>
-        </message>
-        <message>
-            <location filename="../designassistant/presentation.py" line="173" />
-            <source>Processed: {processed}/{total}   Feasible: {feasible}   Rejected: {rejected}   Errors: {errors}</source>
-            <translation>Обработано: {processed}/{total}   Допустимых: {feasible}   Отклонённых: {rejected}   Ошибок: {errors}</translation>
-        </message>
-        <message>
-            <location filename="../designassistant/presentation.py" line="177" />
-            <source>Search: %v/%m</source>
-            <translation>Поиск: %v/%m</translation>
-        </message>
-        <message>
-            <location filename="../designassistant/presentation.py" line="178" />
-            <source>Current candidate: %p%</source>
-            <translation>Текущий кандидат: %p%</translation>
-        </message>
-        <message>
-            <location filename="../designassistant/presentation.py" line="179" />
-            <source>No candidate running</source>
-            <translation>Нет активного кандидата</translation>
         </message>
     </context>
     <context>
@@ -2884,35 +3352,35 @@ The rest of the motor will be imported.</source>
     <context>
         <name>Window</name>
         <message>
-            <location filename="../widgets/mainWindow.py" line="401" />
+            <location filename="../widgets/mainWindow.py" line="402" />
             <source>{} (G: {})</source>
             <translation>{} (шашка: {})</translation>
         </message>
         <message>
-            <location filename="../widgets/mainWindow.py" line="510" />
+            <location filename="../widgets/mainWindow.py" line="511" />
             <location filename="../widgets/mainWindow.py" line="125" />
             <source>Design Assistant</source>
             <translation>Помощник проектирования</translation>
         </message>
         <message>
-            <location filename="../widgets/mainWindow.py" line="163" />
+            <location filename="../widgets/mainWindow.py" line="164" />
             <source>Unapplied Motor Editor changes</source>
             <translation>Неприменённые изменения в редакторе двигателя</translation>
         </message>
         <message>
-            <location filename="../widgets/mainWindow.py" line="164" />
+            <location filename="../widgets/mainWindow.py" line="165" />
             <source>Apply the current Motor Editor changes before opening this candidate?</source>
             <translation>Применить текущие изменения в редакторе двигателя перед открытием кандидата?</translation>
         </message>
         <message>
-            <location filename="../widgets/mainWindow.py" line="523" />
-            <location filename="../widgets/mainWindow.py" line="270" />
+            <location filename="../widgets/mainWindow.py" line="524" />
+            <location filename="../widgets/mainWindow.py" line="271" />
             <source>Nozzle</source>
             <translation>Сопло</translation>
         </message>
         <message>
-            <location filename="../widgets/mainWindow.py" line="523" />
-            <location filename="../widgets/mainWindow.py" line="275" />
+            <location filename="../widgets/mainWindow.py" line="524" />
+            <location filename="../widgets/mainWindow.py" line="276" />
             <source>Config</source>
             <translation>Конфигурация</translation>
         </message>

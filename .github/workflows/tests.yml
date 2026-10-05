@@ -5,12 +5,18 @@ on: [push, pull_request]
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      QT_QPA_PLATFORM: offscreen
+      PYTHONPATH: .
+      PYTHONUNBUFFERED: "1"
     strategy:
       matrix:
         python-version: ['3.10', '3.12']
 
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
     - name: Install uv
       uses: astral-sh/setup-uv@v3
@@ -24,35 +30,61 @@ jobs:
 
     - name: Install dependencies
       run: |
-        uv sync --frozen --no-install-project
+        uv sync --frozen --python ${{ matrix.python-version }} --no-install-project
         uv pip install --python .venv/bin/python -r pyinstaller/requirements-build.txt
+
+    - name: Install Qt runtime libraries
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libegl1 libopengl0
 
     - name: Build mathlib
       run: |
-        uv run python setup.py build_ext --inplace
+        .venv/bin/python setup.py build_ext --inplace
 
     - name: Lint with ruff
       run: |
-        uv run ruff check . --select E9,F63,F7,F82
-        uv run ruff check . --exit-zero
+        .venv/bin/ruff check . --select E9,F63,F7,F82
+        .venv/bin/ruff check designassistant uilib/designassistant test/designassistant_gui test/packaging
 
     - name: Run unit tests
       run: |
-        PYTHONPATH=. uv run python test/unit.py
+        .venv/bin/python test/unit.py 2>&1 | tee unit-tests.log
 
     - name: Build UI and run localization tests
-      env:
-        QT_QPA_PLATFORM: offscreen
       run: |
         for form in uilib/views/forms/*.ui; do
-          uv run --frozen pyuic6 "$form" -o "uilib/views/$(basename "${form%.ui}")_ui.py"
+          .venv/bin/python -m PyQt6.uic.pyuic "$form" -o "uilib/views/$(basename "${form%.ui}")_ui.py"
         done
-        PYTHONPATH=. uv run --frozen python -m unittest discover -s test/localization -v
+        .venv/bin/python scripts/compatibility_baseline.py --output-dir build/compatibility-baseline 2>&1 | tee baseline.log
+        OPENMOTOR_COMPATIBILITY_REFERENCE_DIR="$PWD/build/compatibility-baseline" .venv/bin/python -m unittest discover -s test/localization -v 2>&1 | tee localization-tests.log
 
     - name: Run Design Assistant core and GUI tests
-      env:
-        QT_QPA_PLATFORM: offscreen
       run: |
-        PYTHONPATH=. uv run --frozen python -m unittest discover -s test/designassistant -v
-        PYTHONPATH=. uv run --frozen python -m unittest discover -s test/designassistant_gui -v
-        PYTHONPATH=. uv run --frozen python -m unittest discover -s test/packaging -v
+        .venv/bin/python -m unittest discover -s test/designassistant -v 2>&1 | tee design-core-tests.log
+        .venv/bin/python -m unittest discover -s test/designassistant_gui -v 2>&1 | tee design-gui-tests.log
+        .venv/bin/python -m unittest discover -s test/packaging -v 2>&1 | tee packaging-tests.log
+
+    - name: Publish failure diagnostics
+      if: failure()
+      run: |
+        .venv/bin/python - <<'PY'
+        from pathlib import Path
+        import re
+        for path in sorted(Path('.').glob('*tests.log')):
+            text = path.read_text(errors='replace')
+            if 'FAILED' not in text and 'Traceback' not in text:
+                continue
+            text = '\n'.join(line for line in text.splitlines() if not re.match(r'^\d+\.\d+ \[(LOG|WRN|ERR)\]', line))[-3800:]
+            escaped = text.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
+            print(f'::error title={path.name}::{escaped}')
+        PY
+
+    - uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: test-diagnostics-python-${{ matrix.python-version }}
+        path: |
+          *tests.log
+          baseline.log
+          build/compatibility-baseline/*.json

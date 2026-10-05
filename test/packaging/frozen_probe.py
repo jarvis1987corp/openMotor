@@ -34,6 +34,7 @@ platformdirs.user_log_dir = lambda *args, **kwargs: str(directory / "logs")
 import uilib  # noqa: F401 -- choose Qt before app.py imports pyplot
 
 # isort: split
+from PyQt6.QtCore import QItemSelectionModel
 from PyQt6.QtGui import QFontMetrics
 from PyQt6.QtWidgets import QMessageBox
 
@@ -208,9 +209,51 @@ random_rows = tuple(assistant.model.rows)
 assistant.start_search()
 wait_for_design_search()
 assert tuple(assistant.model.rows) == random_rows
-candidate_id = assistant.model.rows[0][0].candidate_id
+
+# Smart Design uses the same engine and a requirements form, not manual paths.
+assistant.mode.setCurrentIndex(assistant.mode.findData("smart"))
+smart_target = assistant.smart.targets["burn_time"]
+smart_target.enabled.setChecked(True)
+smart_target.value.setValue(result.getBurnTime())
+smart_target.tolerance.setValue(1)
+assistant.smart.budget.setValue(8)
+assistant.smart.top_n.setValue(2)
+assistant.start_search()
+wait_for_design_search()
+assert assistant._state == "completed"
+smart_ranked = assistant.controller.smart_store.top
+assert len(smart_ranked) == 2
+assert all(r.context.stage == "verification" for r in smart_ranked)
+smart_requirements = assistant.smart.build_requirements()
+for language in ("en", "ru", "en"):
+    app.translationManager.setLanguage(language)
+    app.processEvents()
+    assert assistant.mode.currentText() == ("Умный подбор" if language == "ru" else "Smart Design")
+    assert assistant.smart.build_requirements() == smart_requirements
+    assert assistant.controller.smart_store.top == smart_ranked
+    assert assistant.controller.baseline == baseline
+    assert app.fileManager.getCurrentMotor().getDict() == model
+    assert manager.simRes is result and result_digest() == original_digest
+assistant.start_search()
+wait_for_design_search()
+assert assistant.controller.smart_store.top == smart_ranked
+for record in smart_ranked:
+    source_row = next(
+        i for i, (p, _) in enumerate(assistant.model.rows) if p.candidate_id == record.proposal.candidate_id
+    )
+    index = assistant.proxy.mapFromSource(assistant.model.index(source_row, 0))
+    assistant.table.selectionModel().select(
+        index, QItemSelectionModel.SelectionFlag.Select | QItemSelectionModel.SelectionFlag.Rows
+    )
+assert assistant.compareButton.isEnabled()
+assistant.compare_selected()
+assert assistant.comparison.records == smart_ranked
+assistant.comparison.hide()
+candidate_id = smart_ranked[0].proposal.candidate_id
 candidate = assistant.controller.request_for(candidate_id).snapshot
-assistant.table.selectRow(assistant.proxy.mapFromSource(assistant.model.index(0, 0)).row())
+assistant.table.clearSelection()
+source_row = next(i for i, (p, _) in enumerate(assistant.model.rows) if p.candidate_id == candidate_id)
+assistant.table.selectRow(assistant.proxy.mapFromSource(assistant.model.index(source_row, 0)).row())
 assistant.open_selected()
 assert app.fileManager.fileName is None and app.fileManager.savedVersion == -1
 from designassistant import Snapshot
@@ -218,6 +261,12 @@ from designassistant import Snapshot
 assert Snapshot.from_dict(app.fileManager.getCurrentMotor().getDict()) == candidate
 assert saved_project.read_bytes() == source_bytes
 assert assistant.controller.baseline == baseline
+assistant.smart.budget.setValue(10000)
+assistant.start_search()
+assistant.stop_search()
+wait_for_design_search()
+assert assistant._state == "stopped" and assistant._progress.processed < 10000
+assistant.mode.setCurrentIndex(assistant.mode.findData("manual"))
 assistant.budget.setValue(10000)
 assistant.start_search()
 assistant.stop_search()
@@ -263,6 +312,10 @@ report = {
         "Design Assistant grid and seeded random search",
         "Design Assistant language round trip",
         "Design Assistant Start/Stop",
+        "Smart Design frozen search space and coarse-to-fine ranking",
+        "Smart Design seeded reproducibility and finalist recheck",
+        "Smart Design language round trip and comparison",
+        "Smart Design Start/Stop and unchanged baseline",
         "candidate unsaved handoff",
         "unchanged source project",
     ],

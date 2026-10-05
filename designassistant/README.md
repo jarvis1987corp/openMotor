@@ -1,8 +1,11 @@
-# Design Assistant — Phase 1 core
+# Design Assistant core
 
 This is an independent Python package. It does not construct GUI objects, import
 Qt/uilib/matplotlib, load project files, manage workers, or change the simulation
-model. The normal openMotor workflow does not import this package.
+model. GUI and headless callers share the same core.
+
+Smart Design's search-space, coarse-to-fine and ranking contracts are described
+in [SMART_DESIGN.md](../SMART_DESIGN.md).
 
 ## Pipeline and public API
 

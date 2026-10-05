@@ -122,6 +122,13 @@ class PackagingTests(unittest.TestCase):
         self.assertIn("designassistant", imports)
         self.assertIn("uilib.designassistant.window", imports)
         self.assertIn("uilib.designassistant.controller", imports)
+        for name in (
+            "designassistant.smart",
+            "designassistant.smart_results",
+            "uilib.designassistant.smart_form",
+            "uilib.designassistant.smart_results",
+        ):
+            self.assertIn(name, imports)
         self.assertIn(str(ROOT / "pyinstaller/runtime_utf8.py"), analysis.call_args.kwargs["runtime_hooks"])
 
     def test_frozen_console_hook_handles_cyrillic_and_absent_streams(self):
@@ -156,7 +163,7 @@ class PackagingTests(unittest.TestCase):
         job = workflow["jobs"]["windows"]
         self.assertEqual(job["runs-on"], "windows-2022")
         artifacts = [step for step in job["steps"] if step.get("uses") == "actions/upload-artifact@v4"]
-        release = next(step for step in artifacts if step["with"]["name"] == "openMotor-Windows-x64")
+        release = next(step for step in artifacts if step["with"]["name"] == "openMotor-SmartDesign-Windows-x64")
         self.assertEqual(release["with"]["path"], "dist/windows/onedir/openMotor/")
         commands = "\n".join(step.get("run", "") for step in job["steps"])
         self.assertIn("--mode onedir", commands)

@@ -132,14 +132,23 @@ class ResultsFilter(QSortFilterProxyModel):
         super().__init__(parent)
         self.status = "all"
         self.text = ""
+        self.top_n = None
         self.setSortRole(SORT_ROLE)
 
     def set_filters(self, status, text):
         self.status, self.text = status, text.casefold()
         self.invalidateFilter()
 
+    def set_top_n(self, value):
+        self.top_n = value
+        self.invalidateFilter()
+
     def filterAcceptsRow(self, source_row, parent):
         model = self.sourceModel()
+        if self.top_n is not None and model.data(model.index(source_row, 0), STATUS_ROLE) == "feasible":
+            rank = model.data(model.index(source_row, 0), SORT_ROLE)
+            if rank > self.top_n:
+                return False
         if self.status != "all" and model.data(model.index(source_row, 0), STATUS_ROLE) != self.status:
             return False
         return not self.text or any(

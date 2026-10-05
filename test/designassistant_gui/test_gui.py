@@ -15,7 +15,7 @@ from unittest.mock import patch
 from test.localization import test_localization as isolation
 
 # isort: split
-from PyQt6.QtCore import QCoreApplication, Qt, QThread, QTimer
+from PyQt6.QtCore import QCoreApplication, QItemSelectionModel, Qt, QThread, QTimer
 from PyQt6.QtWidgets import QMessageBox
 
 from designassistant import CandidateGenerator, MetricValue, OutcomeStatus, SimulationOutcome, Snapshot
@@ -23,6 +23,7 @@ from motorlib.motor import Motor
 from motorlib.units import convert
 from uilib.designassistant.presentation import CORE_MESSAGES, UI_MESSAGES, diagnostic_text
 from uilib.designassistant.results import ID_ROLE
+from uilib.designassistant.smart_messages import SMART_MESSAGES
 from uilib.fileIO import fileTypes, loadFile, saveFile
 from uilib.localization import TRANSLATIONS_PATH
 
@@ -576,6 +577,273 @@ class DesignGuiTests(unittest.TestCase):
             self.assertIsInstance(evaluation.outcome, SimulationOutcome)
             self.assertEqual(evaluation.outcome.status, OutcomeStatus.COMPLETED)
             json.dumps(dataclasses.asdict(evaluation.outcome), allow_nan=False)
+
+
+class SmartGuiTests(unittest.TestCase):
+    tearDown = DesignGuiTests.tearDown
+    wait_finished = DesignGuiTests.wait_finished
+
+    def setUp(self):
+        DesignGuiTests.setUp(self)
+        self.window.mode.setCurrentIndex(self.window.mode.findData("smart"))
+        row = self.window.smart.targets["burn_time"]
+        row.enabled.setChecked(True)
+        row.value.setValue(2)
+        row.tolerance.setValue(1)
+        self.window.smart.budget.setValue(12)
+        self.window.smart.top_n.setValue(3)
+
+    def search(self):
+        self.window.startButton.click()
+        self.wait_finished()
+        self.warning.assert_not_called()
+        self.assertEqual(self.window._state, "completed")
+        return self.window.controller.smart_store.top
+
+    def select_candidates(self, records):
+        selection = self.window.table.selectionModel()
+        selection.clearSelection()
+        for record in records:
+            row = next(
+                i for i, (p, _) in enumerate(self.window.model.rows) if p.candidate_id == record.proposal.candidate_id
+            )
+            index = self.window.proxy.mapFromSource(self.window.model.index(row, 0))
+            self.assertTrue(index.isValid())
+            selection.select(index, QItemSelectionModel.SelectionFlag.Select | QItemSelectionModel.SelectionFlag.Rows)
+        APP.processEvents()
+
+    def test_modes_preserve_manual_inputs(self):
+        self.window.mode.setCurrentIndex(0)
+        self.window.add_variable("nozzle.throat")
+        before = self.window.build_requirements()
+        self.window.mode.setCurrentIndex(1)
+        self.assertFalse(self.window.tabs.isVisible())
+        self.assertTrue(self.window.smartScroll.isVisible())
+        self.assertEqual(self.window.mode.currentData(), "smart")
+        self.window.mode.setCurrentIndex(0)
+        self.assertEqual(self.window.build_requirements(), before)
+        self.assertTrue(self.window.tabs.isVisible())
+
+    def test_partial_targets_launch_without_manual_variables(self):
+        self.assertFalse(self.window.variable_rows)
+        ranked = self.search()
+        self.assertTrue(ranked)
+        self.assertLessEqual(len(ranked), 3)
+        self.assertTrue(all(r.context.stage == "verification" for r in ranked))
+        self.assertEqual(self.window._progress.stage, "ranking")
+        self.assertIsNotNone(self.window._progress.best_score)
+        self.assertGreater(self.window._progress.elapsed, 0)
+        self.assertLessEqual(self.window._progress.processed, 12)
+
+    def test_quality_changes_budget_only_and_estimates_simulations(self):
+        from designassistant.smart import QUALITY_BUDGETS
+
+        original = self.window.controller.baseline.to_dict()["config"]
+        for key, budget in QUALITY_BUDGETS.items():
+            self.window.smart.quality.setCurrentIndex(self.window.smart.quality.findData(key))
+            self.assertEqual(self.window.smart.budget.value(), budget)
+            self.assertIn(str(budget), self.window.smart.estimate.text())
+            for variant in self.window.smart.build_plan().variants:
+                self.assertEqual(variant.baseline.to_dict()["config"], original)
+
+    def test_missing_target_reports_specific_error_without_losing_results(self):
+        self.search()
+        before = tuple(self.window.model.rows)
+        self.window.smart.targets["burn_time"].enabled.setChecked(False)
+        self.window.start_search()
+        self.assertIn("Enable at least one target", self.warning.call_args.args[2])
+        self.assertEqual(tuple(self.window.model.rows), before)
+
+    def test_conflicting_requirements_prevent_worker_start(self):
+        maximum = self.window.smart.constraints["burn_time"][1]
+        maximum.enabled.setChecked(True)
+        maximum.value.setValue(1)
+        self.window.start_search()
+        self.assertFalse(self.window.controller.is_running)
+        self.assertIn("outside", self.warning.call_args.args[2])
+
+    def test_library_all_subset_and_fixed_selection_use_stable_existing_keys(self):
+        widget = self.window.smart
+        widget.all_library.setChecked(True)
+        req = widget.build_requirements()
+        self.assertEqual(set(req.library_keys), {e.key for e in widget.library_entries})
+        widget.all_library.setChecked(False)
+        for i in range(widget.library.count()):
+            widget.library.item(i).setCheckState(Qt.CheckState.Checked if i < 2 else Qt.CheckState.Unchecked)
+        self.assertEqual(len(widget.build_requirements().library_keys), 2)
+        widget.library.item(1).setCheckState(Qt.CheckState.Unchecked)
+        self.assertEqual(len(widget.build_requirements().library_keys), 1)
+
+    def test_compatible_geometry_selection_preserves_count_and_accuracy(self):
+        widget = self.window.smart
+        for i in range(widget.geometry.count()):
+            widget.geometry.item(i).setCheckState(Qt.CheckState.Checked)
+        built = widget.build_plan()
+        self.assertGreater(len(built.variants), 1)
+        for variant in built.variants:
+            self.assertEqual(len(variant.baseline.to_dict()["grains"]), len(BASELINE["grains"]))
+            self.assertEqual(variant.baseline.to_dict()["config"], BASELINE["config"])
+
+    def test_same_seed_ranking_and_metrics_repeat(self):
+        first = self.search()
+        second = self.search()
+        self.assertEqual(first, second)
+        self.window.smart.seed.setValue(self.window.smart.seed.value() + 1)
+        self.assertNotEqual(first, self.search())
+
+    def test_language_roundtrip_keeps_inputs_results_selection_comparison(self):
+        ranked = self.search()
+        self.select_candidates(ranked[:2])
+        self.window.compare_selected()
+        self.window.show_details()
+        inputs = self.window.smart.build_requirements()
+        rows = tuple(self.window.model.rows)
+        ids = self.window.selected_ids()
+        comparison = self.window.comparison.records
+        for language in ("en", "ru", "en"):
+            APP.translationManager.setLanguage(language)
+            APP.processEvents()
+            self.assertEqual(self.window.smart.build_requirements(), inputs)
+            self.assertEqual(tuple(self.window.model.rows), rows)
+            self.assertEqual(self.window.selected_ids(), ids)
+            self.assertEqual(self.window.comparison.records, comparison)
+            self.assertEqual(self.window.controller.smart_store.top, ranked)
+            self.assertEqual(self.window.mode.currentText(), "Умный подбор" if language == "ru" else "Smart Design")
+            self.assertEqual(self.window.compareButton.text(), "Сравнить" if language == "ru" else "Compare")
+            self.assertIn(
+                "Суммарный импульс" if language == "ru" else "Total Impulse", self.window.details.text.toPlainText()
+            )
+
+    def test_language_does_not_influence_ranking(self):
+        english = self.search()
+        APP.translationManager.setLanguage("ru")
+        APP.processEvents()
+        self.assertEqual(self.search(), english)
+
+    def test_top_n_filter_is_numeric_and_limits_visible_results(self):
+        self.search()
+        self.window.smart.top_n.setValue(2)
+        APP.processEvents()
+        self.assertLessEqual(self.window.proxy.rowCount(), 2)
+        self.assertEqual(self.window.proxy.data(self.window.proxy.index(0, 0)), 1)
+        self.window.textFilter.setText("no matching candidate")
+        self.assertEqual(self.window.proxy.rowCount(), 0)
+
+    def test_comparison_table_includes_targets_deviations_constraints_score_and_warnings(self):
+        maximum = self.window.smart.constraints["maximum_pressure"][1]
+        maximum.enabled.setChecked(True)
+        maximum.value.setValue(1e7)
+        ranked = self.search()
+        self.assertGreaterEqual(len(ranked), 2)
+        self.select_candidates(ranked[:2])
+        self.assertTrue(self.window.compareButton.isEnabled())
+        self.window.compareButton.click()
+        table = self.window.comparison.table
+        text = "\n".join(
+            table.item(r, c).text()
+            for r in range(table.rowCount())
+            for c in range(table.columnCount())
+            if table.item(r, c) is not None
+        )
+        self.assertIn("Score", text)
+        self.assertIn("Warnings", text)
+        self.assertIn("Target Value", text)
+        self.assertIn("Maximum", text)
+        self.assertEqual(table.columnCount(), 5)
+        self.assertEqual(self.window.comparison.records, tuple(ranked[:2]))
+
+    def test_invalid_candidate_does_not_terminate_smart_search(self):
+        original = Motor.runSimulation
+        calls = 0
+
+        def fail_once(motor, callback=None):
+            nonlocal calls
+            calls += 1
+            if calls == 1:
+                raise RuntimeError("Injected Smart candidate failure")
+            return original(motor, callback)
+
+        with patch.object(Motor, "runSimulation", fail_once):
+            ranked = self.search()
+        self.assertTrue(ranked)
+        self.assertEqual(self.window._progress.errors, 1)
+
+    def test_warning_policy_uses_existing_constraint_evaluator(self):
+        self.window.smart.reject_warnings.setChecked(True)
+        ranked = self.search()
+        self.assertTrue(self.window.controller.smart_plan.requirements.reject_warnings)
+        self.assertTrue(all(not any(d.level == "WARNING" for d in r.evaluation.outcome.diagnostics) for r in ranked))
+
+    def test_stop_retains_finished_results_and_baseline(self):
+        self.window.smart.budget.setValue(1000)
+        self.window.controller.progressChanged.connect(
+            lambda p: self.window.stop_search() if p.processed >= 1 and self.window.controller.is_running else None
+        )
+        self.window.start_search()
+        self.wait_finished()
+        self.assertEqual(self.window._state, "stopped")
+        self.assertGreaterEqual(len(self.window.model.rows), 1)
+        self.assertLess(self.window._progress.processed, 1000)
+        self.assertEqual(self.window.controller.baseline, self.original_snapshot)
+        self.assertEqual(Snapshot.from_dict(APP.fileManager.getCurrentMotor().getDict()), self.original_snapshot)
+
+    def test_smart_worker_keeps_gui_timer_and_receivers_on_gui_thread(self):
+        ticks, receivers = [], []
+        timer = QTimer()
+        timer.setInterval(2)
+        timer.timeout.connect(lambda: ticks.append(time.monotonic()))
+        self.window.controller.candidateReady.connect(lambda *_: receivers.append(QThread.currentThread()))
+        timer.start()
+        original = Motor.runSimulation
+
+        def slow_calculation(motor, callback=None):
+            time.sleep(0.02)
+            return original(motor, callback)
+
+        with patch.object(Motor, "runSimulation", slow_calculation):
+            self.search()
+        timer.stop()
+        self.assertGreater(len(ticks), 5)
+        self.assertTrue(receivers)
+        self.assertTrue(all(thread == APP.thread() for thread in receivers))
+
+    def test_unsaved_handoff_contains_selected_library_and_parameters_without_source_write(self):
+        source = SOURCE.read_bytes()
+        ranked = self.search()
+        self.select_candidates(ranked[:1])
+        request = self.window.controller.request_for(ranked[0].proposal.candidate_id)
+        self.window.open_selected()
+        self.assertIsNone(APP.fileManager.fileName)
+        self.assertEqual(APP.fileManager.savedVersion, -1)
+        self.assertEqual(Snapshot.from_dict(APP.fileManager.getCurrentMotor().getDict()), request.snapshot)
+        self.assertEqual(SOURCE.read_bytes(), source)
+        self.assertEqual(self.window.controller.baseline, self.original_snapshot)
+
+    def test_unsaved_check_cancel_blocks_smart_handoff(self):
+        ranked = self.search()
+        self.select_candidates(ranked[:1])
+        APP.fileManager.savedVersion = -1
+        history = copy.deepcopy(APP.fileManager.fileHistory)
+        with patch.object(QMessageBox, "exec", return_value=QMessageBox.StandardButton.Cancel):
+            self.window.open_selected()
+        self.assertEqual(APP.fileManager.fileHistory, history)
+        self.assertEqual(APP.fileManager.fileName, str(SOURCE))
+
+    def test_smart_messages_and_literals_have_complete_russian_catalog_entries(self):
+        root = ET.parse(TRANSLATIONS_PATH / "openmotor_ru.ts").getroot()
+        messages = {
+            (c.findtext("name"), m.findtext("source")): m for c in root.findall("context") for m in c.findall("message")
+        }
+        for marker in SMART_MESSAGES:
+            message = messages[(marker.context, marker.source)]
+            self.assertTrue(message.findtext("translation"))
+            self.assertNotEqual(message.find("translation").get("type"), "unfinished")
+        for filename in ("smart_form.py", "smart_results.py"):
+            tree = ast.parse((ROOT / "uilib/designassistant" / filename).read_text())
+            for node in ast.walk(tree):
+                if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "translate":
+                    if node.args and isinstance(node.args[0], ast.Constant):
+                        self.assertIn(("DesignAssistant", node.args[0].value), messages)
 
 
 if __name__ == "__main__":

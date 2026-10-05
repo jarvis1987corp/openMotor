@@ -1,8 +1,15 @@
-# Design Assistant MVP
+# Design Assistant: Manual and Smart Design
 
 Open an existing motor, then choose **Tools → Design Assistant**. A separate
 window captures the current motor as an independent baseline. Further edits or
 file operations in the main editor do not change that baseline.
+
+Choose **Manual / Ручной** to use the workflow below. The additional
+**Smart Design / Умный подбор** mode provides a requirements form, automatic
+search-space construction, coarse-to-fine search and summary comparisons.
+See [SMART_DESIGN.md](../../SMART_DESIGN.md) for that workflow and its limits.
+Inputs in both modes survive switching modes; starting a new search replaces
+the current run's in-memory results.
 
 1. **Variables:** choose a nozzle or grain numeric parameter, add it, enter
    minimum, maximum and number of grid values. Labels show the nozzle or grain
@@ -54,16 +61,23 @@ buttons use the application's existing Qt catalogs.
 - `presentation.py`: parameter labels, metric labels, core diagnostic templates
   and display-unit conversions using existing motorlib.units functions.
 - `results.py`: table model, numeric sorting, status/text filtering and rank.
-- `designassistant/`: existing engine-independent core. No Qt imports were added
-  to that package; only frozen fingerprint support was extended.
+- `smart_form.py`: project limits, optional targets/constraints, allowed library
+  and compatible geometry options, quality presets and simulation estimate.
+- `smart_results.py`: Smart result table, explanations and comparison dialog.
+- `smart_messages.py`: Qt extraction markers for new UI/core source templates.
+- `editors.py`: numeric editors shared by both modes.
+- `designassistant/`: Qt-free engine adapter, candidate validation, search
+  strategies, Smart search-space construction and compact result analysis.
 
 ## MVP limits
 
 Search settings/results live in memory until this window closes. There is no
 SQLite `.omdesign`, durable session/resume, caching, multiprocessing, advanced
-optimizer, coarse-to-fine, full curve storage or graph-comparison UI. Use the
+optimizer, full curve storage or graph-comparison UI. Use the
 ordinary editor and simulation workflow for detailed candidate graphs/export.
-Geometry types/count, propellant and simulation accuracy stay fixed. Closing an
+Manual fixes geometry types/count, propellant and accuracy. Smart can compare
+allowed existing library/compatible geometry variants while keeping count and
+accuracy fixed. Closing an
 active assistant stops it and defers destruction until the worker finishes;
 application exit also waits asynchronously before the normal unsaved check.
 Cancellation cannot interrupt geometry preparation or a single solver call.
@@ -86,3 +100,4 @@ Both Windows specs include these modules, application/Qt catalogs, numerical
 dependency metadata and a build-time engine manifest. See
 `pyinstaller/WINDOWS_BUILD.md` and `.github/workflows/windows-build.yml` for the
 native Windows standalone build and downloadable ZIP artifact.
+The runnable artifact is `openMotor-SmartDesign-Windows-x64`.

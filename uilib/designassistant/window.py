@@ -1,15 +1,15 @@
 """Programmatic Qt form; changing language repaints labels, never input values."""
 
 import math
+import time
 from dataclasses import dataclass
 
-from PyQt6.QtCore import QEvent, Qt, pyqtSignal
+from PyQt6.QtCore import QEvent, Qt, QTimer, pyqtSignal
 from PyQt6.QtWidgets import (
     QAbstractItemView,
     QCheckBox,
     QComboBox,
     QDialog,
-    QDoubleSpinBox,
     QFormLayout,
     QGroupBox,
     QHBoxLayout,
@@ -20,6 +20,7 @@ from PyQt6.QtWidgets import (
     QPlainTextEdit,
     QProgressBar,
     QPushButton,
+    QScrollArea,
     QSpinBox,
     QTableView,
     QTableWidget,
@@ -29,11 +30,12 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from designassistant import DesignRequirements, DesignVariable, MetricConstraint, ParameterRange, Target
+from designassistant import DesignRequirements, DesignVariable, LibraryEntry, MetricConstraint, ParameterRange, Target
 from motorlib.units import convert
 from uilib.localization import display_text
 
 from .controller import DesignController, SearchProgress
+from .editors import OptionalBound, number_editor
 from .presentation import (
     METRIC_LABELS,
     STATUS_LABELS,
@@ -46,17 +48,8 @@ from .presentation import (
     translate,
 )
 from .results import ID_ROLE, ResultsFilter, ResultsModel
-
-
-def number_editor(value=1.0, minimum=-1e100, maximum=1e100, integer=False):
-    editor = QSpinBox() if integer else QDoubleSpinBox()
-    if not integer:
-        editor.setDecimals(12)
-        editor.setSingleStep(0.1)
-    editor.setRange(int(minimum) if integer else minimum, int(maximum) if integer else maximum)
-    editor.setValue(value)
-    editor.setMinimumWidth(110)
-    return editor
+from .smart_form import SmartDesignForm
+from .smart_results import CandidateComparison, SmartResultsModel
 
 
 @dataclass
@@ -73,20 +66,6 @@ class TargetRow:
     value: object
     weight: object
     scale: object
-
-
-class OptionalBound(QWidget):
-    def __init__(self, enabled=False):
-        super().__init__()
-        layout = QHBoxLayout(self)
-        layout.setContentsMargins(2, 0, 2, 0)
-        self.enabled = QCheckBox()
-        self.value = number_editor()
-        self.value.setEnabled(enabled)
-        self.enabled.setChecked(enabled)
-        self.enabled.toggled.connect(self.value.setEnabled)
-        layout.addWidget(self.enabled)
-        layout.addWidget(self.value)
 
 
 @dataclass
@@ -121,6 +100,9 @@ class CandidateDetails(QDialog):
         self.setWindowTitle(translate("Candidate Details"))
         self.closeButton.setText(translate("Close"))
         if self.candidate_id not in self.window.controller.evaluations:
+            return
+        if getattr(self.window.model, "is_smart", False):
+            self.text.setPlainText(self.window.model.detail_text(self.candidate_id))
             return
         proposal = self.window.controller.proposals[self.candidate_id]
         evaluation = self.window.controller.evaluations[self.candidate_id]
@@ -165,7 +147,7 @@ class CandidateDetails(QDialog):
 class DesignAssistantWindow(QDialog):
     closed = pyqtSignal()
 
-    def __init__(self, baseline, preferences, parent=None, *, source_name="", open_candidate=None):
+    def __init__(self, baseline, preferences, parent=None, *, source_name="", open_candidate=None, library_entries=()):
         super().__init__(parent, Qt.WindowType.Window)
         self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
         self.preferences, self.source_name = preferences, source_name
@@ -176,12 +158,21 @@ class DesignAssistantWindow(QDialog):
         self._state = "ready"
         self._progress = SearchProgress()
         self._close_requested = False
+        self._search_started = None
         self.resize(1180, 800)
         self.setMinimumSize(800, 600)
         layout = QVBoxLayout(self)
         self.baselineLabel = QLabel()
         self.baselineLabel.setWordWrap(True)
         layout.addWidget(self.baselineLabel)
+        modes = QHBoxLayout()
+        self.modeLabel, self.mode = QLabel(), QComboBox()
+        self.mode.addItem("", "manual")
+        self.mode.addItem("", "smart")
+        modes.addWidget(self.modeLabel)
+        modes.addWidget(self.mode)
+        modes.addStretch()
+        layout.addLayout(modes)
         self.tabs = QTabWidget()
         layout.addWidget(self.tabs)
         self.variablesTable, self.variableChooser, self.addVariableButton, self.removeVariableButton = (
@@ -209,14 +200,28 @@ class DesignAssistantWindow(QDialog):
         constraints_layout.addWidget(self.errorPolicyLabel)
         constraints_layout.addWidget(self.rejectWarnings)
         self._search_settings()
+        entries = tuple(e if isinstance(e, LibraryEntry) else LibraryEntry.from_dict(e) for e in library_entries)
+        self.smart = SmartDesignForm(self.controller.baseline, preferences, entries, self)
+        self.smartScroll = QScrollArea()
+        self.smartScroll.setWidgetResizable(True)
+        self.smartScroll.setWidget(self.smart)
+        self.smartScroll.hide()
+        layout.addWidget(self.smartScroll, 2)
         self._progress_controls(layout)
         self._results_controls(layout)
         self.details = CandidateDetails(self)
+        self.comparison = CandidateComparison(self.preferences, self)
+        self.mode.currentIndexChanged.connect(self._mode_changed)
+        self.smart.top_n.valueChanged.connect(self._top_n_changed)
         self.controller.candidateReady.connect(self._candidate)
         self.controller.progressChanged.connect(self._update_progress)
         self.controller.finished.connect(self._finished)
         self.add_target("burn_time")
         self.retranslate()
+        self.elapsedTimer = QTimer(self)
+        self.elapsedTimer.setInterval(250)
+        self.elapsedTimer.timeout.connect(self._elapsed)
+        self.elapsedTimer.start()
 
     def _input_table(self, columns):
         page = QWidget()
@@ -281,6 +286,9 @@ class DesignAssistantWindow(QDialog):
         self.currentProgress = QProgressBar()
         controls.addWidget(self.progressBar)
         controls.addWidget(self.currentProgress)
+        self.progressDetails = QLabel()
+        self.progressDetails.setWordWrap(True)
+        controls.addWidget(self.progressDetails)
         layout.addWidget(self.progressGroup)
 
     def _results_controls(self, layout):
@@ -292,15 +300,19 @@ class DesignAssistantWindow(QDialog):
         for key in ("all", "feasible", "rejected", "error", "cancelled"):
             self.statusFilter.addItem("", key)
         self.textFilter = QLineEdit()
-        self.detailsButton, self.openButton = QPushButton(), QPushButton()
+        self.detailsButton, self.openButton, self.compareButton = QPushButton(), QPushButton(), QPushButton()
         self.detailsButton.clicked.connect(self.show_details)
         self.openButton.clicked.connect(self.open_selected)
+        self.compareButton.clicked.connect(self.compare_selected)
         filters.addWidget(self.statusFilter)
         filters.addWidget(self.textFilter, 1)
         filters.addWidget(self.detailsButton)
+        filters.addWidget(self.compareButton)
         filters.addWidget(self.openButton)
         controls.addLayout(filters)
-        self.model = ResultsModel(self.options, self.preferences, self)
+        self.manualModel = ResultsModel(self.options, self.preferences, self)
+        self.smartModel = SmartResultsModel(self.preferences, self)
+        self.model = self.manualModel
         self.proxy = ResultsFilter(self)
         self.proxy.setSourceModel(self.model)
         self.table = QTableView()
@@ -316,6 +328,9 @@ class DesignAssistantWindow(QDialog):
         self.statusFilter.currentIndexChanged.connect(self._filter)
         self.textFilter.textChanged.connect(self._filter)
         controls.addWidget(self.table)
+        self.smartResultHint = QLabel()
+        self.smartResultHint.setWordWrap(True)
+        controls.addWidget(self.smartResultHint)
         layout.addWidget(self.resultsGroup, 2)
         self._selection_changed()
 
@@ -423,6 +438,18 @@ class DesignAssistantWindow(QDialog):
 
     def start_search(self):
         try:
+            smart = self.mode.currentData() == "smart"
+            if smart:
+                plan = self.smart.build_plan()
+                self.controller.start_smart(plan)
+                self.model = self.smartModel
+                self.smartModel.reset(self.controller.smart_store)
+                self.proxy.setSourceModel(self.model)
+                self.proxy.set_top_n(plan.requirements.top_n)
+                self.statusFilter.setCurrentIndex(self.statusFilter.findData("feasible"))
+                self.table.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
+                self._search_started_ui()
+                return
             baseline = self.controller.baseline.to_dict()
             if not baseline["grains"] or baseline["propellant"] is None:
                 raise ValueError("The current motor must contain grains and a propellant.")
@@ -434,7 +461,18 @@ class DesignAssistantWindow(QDialog):
             QMessageBox.warning(self, translate("Cannot Start Search"), translate(str(error)))
             return
         self.details.hide()
+        self.comparison.hide()
+        self.model = self.manualModel
         self.model.reset(requirements.variables)
+        self.proxy.setSourceModel(self.model)
+        self.proxy.set_top_n(None)
+        self.table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
+        self._search_started_ui()
+
+    def _search_started_ui(self):
+        self.details.hide()
+        self.comparison.hide()
+        self._search_started = time.monotonic()
         self._state = "running"
         self._set_running(True)
         self._update_progress(SearchProgress())
@@ -447,6 +485,8 @@ class DesignAssistantWindow(QDialog):
 
     def _set_running(self, running):
         self.tabs.setEnabled(not running)
+        self.mode.setEnabled(not running)
+        self.smartScroll.setEnabled(not running)
         self.startButton.setEnabled(not running)
         self.stopButton.setEnabled(running)
         self._selection_changed()
@@ -475,9 +515,47 @@ class DesignAssistantWindow(QDialog):
         self.currentProgress.setFormat(translate("Current candidate: %p%"))
         if self._state not in ("running", "stopping"):
             self.currentProgress.setFormat(translate("No candidate running"))
+        smart = getattr(self.model, "is_smart", False)
+        self.progressDetails.setVisible(smart)
+        if smart:
+            sources = {
+                "manual": "Ready",
+                "exploration": "Exploration",
+                "selection": "Selection",
+                "refinement": "Refinement",
+                "verification": "Finalist Recheck",
+                "ranking": "Final Ranking",
+            }
+            elapsed = (
+                time.monotonic() - self._search_started
+                if self._state in ("running", "stopping") and self._search_started is not None
+                else progress.elapsed
+            )
+            self.progressDetails.setText(
+                translate("Stage: {stage}   Best score: {score}   Elapsed: {seconds} s").format(
+                    stage=translate(sources[progress.stage]),
+                    score="—" if progress.best_score is None else "{:.6g}".format(progress.best_score),
+                    seconds="{:.1f}".format(elapsed),
+                )
+            )
+        self.smartResultHint.setVisible(smart)
+        if smart and self.controller.smart_store is not None:
+            count = len(self.controller.smart_store.ranked())
+            self.smartResultHint.setText(
+                translate(
+                    "Top {shown} of {count} admissible designs. Lower scores mean closer target agreement."
+                ).format(shown=min(self.smart.top_n.value(), count), count=count)
+                if count
+                else translate("No admissible candidates yet. Review targets, limits or allowed options.")
+            )
+
+    def _elapsed(self):
+        if self._state in ("running", "stopping"):
+            self._update_progress(self._progress)
 
     def _finished(self, summary):
         self._state = summary.state
+        self.model.retranslate()
         self._set_running(False)
         self._update_progress(summary.progress)
         if summary.error:
@@ -500,6 +578,28 @@ class DesignAssistantWindow(QDialog):
         self.proxy.set_filters(self.statusFilter.currentData(), self.textFilter.text())
         self._selection_changed()
 
+    def _mode_changed(self):
+        smart = self.mode.currentData() == "smart"
+        self.tabs.setVisible(not smart)
+        self.smartScroll.setVisible(smart)
+        self.retranslate()
+
+    def _top_n_changed(self):
+        if getattr(self.model, "is_smart", False):
+            self.proxy.set_top_n(self.smart.top_n.value())
+            self._update_progress(self._progress)
+
+    def selected_ids(self):
+        return tuple(self.proxy.data(row, ID_ROLE) for row in self.table.selectionModel().selectedRows())
+
+    def compare_selected(self):
+        if self.controller.smart_store is None:
+            return
+        try:
+            self.comparison.show_candidates(self.controller.smart_store.compare(self.selected_ids()))
+        except ValueError as error:
+            QMessageBox.warning(self, translate("Cannot Compare Candidates"), translate(str(error)))
+
     def selected_id(self):
         rows = self.table.selectionModel().selectedRows()
         return self.proxy.data(rows[0], ID_ROLE) if rows else None
@@ -510,6 +610,12 @@ class DesignAssistantWindow(QDialog):
         evaluation = self.controller.evaluations.get(candidate_id)
         self.openButton.setEnabled(
             not self.controller.is_running and evaluation is not None and evaluation.outcome.valid
+        )
+        self.compareButton.setVisible(getattr(self.model, "is_smart", False))
+        ids = self.selected_ids()
+        ranked = self.smartModel.ranks if getattr(self.model, "is_smart", False) else {}
+        self.compareButton.setEnabled(
+            not self.controller.is_running and 2 <= len(ids) <= 5 and all(key in ranked for key in ids)
         )
 
     def show_details(self, *_):
@@ -531,9 +637,17 @@ class DesignAssistantWindow(QDialog):
 
     def retranslate(self):
         self.setWindowTitle(translate("Design Assistant"))
+        smart = self.mode.currentData() == "smart"
+        self.modeLabel.setText(translate("Mode"))
+        self.mode.setItemText(0, translate("Manual"))
+        self.mode.setItemText(1, translate("Smart Design"))
+        self.smart.retranslate()
         self.baselineLabel.setText(
             translate(
-                "Baseline: {name}. Grain types, grain count, propellant and simulation settings remain fixed."
+                "Baseline: {name}. Grain count and simulation settings remain fixed; "
+                "options use existing library entries."
+                if smart
+                else "Baseline: {name}. Grain types, grain count, propellant and simulation settings remain fixed."
             ).format(name=self.source_name or translate("Unsaved motor"))
         )
         for index, source in enumerate(("Variables", "Targets", "Constraints", "Search Settings")):
@@ -556,10 +670,11 @@ class DesignAssistantWindow(QDialog):
             (self.removeVariableButton, "Remove Selected"),
             (self.removeTargetButton, "Remove Selected"),
             (self.removeConstraintButton, "Remove Selected"),
-            (self.startButton, "Start"),
+            (self.startButton, "Run Smart Design" if smart else "Start"),
             (self.stopButton, "Stop"),
             (self.detailsButton, "Details"),
             (self.openButton, "Open in Motor Editor"),
+            (self.compareButton, "Compare"),
         ):
             button.setText(translate(source))
             button.setMinimumWidth(button.sizeHint().width())
