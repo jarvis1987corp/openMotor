@@ -162,6 +162,10 @@ class PackagingTests(unittest.TestCase):
         self.assertIn("--mode onedir", commands)
         self.assertIn("packagingProbe.spec", commands)
         self.assertIn('"first", "restart", "english"', commands)
+        validation = next(
+            step for step in job["steps"] if step.get("name") == "Validate frozen application and Design Assistant"
+        )
+        self.assertEqual(validation["env"]["QT_QPA_PLATFORM"], "windows")
 
     def test_windows_preparation_runs_core_and_gui_suites(self):
         from scripts.build_windows import prepare

@@ -80,6 +80,8 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Validate frozen application and Design Assistant
+        env:
+          QT_QPA_PLATFORM: windows
         shell: pwsh
         run: |
           $probe = (Resolve-Path dist\windows\probe\openMotor-check\openMotor-check.exe).Path

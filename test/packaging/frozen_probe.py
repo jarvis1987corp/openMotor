@@ -133,7 +133,12 @@ for language in ("en", "ru", "en"):
     standard_buttons[language] = button
     if language == "ru":
         metrics = QFontMetrics(app.window.font())
-        assert all(metrics.inFont(character) for character in "ТягаДавлениеРусский")
+        missing_glyphs = sorted({character for character in "ТягаДавлениеРусский" if not metrics.inFont(character)})
+        assert not missing_glyphs, {
+            "missing_glyphs": missing_glyphs,
+            "font": app.window.font().toString(),
+            "platform": app.platformName(),
+        }
     for extension, exporter_type, config in (
         ("csv", CsvExporter, [[], []]),
         ("eng", EngExporter, settings),

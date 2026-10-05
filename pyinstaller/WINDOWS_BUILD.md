@@ -185,7 +185,7 @@ $qa = Join-Path $env:TEMP ("openMotor-проверка-" + [guid]::NewGuid().ToS
 New-Item -ItemType Directory -Path $qa
 Copy-Item $project (Join-Path $qa "двигатель исходный.ric")
 $project = Join-Path $qa "двигатель исходный.ric"
-$env:QT_QPA_PLATFORM = "offscreen"
+$env:QT_QPA_PLATFORM = "windows"
 Push-Location $qa
 & $probe --data-dir $qa --project $project --phase first
 & $probe --data-dir $qa --project $project --phase restart
@@ -204,7 +204,8 @@ BurnSim import and PNG export. Export bytes must be identical between languages;
 computed channels and the simulation thread must remain unchanged when the
 language switches. All user data is confined to `$qa`.
 
-This offscreen probe is additional evidence, not a substitute for the Windows
+The frozen probe uses the native Windows Qt platform, including system fonts;
+source unit tests continue to use `offscreen`. The probe is additional evidence, not a substitute for the Windows
 release EXE and native desktop checks below. Do not distribute the probe as the
 application.
 
