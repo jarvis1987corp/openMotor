@@ -37,7 +37,7 @@ def _snapshots():
             from uilib.fileIO import fileTypes, loadFile
 
             snapshots = {
-                str(path.relative_to(ROOT / "test/data")): Motor(loadFile(str(path), fileTypes.MOTOR)).getDict()
+                path.relative_to(ROOT / "test/data").as_posix(): Motor(loadFile(str(path), fileTypes.MOTOR)).getDict()
                 for path in FIXTURES
             }
             # Release Windows log handles before TemporaryDirectory cleanup.
