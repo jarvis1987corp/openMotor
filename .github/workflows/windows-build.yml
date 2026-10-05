@@ -56,6 +56,7 @@ jobs:
             Get-Content build\windows-build.log -Tail 120 | Out-File $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
             '```' | Out-File $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
             $tail = Get-Content build\windows-build.log -Tail 120 | Out-String
+            if ($tail.Length -gt 3800) { $tail = $tail.Substring($tail.Length - 3800) }
             $annotation = $tail.Replace('%', '%25').Replace("`r", '%0D').Replace("`n", '%0A')
             Write-Output "::error title=Windows build diagnostics::$annotation"
           }
