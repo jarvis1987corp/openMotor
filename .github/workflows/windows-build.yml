@@ -46,6 +46,17 @@ jobs:
           & .venv\Scripts\python.exe scripts\build_windows.py --mode onedir *>&1 | Tee-Object build\windows-build.log
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
+      - name: Publish build failure diagnostics
+        if: failure()
+        shell: pwsh
+        run: |
+          if (Test-Path build\windows-build.log) {
+            "### Windows build failure" | Out-File $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+            '```text' | Out-File $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+            Get-Content build\windows-build.log -Tail 120 | Out-File $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+            '```' | Out-File $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+          }
+
       - name: Build frozen GUI validation executable
         shell: pwsh
         run: |
