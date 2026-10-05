@@ -20,6 +20,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -56,6 +58,13 @@ jobs:
             '```text' | Out-File $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
             Get-Content build\windows-build.log -Tail 120 | Out-File $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
             '```' | Out-File $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+            $fullLog = Get-Content build\windows-build.log -Raw
+            foreach ($match in [regex]::Matches($fullLog, '(?ms)^ERROR: .+?(?=^={20,}|\z)')) {
+              $block = $match.Value
+              if ($block.Length -gt 3800) { $block = $block.Substring(0, 3800) }
+              $block = $block.Replace('%', '%25').Replace("`r", '%0D').Replace("`n", '%0A')
+              Write-Output "::error title=Windows test exception::$block"
+            }
             $tail = Get-Content build\windows-build.log |
               Where-Object { $_ -notmatch '^\d+\.\d+ \[(LOG|WRN|ERR)\]' } |
               Select-Object -Last 80 | Out-String
