@@ -90,8 +90,16 @@ jobs:
           Push-Location $qa
           try {
             foreach ($phase in @("first", "restart", "english")) {
-              & $probe --data-dir $qa --project $project --phase $phase
-              if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+              $phaseLog = Join-Path $qa "$phase.log"
+              & $probe --data-dir $qa --project $project --phase $phase *>&1 | Tee-Object $phaseLog
+              $probeExitCode = $LASTEXITCODE
+              if ($probeExitCode -ne 0) {
+                $tail = Get-Content $phaseLog -Raw
+                if ($tail.Length -gt 3800) { $tail = $tail.Substring($tail.Length - 3800) }
+                $annotation = $tail.Replace('%', '%25').Replace("`r", '%0D').Replace("`n", '%0A')
+                Write-Output "::error title=Frozen application $phase::$annotation"
+                exit $probeExitCode
+              }
             }
           } finally {
             Pop-Location
@@ -115,6 +123,7 @@ jobs:
             dist/windows/build-info.json
             build/windows-build.log
             build/проверка Windows/report-*.json
+            build/проверка Windows/*.log
             build/compatibility-baseline/*.json
           if-no-files-found: warn
           retention-days: 30
