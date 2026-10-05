@@ -127,15 +127,16 @@ class LocalizationTests(unittest.TestCase):
         from uilib.resources import resource_path
 
         original = os.getcwd()
-        try:
-            with tempfile.TemporaryDirectory(prefix="openmotor-изображения-") as directory:
+        with tempfile.TemporaryDirectory(prefix="openmotor-изображения-") as directory:
+            try:
                 os.chdir(directory)
                 self.assertFalse(QIcon(resource_path("oMIconCyclesSmall.png")).isNull())
                 self.assertFalse(QPixmap(resource_path("oMIconCyclesSmall.png")).isNull())
                 self.assertFalse(APP.icon.isNull())
                 self.assertFalse(APP.window.aboutDialog.ui.labelImage.pixmap().isNull())
-        finally:
-            os.chdir(original)
+            finally:
+                # Restore cwd before cleanup so Windows can remove this folder.
+                os.chdir(original)
 
     def test_switch_languages_for_existing_and_new_widgets(self):
         window = APP.window
