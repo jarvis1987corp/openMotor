@@ -145,6 +145,35 @@ class PackagingTests(unittest.TestCase):
         for suite in ("test/designassistant", "test/designassistant_gui"):
             self.assertIn(("-m", "unittest", "discover", "-s", suite, "-v"), calls)
 
+    def test_windows_preparation_replays_the_independent_original_source(self):
+        from scripts.build_windows import prepare
+
+        with patch("scripts.build_windows.sys.platform", "win32"), patch("scripts.build_windows.run") as run:
+            prepare()
+        directory = ROOT / "build/compatibility-baseline"
+        calls = [call.args for call in run.call_args_list]
+        self.assertIn(("scripts/compatibility_baseline.py", "--output-dir", directory), calls)
+        localization = next(call for call in run.call_args_list if "test/localization" in call.args)
+        self.assertEqual(localization.kwargs["reference_directory"], directory)
+
+    def test_independent_references_reject_wrong_source_or_runtime(self):
+        from scripts.compatibility_baseline import BASE_COMMIT, REFERENCE_ENV, load_reference
+
+        with tempfile.TemporaryDirectory() as directory:
+            for source in ("HEAD", BASE_COMMIT):
+                with self.subTest(source=source):
+                    provenance = {
+                        "source_commit": source,
+                        "platform": sys.platform,
+                        "python": sys.version,
+                        "fixtures": 18,
+                        "numerical_runtime": {"numpy": "wrong runtime"},
+                    }
+                    (Path(directory) / "provenance.json").write_text(json.dumps(provenance), encoding="utf-8")
+                    with patch.dict(os.environ, {REFERENCE_ENV: directory}):
+                        with self.assertRaisesRegex(ValueError, "pinned ancestor"):
+                            load_reference("model-reference.json")
+
     def test_windows_builder_refuses_cross_compilation(self):
         if sys.platform == "win32":
             with patch("scripts.build_windows.sys.platform", "linux"):

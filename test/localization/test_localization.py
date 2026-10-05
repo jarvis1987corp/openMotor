@@ -51,6 +51,7 @@ from motorlib.propellant import Propellant, PropellantTab
 from motorlib.properties import EnumProperty
 from motorlib.simResult import SimulationResult
 from scripts.translations import check_catalogs
+from scripts.compatibility_baseline import load_reference
 from uilib.converters import BurnSimExporter, BurnSimImporter, CsvExporter, EngExporter
 from uilib.converters.engExporter import EngSettings
 from uilib.defaults import DEFAULT_PREFERENCES
@@ -422,10 +423,12 @@ class LocalizationTests(unittest.TestCase):
     def test_catalog_matches_fresh_extraction_including_all_forms(self):
         with tempfile.TemporaryDirectory() as directory:
             target = Path(directory) / "extracted.ts"
-            command = [sys.executable, "-c", "from PyQt6.lupdate.pylupdate import main; main()",
+            command = [sys.executable, "-c", "from PyQt6.lupdate.pylupdate import main; raise SystemExit(main())",
                        "app.py", "uilib", "motorlib", "mathlib", "--exclude", "*_ui.py",
                        "--no-obsolete", "--no-summary", "--ts", str(target)]
-            subprocess.run(command, cwd=ROOT, check=True, capture_output=True, timeout=30)
+            extraction = subprocess.run(command, cwd=ROOT, capture_output=True, text=True, timeout=30)
+            self.assertEqual(extraction.returncode, 0, extraction.stdout + extraction.stderr)
+            self.assertTrue(target.is_file(), extraction.stdout + extraction.stderr)
 
             def identities(path):
                 return {(context.findtext("name"), message.findtext("source"), message.findtext("comment"))
@@ -734,7 +737,7 @@ class LocalizationTests(unittest.TestCase):
             widget.deleteLater()
 
     def test_calculations_projects_and_exports_match_stage_one_byte_for_byte(self):
-        reference = json.loads((ROOT / "test/localization/data/stage1-reference.json").read_text())
+        reference = load_reference("stage1-reference.json")
         result = self.reference_result()
         channels = {key: channel.data for key, channel in result.channels.items()}
         encoded = json.dumps(channels, sort_keys=True, separators=(",", ":")).encode()
@@ -810,7 +813,7 @@ class LocalizationTests(unittest.TestCase):
             manager.motor = original
 
     def test_all_existing_motor_fixtures_match_original_calculations_and_alerts(self):
-        references = json.loads((ROOT / "test/localization/data/model-reference.json").read_text())
+        references = load_reference("model-reference.json")
         self.select_language("ru")
         for relative, expected in references.items():
             with self.subTest(project=relative):

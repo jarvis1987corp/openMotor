@@ -11,9 +11,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def run(*args):
+def run(*args, reference_directory=None):
     environment = os.environ.copy()
     environment["PYTHONPATH"] = os.pathsep.join([str(ROOT), environment.get("PYTHONPATH", "")])
+    if reference_directory is not None:
+        environment["OPENMOTOR_COMPATIBILITY_REFERENCE_DIR"] = str(reference_directory)
     subprocess.run([sys.executable, *map(str, args)], cwd=ROOT, env=environment, check=True)
 
 
@@ -22,10 +24,14 @@ def prepare():
         target = ROOT / "uilib/views" / (form.stem + "_ui.py")
         run("-m", "PyQt6.uic.pyuic", form, "-o", target)
     run("setup.py", "build_ext", "--inplace")
+    references = None
+    if sys.platform == "win32":
+        references = ROOT / "build/compatibility-baseline"
+        run("scripts/compatibility_baseline.py", "--output-dir", references)
     run("scripts/translations.py", "check")
     run("-m", "unittest", "discover", "-s", "test/packaging", "-v")
     run("test/unit.py")
-    run("-m", "unittest", "discover", "-s", "test/localization", "-v")
+    run("-m", "unittest", "discover", "-s", "test/localization", "-v", reference_directory=references)
     run("-m", "unittest", "discover", "-s", "test/designassistant", "-v")
     run("-m", "unittest", "discover", "-s", "test/designassistant_gui", "-v")
     run("-m", "ruff", "check", "designassistant", "uilib/designassistant", "test/designassistant_gui")

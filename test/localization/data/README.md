@@ -22,6 +22,20 @@ types, locations and descriptions. The original and localized model snapshots
 were compared exactly before recording the fixture. These hashes include full
 floating-point values, without rounding or tolerances that could hide changes.
 
+Native build hosts can use `scripts/compatibility_baseline.py` to replay the
+pinned pre-localization ancestor `dcc7fd62045d55036451b833f60e16a786f4685d`.
+It archives that exact source, verifies the Cython source is unchanged, uses the
+same compiled kernel and numerical runtime, regenerates its original Designer
+forms and runs its original engine/exporters in an isolated subprocess. The
+resulting references include source/runtime provenance. They are not generated
+from the current engine and do not replace the committed Linux goldens.
+
+Windows builds use these independent host references for exact channel/model/
+alert/export comparisons. This avoids treating platform floating-point/libm
+differences as localization regressions while still rejecting any difference
+between the original and localized engine on that same Windows host. The
+independent replay was also verified against every committed Linux hash.
+
 Do not regenerate references merely to make a failing test pass. First investigate
 whether a calculation, file format or stable identity was changed. Deliberate
 future physics changes require separate review and corresponding reference updates.

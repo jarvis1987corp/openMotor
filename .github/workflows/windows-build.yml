@@ -115,5 +115,6 @@ jobs:
             dist/windows/build-info.json
             build/windows-build.log
             build/проверка Windows/report-*.json
+            build/compatibility-baseline/*.json
           if-no-files-found: warn
           retention-days: 30

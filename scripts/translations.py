@@ -17,7 +17,7 @@ CATALOGS = ROOT / "uilib" / "translations"
 
 def update():
     # Use the same interpreter as the development environment, not system PyQt.
-    command = [sys.executable, "-c", "from PyQt6.lupdate.pylupdate import main; main()"]
+    command = [sys.executable, "-c", "from PyQt6.lupdate.pylupdate import main; raise SystemExit(main())"]
     for catalog in sorted(CATALOGS.glob("openmotor_*.ts")):
         subprocess.run(command + ["app.py", "uilib", "motorlib", "mathlib", "--exclude", "*_ui.py",
                                  "--no-obsolete", "--ts", str(catalog.relative_to(ROOT))], cwd=ROOT, check=True)

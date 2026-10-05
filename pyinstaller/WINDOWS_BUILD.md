@@ -100,6 +100,16 @@ Diagnostic logs are written as UTF-8, so Cyrillic paths do not fail with a Weste
 Windows ANSI code page. This changes log encoding only; project/export formats
 and numerical calculations are unchanged.
 
+The checkout must contain history back to the pinned pre-localization ancestor
+`dcc7fd62045d55036451b833f60e16a786f4685d`. The Actions checkout uses
+`fetch-depth: 0`; for a local shallow clone, fetch its history before building.
+The build helper independently replays that exact original source and exporters
+on the Windows runtime, then compares localized output exactly against them.
+Compiled Cython source must be unchanged. Linux's committed golden hashes stay
+unchanged; numerical differences between Linux and Windows are not masked by
+tolerances or new hashes from the current engine. The provenance and independent
+reference JSON files are included in the validation artifact.
+
 The committed `.qm` is checked against every active `.ts` message by the packaging
 tests. If the translation source is edited, regenerate before building:
 
@@ -150,9 +160,9 @@ so there is no second nested ZIP to unpack. Build/test reports are available as
 
 The workflow is prepared in source. A successful Windows run, artifact size and
 Windows desktop behavior must be verified after push; they cannot be inferred
-from tests on Linux. Strict numerical localization references are retained:
-if a Windows runtime produces a different hash, investigate it rather than
-altering the calculation model or refreshing references to bypass the failure.
+from tests on Linux. Original-source comparisons remain exact: a Windows result
+that differs from the independent original-engine replay must be investigated;
+do not alter the model or refresh references from current output to bypass it.
 
 Localization tests explicitly isolate platformdirs on Windows and Linux, so they
 do not change real user preferences. Text reference hashes account for Windows
