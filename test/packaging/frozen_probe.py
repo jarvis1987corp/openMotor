@@ -275,6 +275,68 @@ assert assistant._state == "stopped" and assistant._progress.processed < 10000
 assistant.close()
 app.processEvents()
 
+# The Quick wizard delegates to that same Smart backend and comparison dialog.
+assert app.fileManager.load(str(saved_project))
+app.window.postLoadUpdate()
+app.window.quickDesignAction.trigger()
+quick = app.window.quickDesign
+quick.allowed_keys = smart_requirements.library_keys
+quick.rows["burn_time"].enabled.setChecked(True)
+quick.rows["burn_time"].value.setValue(result.getBurnTime())
+quick.next()
+assert quick.pages.currentIndex() == 1 and quick.problem is not None
+quick.start_search(budget=16)
+deadline = time.monotonic() + 60
+while quick.controller.is_running and time.monotonic() < deadline:
+    app.processEvents()
+    time.sleep(0.005)
+assert not quick.controller.is_running and quick._state == "completed"
+assert 2 <= len(quick.recommendations) <= 5
+quick_ranked = quick.recommendations
+quick_requirements = quick.build_requirements()
+for language in ("en", "ru", "en"):
+    app.translationManager.setLanguage(language)
+    app.processEvents()
+    assert quick.windowTitle() == ("Быстрое проектирование" if language == "ru" else "Quick Design")
+    assert quick.build_requirements() == quick_requirements
+    assert quick.recommendations == quick_ranked
+    assert quick.controller.baseline == baseline
+    assert app.fileManager.getCurrentMotor().getDict() == model
+    assert result_digest() == original_digest
+quick.start_search(budget=16)
+deadline = time.monotonic() + 60
+while quick.controller.is_running and time.monotonic() < deadline:
+    app.processEvents()
+    time.sleep(0.005)
+assert not quick.controller.is_running and quick.recommendations == quick_ranked
+for record in quick_ranked[:2]:
+    quick.cards[record.proposal.candidate_id].selected.setChecked(True)
+quick.compare_selected()
+assert quick.comparison.records == quick_ranked[:2]
+quick.comparison.hide()
+advanced = quick.open_advanced()
+assert advanced.mode.currentData() == "manual" and advanced.variable_rows
+assert advanced.build_requirements().targets[0].metric == "burn_time"
+assert app.fileManager.getCurrentMotor().getDict() == model
+advanced.close()
+app.processEvents()
+quick_id = quick_ranked[0].proposal.candidate_id
+quick_candidate = quick.controller.request_for(quick_id).snapshot
+quick.open_candidate_id(quick_id)
+assert app.fileManager.fileName is None and app.fileManager.savedVersion == -1
+assert Snapshot.from_dict(app.fileManager.getCurrentMotor().getDict()) == quick_candidate
+assert saved_project.read_bytes() == source_bytes
+quick.start_search(budget=10000)
+quick.stop_search()
+deadline = time.monotonic() + 60
+while quick.controller.is_running and time.monotonic() < deadline:
+    app.processEvents()
+    time.sleep(0.005)
+assert not quick.controller.is_running and quick._state == "stopped"
+assert quick._progress.processed < 10000
+quick.close()
+app.processEvents()
+
 # Leave Russian saved for the next process, then English after restart checks.
 final_language = "ru" if arguments.phase == "first" else "en"
 menu.load(app.preferencesManager.preferences)
@@ -316,6 +378,10 @@ report = {
         "Smart Design seeded reproducibility and finalist recheck",
         "Smart Design language round trip and comparison",
         "Smart Design Start/Stop and unchanged baseline",
+        "Quick Design wizard and existing Smart backend",
+        "Quick Design language round trip and seeded reproducibility",
+        "Quick Design cards, comparison and Advanced handoff",
+        "Quick Design Start/Stop, unsaved handoff and unchanged source",
         "candidate unsaved handoff",
         "unchanged source project",
     ],

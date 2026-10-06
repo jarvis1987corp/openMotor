@@ -7,6 +7,7 @@ from PyQt6.QtWidgets import QHeaderView, QMainWindow, QMessageBox, QTableWidgetI
 
 import motorlib
 import uilib.widgets.aboutDialog
+from uilib.designassistant.quick_window import QuickDesignWindow
 from uilib.designassistant.window import DesignAssistantWindow
 from uilib.localization import QT_TRANSLATE_NOOP, display_text, geometry_name
 from uilib.views.MainWindow_ui import Ui_MainWindow
@@ -20,6 +21,8 @@ class Window(QMainWindow):
 
         self.app = app
         self.designAssistant = None
+        self.quickDesign = None
+        self.quickAdvancedWindows = []
         self._closeAfterDesignSearch = False
 
         self.setWindowIcon(self.app.icon)
@@ -126,6 +129,9 @@ class Window(QMainWindow):
         self.designAssistantAction.triggered.connect(self.openDesignAssistant)
         self.ui.menuTools.addSeparator()
         self.ui.menuTools.addAction(self.designAssistantAction)
+        self.quickDesignAction = QAction(self.tr("Quick Design..."), self)
+        self.quickDesignAction.triggered.connect(self.openQuickDesign)
+        self.ui.menuTools.addAction(self.quickDesignAction)
 
         # Help
         self.ui.actionAboutOpenMotor.triggered.connect(self.aboutDialog.show)
@@ -150,6 +156,46 @@ class Window(QMainWindow):
 
     def _designClosed(self):
         self.designAssistant = None
+
+    def openQuickDesign(self):
+        if self.quickDesign is None:
+            manager = self.app.fileManager
+            self.quickDesign = QuickDesignWindow(
+                manager.getCurrentMotor().getDict(), self.app.preferencesManager.preferences, self,
+                source_name=manager.fileName or "", open_candidate=self.openDesignCandidate,
+                open_advanced=self.openQuickAdvanced,
+                library_entries=[p.getProperties() for p in self.app.propellantManager.propellants],
+            )
+            self.quickDesign.setWindowIcon(self.app.icon)
+            self.quickDesign.closed.connect(self._quickClosed)
+            self.quickDesign.controller.finished.connect(self._designFinished)
+        self.quickDesign.show()
+        self.quickDesign.raise_()
+        self.quickDesign.activateWindow()
+
+    def _quickClosed(self):
+        self.quickDesign = None
+
+    def openQuickAdvanced(self, problem, variant):
+        from designassistant import MetricRegistry
+
+        window = DesignAssistantWindow(
+            variant.baseline.to_dict(), self.app.preferencesManager.preferences, self,
+            source_name=self.quickDesign.source_name if self.quickDesign is not None else "",
+            open_candidate=self.openDesignCandidate,
+            library_entries=[p.getProperties() for p in self.app.propellantManager.propellants],
+            registry=MetricRegistry(problem.plan.requirements.metric_definitions),
+        )
+        window.load_requirements(variant.requirements, budget=problem.requirements.simulation_budget,
+                                 seed=problem.requirements.seed)
+        window.setWindowIcon(self.app.icon)
+        self.quickAdvancedWindows.append(window)
+        window.closed.connect(lambda: self.quickAdvancedWindows.remove(window))
+        window.controller.finished.connect(self._designFinished)
+        window.show()
+        window.raise_()
+        window.activateWindow()
+        return window
 
     def _designFinished(self, _):
         if self._closeAfterDesignSearch:
@@ -483,9 +529,12 @@ class Window(QMainWindow):
         self.updatePropBoxSelection()
 
     def closeEvent(self, event=None):
-        if self.designAssistant is not None and self.designAssistant.controller.is_running:
+        running = [w for w in [self.designAssistant, self.quickDesign, *self.quickAdvancedWindows]
+                   if w is not None and w.controller.is_running]
+        if running:
             self._closeAfterDesignSearch = True
-            self.designAssistant.stop_search()
+            for window in running:
+                window.stop_search()
             if event is not None and not isinstance(event, bool):
                 event.ignore()
             return
@@ -509,6 +558,7 @@ class Window(QMainWindow):
             title = self.windowTitle()
             self.ui.retranslateUi(self)
             self.designAssistantAction.setText(self.tr("Design Assistant"))
+            self.quickDesignAction.setText(self.tr("Quick Design..."))
             for label, value in zip(self.motorStatLabels, values):
                 label.setText(value)
             if self._peakMassFluxText is not None:

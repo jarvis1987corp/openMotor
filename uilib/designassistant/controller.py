@@ -50,12 +50,13 @@ class SearchWorker(QObject):
     progressChanged = pyqtSignal(object)
     finished = pyqtSignal(object)
 
-    def __init__(self, baseline, requirements, strategy, budget, seed, stop_event, *, smart_plan=None):
+    def __init__(self, baseline, requirements, strategy, budget, seed, stop_event, *, smart_plan=None, registry=None):
         super().__init__()
         self.baseline, self.requirements = baseline, requirements
         self.strategy, self.budget, self.seed = strategy, budget, seed
         self.stop_event = stop_event
         self.smart_plan = smart_plan
+        self.registry = registry
 
     @pyqtSlot()
     def run(self):
@@ -81,7 +82,7 @@ class SearchWorker(QObject):
             generator = (
                 None if self.smart_plan is not None else CandidateGenerator(self.baseline.to_dict(), self.requirements)
             )
-            adapter = EngineAdapter()
+            adapter = EngineAdapter(self.registry)
             adapter.registry.validate_requirements(self.requirements)
             objective = Objective(adapter.registry)
             search = (
@@ -169,7 +170,7 @@ class DesignController(QObject):
     progressChanged = pyqtSignal(object)
     finished = pyqtSignal(object)
 
-    def __init__(self, baseline, parent=None):
+    def __init__(self, baseline, parent=None, *, registry=None):
         super().__init__(parent)
         self.baseline = baseline if isinstance(baseline, Snapshot) else Snapshot.from_dict(baseline)
         self.requirements = None
@@ -181,6 +182,7 @@ class DesignController(QObject):
         self._summary = None
         self.smart_plan = None
         self.smart_store = None
+        self.registry = registry if registry is not None else MetricRegistry()
 
     @property
     def is_running(self):
@@ -195,7 +197,7 @@ class DesignController(QObject):
             raise ValueError("Random seed must be an integer.")
         if not requirements.targets:
             raise ValueError("Add at least one target before starting the search.")
-        MetricRegistry().validate_requirements(requirements)
+        self.registry.validate_requirements(requirements)
         CandidateGenerator(self.baseline.to_dict(), requirements)
         self.requirements = requirements
         self.smart_plan, self.smart_store = None, None
@@ -207,6 +209,7 @@ class DesignController(QObject):
         if not isinstance(plan, SmartSearchPlan) or plan.baseline != self.baseline:
             raise ValueError("Smart Design must use the unchanged current baseline.")
         self.smart_plan, self.smart_store = plan, SmartResultStore(plan)
+        self.registry = MetricRegistry(plan.requirements.metric_definitions)
         self.requirements = plan.variants[0].requirements
         self._launch(self.requirements, "coarse_to_fine", plan.requirements.budget, plan.requirements.seed)
 
@@ -217,7 +220,8 @@ class DesignController(QObject):
         self._stop.clear()
         self.thread = QThread(self)
         self.worker = SearchWorker(
-            self.baseline, requirements, strategy, budget, seed, self._stop, smart_plan=self.smart_plan
+            self.baseline, requirements, strategy, budget, seed, self._stop, smart_plan=self.smart_plan,
+            registry=self.registry,
         )
         self.worker.moveToThread(self.thread)
         self.thread.started.connect(self.worker.run)

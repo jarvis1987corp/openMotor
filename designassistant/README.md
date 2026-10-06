@@ -7,6 +7,12 @@ model. GUI and headless callers share the same core.
 Smart Design's search-space, coarse-to-fine and ranking contracts are described
 in [SMART_DESIGN.md](../SMART_DESIGN.md).
 
+`quick.py` adds `QuickCriterion`, `QuickDesignRequirements`,
+`QuickDesignRequirementsValidator` and `QuickDesignProblemBuilder`. These compile
+simple requirements into the same Smart plan and engine API. Its scoped metric
+registry adds two existing envelope getters without changing default metrics.
+See [QUICK_DESIGN.md](../QUICK_DESIGN.md) for assumptions and limits.
+
 ## Pipeline and public API
 
 ```text

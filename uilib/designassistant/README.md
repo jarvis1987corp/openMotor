@@ -8,6 +8,11 @@ Choose **Manual / Ручной** to use the workflow below. The additional
 **Smart Design / Умный подбор** mode provides a requirements form, automatic
 search-space construction, coarse-to-fine search and summary comparisons.
 See [SMART_DESIGN.md](../../SMART_DESIGN.md) for that workflow and its limits.
+
+The separate **Tools → Quick Design...** wizard reuses this controller, Smart
+backend, details and comparison dialogs. See [QUICK_DESIGN.md](../../QUICK_DESIGN.md).
+Its Advanced handoff opens an independent Manual window with editable generated
+ranges, objectives, constraints, budget and seed.
 Inputs in both modes survive switching modes; starting a new search replaces
 the current run's in-memory results.
 

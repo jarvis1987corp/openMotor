@@ -19,6 +19,7 @@ from PyQt6.QtCore import QCoreApplication, QItemSelectionModel, Qt, QThread, QTi
 from PyQt6.QtWidgets import QMessageBox
 
 from designassistant import CandidateGenerator, MetricValue, OutcomeStatus, SimulationOutcome, Snapshot
+from designassistant.quick import QuickCriterion
 from motorlib.motor import Motor
 from motorlib.units import convert
 from uilib.designassistant.presentation import CORE_MESSAGES, UI_MESSAGES, diagnostic_text
@@ -844,6 +845,384 @@ class SmartGuiTests(unittest.TestCase):
                 if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "translate":
                     if node.args and isinstance(node.args[0], ast.Constant):
                         self.assertIn(("DesignAssistant", node.args[0].value), messages)
+
+
+class QuickDesignGuiTests(unittest.TestCase):
+    def setUp(self):
+        APP.translationManager.setLanguage("en")
+        APP.processEvents()
+        APP.window.ui.motorEditor.close()
+        saveFile(SOURCE, copy.deepcopy(BASELINE), fileTypes.MOTOR)
+        APP.fileManager.startFromMotor(Motor(copy.deepcopy(BASELINE)), str(SOURCE), checkPropellant=False)
+        APP.window.postLoadUpdate()
+        self.original = Snapshot.from_dict(APP.fileManager.getCurrentMotor().getDict())
+        self.source_bytes = SOURCE.read_bytes()
+        APP.window.quickDesignAction.trigger()
+        self.window = APP.window.quickDesign
+        self.window.allowed_keys = (Snapshot.from_dict(BASELINE["propellant"]).digest,)
+        self.warnings = patch.object(QMessageBox, "warning", return_value=QMessageBox.StandardButton.Ok)
+        self.warning = self.warnings.start()
+
+    def tearDown(self):
+        self.window.controller.stop()
+        self.wait_finished()
+        for advanced in list(APP.window.quickAdvancedWindows):
+            advanced.controller.stop()
+            deadline = time.monotonic() + 30
+            while advanced.controller.is_running and time.monotonic() < deadline:
+                APP.processEvents()
+                time.sleep(0.002)
+            advanced.close()
+        if APP.window.designAssistant is not None:
+            APP.window.designAssistant.stop_search()
+            APP.window.designAssistant.close()
+        APP.translationManager.setLanguage("en")
+        APP.processEvents()
+        self.window.close()
+        APP.processEvents()
+        APP.processEvents()
+        APP.window.ui.motorEditor.close()
+        self.warnings.stop()
+
+    def wait_finished(self):
+        deadline = time.monotonic() + 30
+        while self.window.controller.is_running and time.monotonic() < deadline:
+            APP.processEvents()
+            time.sleep(0.002)
+        APP.processEvents()
+        self.assertFalse(self.window.controller.is_running)
+
+    def configure(self):
+        row = self.window.rows["burn_time"]
+        row.enabled.setChecked(True)
+        row.value.setValue(2)
+
+    def search(self, budget=12):
+        self.configure()
+        self.window.start_search(budget=budget)
+        self.wait_finished()
+        self.warning.assert_not_called()
+        self.assertEqual(self.window._state, "completed")
+        self.assertTrue(self.window.recommendations)
+        return self.window.recommendations
+
+    def test_separate_tools_action_and_manual_window_preserved(self):
+        APP.window.designAssistantAction.trigger()
+        advanced = APP.window.designAssistant
+        self.assertEqual(advanced.mode.currentData(), "manual")
+        self.assertEqual(self.window.windowTitle(), "Quick Design")
+        self.assertIsNot(self.window, advanced)
+        self.window.next_button.click()
+        self.warning.assert_called_once()
+        self.assertEqual(advanced.mode.currentData(), "manual")
+
+    def test_no_target_does_not_start_worker(self):
+        self.window.find_button.click()
+        self.warning.assert_called_once()
+        self.assertFalse(self.window.controller.is_running)
+        self.assertEqual(self.window.controller.evaluations, {})
+
+    def test_three_step_workflow(self):
+        self.configure()
+        self.assertEqual(self.window.pages.currentIndex(), 0)
+        self.window.next_button.click()
+        self.assertEqual(self.window.pages.currentIndex(), 1)
+        self.assertTrue(self.window.problem)
+        self.assertIn("Automatic options", self.window.review.toPlainText())
+        self.window.start_search(budget=12)
+        self.assertEqual(self.window.pages.currentIndex(), 2)
+        self.wait_finished()
+        self.assertLessEqual(len(self.window.cards), 5)
+        self.assertTrue(self.window.cards)
+        self.window.back_button.click()
+        self.assertEqual(self.window.pages.currentIndex(), 1)
+
+    def test_mm_m_conversion_and_si_problem_boundary(self):
+        from uilib.designassistant.quick_window import QuickDesignWindow
+        from uilib.preferencesManager import Preferences
+
+        pref = Preferences(APP.preferencesManager.preferences.getDict())
+        pref.units.setProperty("m", "mm")
+        window = QuickDesignWindow(BASELINE, pref, library_entries=[BASELINE["propellant"]])
+        try:
+            window.rows["diameter"].value.setValue(100)
+            window.rows["length"].enabled.setChecked(True)
+            window.rows["length"].value.setValue(500)
+            window.rows["burn_time"].enabled.setChecked(True)
+            window.rows["burn_time"].value.setValue(3)
+            requirements = window.build_requirements()
+            self.assertEqual(
+                requirements.criteria,
+                (
+                    QuickCriterion("diameter", "maximum", 0.1),
+                    QuickCriterion("length", "maximum", 0.5),
+                    QuickCriterion("burn_time", "target", 3),
+                ),
+            )
+            self.assertEqual(window.rows["burn_time"].unit, "s")
+            self.assertEqual(window.rows["average_thrust"].unit, "N")
+            self.assertEqual(window.rows["total_impulse"].unit, "Ns")
+        finally:
+            window.close()
+            APP.processEvents()
+
+    def test_thrust_impulse_and_time_convert_using_existing_units(self):
+        for key, internal_value in (("burn_time", 3), ("average_thrust", 50), ("total_impulse", 100)):
+            row = self.window.rows[key]
+            row.enabled.setChecked(True)
+            row.value.setValue(convert(internal_value, row.unit, row.display_unit))
+        req = self.window.build_requirements()
+        self.assertEqual(
+            {c.field: c.value for c in req.criteria if c.field != "diameter"},
+            {"burn_time": 3, "average_thrust": 50, "total_impulse": 100},
+        )
+
+    def test_min_max_mode_uses_item_data_and_localized_labels(self):
+        self.configure()
+        row = self.window.rows["burn_time"]
+        row.mode.setCurrentIndex(row.mode.findData("minimum"))
+        before = self.window.build_requirements()
+        APP.translationManager.setLanguage("ru")
+        APP.processEvents()
+        self.assertEqual(row.mode.currentData(), "minimum")
+        self.assertEqual(row.mode.currentText(), "Не меньше")
+        self.assertEqual(self.window.build_requirements(), before)
+
+    def test_conflicting_target_and_optional_limit_do_not_launch(self):
+        self.configure()
+        self.window.other_group.setChecked(True)
+        maximum = self.window.constraints["burn_time"][1]
+        maximum.enabled.setChecked(True)
+        maximum.value.setValue(1)
+        self.window.start_search(budget=12)
+        self.warning.assert_called_once()
+        self.assertFalse(self.window.controller.is_running)
+
+    def test_quality_estimate_uses_existing_presets(self):
+        for key, value in (("quick", 60), ("balanced", 180), ("thorough", 540)):
+            self.window.quality.setCurrentIndex(self.window.quality.findData(key))
+            self.assertIn(str(value), self.window.estimate_label.text())
+            self.assertEqual(self.window.build_requirements().simulation_budget, value)
+
+    def test_library_chooser_language_preserves_checked_stable_keys(self):
+        from uilib.designassistant.quick_window import LibraryChooser
+
+        chooser = LibraryChooser(self.window)
+        try:
+            chooser.compatible.setChecked(False)
+            keys = chooser.selected_keys()
+            for language in ("ru", "en"):
+                APP.translationManager.setLanguage(language)
+                APP.processEvents()
+                self.assertEqual(chooser.selected_keys(), keys)
+                self.assertEqual(
+                    chooser.windowTitle(),
+                    "Допустимые варианты библиотеки" if language == "ru" else "Allowed library entries",
+                )
+        finally:
+            chooser.close()
+            chooser.deleteLater()
+
+    def test_candidate_exception_does_not_abort_quick_search(self):
+        from designassistant import EngineAdapter
+
+        original = EngineAdapter.run
+        calls = []
+
+        def fail_one(adapter, request, **kwargs):
+            calls.append(request.proposal.candidate_id)
+            if len(calls) == 1:
+                raise RuntimeError("Candidate test failure")
+            return original(adapter, request, **kwargs)
+
+        with patch.object(EngineAdapter, "run", fail_one):
+            self.search()
+        self.assertGreater(len(calls), 1)
+        self.assertGreater(self.window._progress.errors, 0)
+        self.assertTrue(self.window.recommendations)
+
+    def test_quick_unapplied_editor_cancel_preserves_project(self):
+        result = self.search()[0]
+        with (
+            patch.object(APP.window.ui.motorEditor, "hasPendingChanges", return_value=True),
+            patch.object(QMessageBox, "question", return_value=QMessageBox.StandardButton.Cancel),
+        ):
+            self.window.cards[result.proposal.candidate_id].open_button.click()
+        self.assertEqual(Snapshot.from_dict(APP.fileManager.getCurrentMotor().getDict()), self.original)
+        self.assertEqual(SOURCE.read_bytes(), self.source_bytes)
+
+    def test_exact_same_seed_search(self):
+        first = self.search()
+        second = self.search()
+        self.assertEqual(first, second)
+
+    def test_cards_explanations_and_technical_details(self):
+        results = self.search()
+        card = self.window.cards[results[0].proposal.candidate_id]
+        self.assertIn("Match:", card.summary.text())
+        self.assertIn("Library entry", card.summary.text())
+        self.assertNotIn("grains.", card.summary.text())
+        self.assertTrue(card.why.text())
+        card.why_button.click()
+        self.assertFalse(card.why.isHidden())
+        card.details_button.click()
+        self.assertEqual(self.window.details.candidate_id, results[0].proposal.candidate_id)
+        self.assertIn("Parameters", self.window.details.text.toPlainText())
+        self.assertIn("simulation-based", self.window.notice.text())
+
+    def test_compare_two_to_three_reuses_smart_dialog(self):
+        results = self.search()
+        self.assertGreaterEqual(len(results), 2)
+        for record in results[:2]:
+            self.window.cards[record.proposal.candidate_id].selected.setChecked(True)
+        self.assertTrue(self.window.compare_button.isEnabled())
+        self.window.compare_button.click()
+        self.assertEqual(self.window.comparison.records, results[:2])
+        self.assertEqual(len(self.window.comparison.definitions), 10)
+
+    def test_english_russian_english_preserves_problem_cards_and_selection(self):
+        results = self.search()
+        before = self.window.build_requirements()
+        first_id = results[0].proposal.candidate_id
+        self.window.cards[first_id].selected.setChecked(True)
+        for language in ("en", "ru", "en"):
+            APP.translationManager.setLanguage(language)
+            APP.processEvents()
+            self.assertEqual(self.window.build_requirements(), before)
+            self.assertEqual(self.window.recommendations, results)
+            self.assertEqual(self.window.selected_ids(), (first_id,))
+            self.assertEqual(
+                self.window.windowTitle(), "Быстрое проектирование" if language == "ru" else "Quick Design"
+            )
+            self.assertEqual(
+                APP.window.quickDesignAction.text(),
+                "Быстрое проектирование..." if language == "ru" else "Quick Design...",
+            )
+            self.assertIn("Соответствие:" if language == "ru" else "Match:", self.window.cards[first_id].summary.text())
+            self.assertEqual(Snapshot.from_dict(APP.fileManager.getCurrentMotor().getDict()), self.original)
+
+    def test_language_independent_ranking(self):
+        before = self.search()
+        APP.translationManager.setLanguage("ru")
+        APP.processEvents()
+        after = self.search()
+        self.assertEqual(before, after)
+
+    def test_stop_retains_completed_results(self):
+        self.configure()
+        self.window.start_search(budget=10000)
+        deadline = time.monotonic() + 30
+        while not self.window.controller.evaluations and time.monotonic() < deadline:
+            APP.processEvents()
+            time.sleep(0.002)
+        self.assertTrue(self.window.controller.evaluations)
+        self.window.stop_button.click()
+        self.wait_finished()
+        self.assertEqual(self.window._state, "stopped")
+        self.assertLess(self.window._progress.processed, 10000)
+        self.assertTrue(self.window.controller.evaluations)
+        self.assertIn("provisional", self.window.results_hint.text())
+
+    def test_gui_responsive_while_existing_simulation_runs(self):
+        self.configure()
+        ticks = []
+        timer = QTimer()
+        timer.setInterval(2)
+        timer.timeout.connect(lambda: ticks.append(QThread.currentThread()))
+        timer.start()
+        original = Motor.runSimulation
+
+        def delayed(motor, callback=None):
+            time.sleep(0.02)
+            return original(motor, callback)
+
+        with patch.object(Motor, "runSimulation", delayed):
+            self.window.start_search(budget=12)
+            self.wait_finished()
+        timer.stop()
+        self.assertGreater(len(ticks), 5)
+        self.assertTrue(all(thread == APP.thread() for thread in ticks))
+
+    def test_baseline_and_source_file_unchanged_after_search(self):
+        self.search()
+        self.assertEqual(self.window.controller.baseline, self.original)
+        self.assertEqual(Snapshot.from_dict(APP.fileManager.getCurrentMotor().getDict()), self.original)
+        self.assertEqual(SOURCE.read_bytes(), self.source_bytes)
+
+    def test_open_candidate_creates_new_unsaved_project(self):
+        result = self.search()[0]
+        expected = self.window.controller.request_for(result.proposal.candidate_id).snapshot
+        self.window.cards[result.proposal.candidate_id].open_button.click()
+        self.assertIsNone(APP.fileManager.fileName)
+        self.assertEqual(APP.fileManager.savedVersion, -1)
+        self.assertEqual(Snapshot.from_dict(APP.fileManager.getCurrentMotor().getDict()), expected)
+        self.assertEqual(self.window.controller.baseline, self.original)
+        self.assertEqual(SOURCE.read_bytes(), self.source_bytes)
+
+    def test_unsaved_project_cancel_preserves_original(self):
+        result = self.search()[0]
+        APP.fileManager.savedVersion = -1
+        with patch.object(QMessageBox, "exec", return_value=QMessageBox.StandardButton.Cancel):
+            self.window.cards[result.proposal.candidate_id].open_button.click()
+        self.assertEqual(Snapshot.from_dict(APP.fileManager.getCurrentMotor().getDict()), self.original)
+        self.assertEqual(SOURCE.read_bytes(), self.source_bytes)
+
+    def test_quick_to_advanced_transfers_editable_problem_and_preserves_existing_window(self):
+        self.configure()
+        APP.window.designAssistantAction.trigger()
+        original_advanced = APP.window.designAssistant
+        window = self.window.open_advanced()
+        self.assertIs(APP.window.designAssistant, original_advanced)
+        self.assertIsNot(window, original_advanced)
+        self.assertEqual(window.mode.currentData(), "manual")
+        problem = self.window._validated()
+        variant = problem.plan.variants[0]
+        transferred = window.build_requirements()
+        self.assertEqual([v.path for v in transferred.variables], [v.path for v in variant.requirements.variables])
+        self.assertEqual([t.metric for t in transferred.targets], [t.metric for t in variant.requirements.targets])
+        self.assertEqual(window.seed.value(), problem.requirements.seed)
+        self.assertEqual(window.budget.value(), problem.requirements.simulation_budget)
+        self.assertEqual(len(window.controller.registry.definitions), 10)
+        self.assertEqual(Snapshot.from_dict(APP.fileManager.getCurrentMotor().getDict()), self.original)
+        window.budget.setValue(2)
+        window.start_search()
+        deadline = time.monotonic() + 30
+        while window.controller.is_running and time.monotonic() < deadline:
+            APP.processEvents()
+            time.sleep(0.002)
+        self.assertFalse(window.controller.is_running)
+        self.assertEqual(window._state, "completed")
+        self.warning.assert_not_called()
+
+    def test_selected_option_survives_changed_goals_on_advanced_handoff(self):
+        results = self.search()
+        record = results[-1]
+        self.window.cards[record.proposal.candidate_id].selected.setChecked(True)
+        self.window.rows["burn_time"].value.setValue(3)
+        advanced = self.window.open_advanced()
+        data = advanced.controller.baseline.to_dict()
+        self.assertEqual(Snapshot.from_dict(data["propellant"]).digest, record.variant.library_key)
+        self.assertEqual(tuple(g["type"] for g in data["grains"]), record.variant.geometries)
+        self.assertEqual(advanced.build_requirements().targets[0].value, 3)
+
+    def test_all_quick_literals_and_markers_have_complete_catalog_entries(self):
+        from uilib.designassistant.quick_messages import QUICK_MESSAGES
+
+        catalog = ET.parse(TRANSLATIONS_PATH / "openmotor_ru.ts").getroot()
+        messages = {
+            (c.findtext("name"), m.findtext("source")): m
+            for c in catalog.findall("context")
+            for m in c.findall("message")
+        }
+        for marker in QUICK_MESSAGES:
+            entry = messages[(marker.context, marker.source)]
+            self.assertTrue(entry.findtext("translation"))
+            self.assertNotEqual(entry.find("translation").get("type"), "unfinished")
+        tree = ast.parse((ROOT / "uilib/designassistant/quick_window.py").read_text())
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "quick_translate":
+                if node.args and isinstance(node.args[0], ast.Constant):
+                    self.assertIn(("QuickDesign", node.args[0].value), messages)
 
 
 if __name__ == "__main__":

@@ -30,14 +30,21 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from designassistant import DesignRequirements, DesignVariable, LibraryEntry, MetricConstraint, ParameterRange, Target
+from designassistant import (
+    DesignRequirements,
+    DesignVariable,
+    LibraryEntry,
+    MetricConstraint,
+    MetricRegistry,
+    ParameterRange,
+    Target,
+)
 from motorlib.units import convert
 from uilib.localization import display_text
 
 from .controller import DesignController, SearchProgress
 from .editors import OptionalBound, number_editor
 from .presentation import (
-    METRIC_LABELS,
     STATUS_LABELS,
     available_variables,
     candidate_status,
@@ -147,12 +154,15 @@ class CandidateDetails(QDialog):
 class DesignAssistantWindow(QDialog):
     closed = pyqtSignal()
 
-    def __init__(self, baseline, preferences, parent=None, *, source_name="", open_candidate=None, library_entries=()):
+    def __init__(self, baseline, preferences, parent=None, *, source_name="", open_candidate=None, library_entries=(),
+                 registry=None):
         super().__init__(parent, Qt.WindowType.Window)
         self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
         self.preferences, self.source_name = preferences, source_name
         self.open_candidate = open_candidate
-        self.controller = DesignController(baseline, self)
+        self.registry = registry or MetricRegistry()
+        self.metric_keys = tuple(d.key for d in self.registry.definitions)
+        self.controller = DesignController(baseline, self, registry=self.registry)
         self.options = available_variables(self.controller.baseline, preferences)
         self.variable_rows, self.target_rows, self.constraint_rows = [], [], []
         self._state = "ready"
@@ -185,7 +195,7 @@ class DesignAssistantWindow(QDialog):
         for option in self.options:
             self.variableChooser.addItem(option.label(), option.path.value)
         for chooser in (self.targetChooser, self.constraintChooser):
-            for key in METRIC_LABELS:
+            for key in self.metric_keys:
                 chooser.addItem(metric_label(key), key)
         self.addVariableButton.clicked.connect(lambda: self.add_variable(self.variableChooser.currentData()))
         self.addTargetButton.clicked.connect(lambda: self.add_target(self.targetChooser.currentData()))
@@ -222,6 +232,46 @@ class DesignAssistantWindow(QDialog):
         self.elapsedTimer.setInterval(250)
         self.elapsedTimer.timeout.connect(self._elapsed)
         self.elapsedTimer.start()
+
+    def load_requirements(self, requirements, *, budget, seed):
+        """Explicit Quick -> Advanced handoff into an independent manual window."""
+        if self.controller.is_running:
+            raise RuntimeError("A search is already running.")
+        self.registry.validate_requirements(requirements)
+        for table, rows in ((self.variablesTable, self.variable_rows), (self.targetsTable, self.target_rows),
+                            (self.constraintsTable, self.constraint_rows)):
+            table.setRowCount(0)
+            rows.clear()
+        self.mode.setCurrentIndex(self.mode.findData("manual"))
+        for variable in requirements.variables:
+            self.add_variable(variable.path.value)
+            row = self.variable_rows[-1]
+            row.minimum.setValue(convert(variable.range.minimum, row.option.unit, row.option.display_unit))
+            row.maximum.setValue(convert(variable.range.maximum, row.option.unit, row.option.display_unit))
+            row.points.setValue(variable.range.points)
+        for target in requirements.targets:
+            self.add_target(target.metric)
+            row = self.target_rows[-1]
+            unit, display = metric_unit(target.metric, self.preferences)
+            row.value.setValue(convert(target.value, unit, display))
+            row.scale.setValue(convert(target.scale, unit, display))
+            row.weight.setValue(target.weight)
+        # Merge repeated bounds into the one row per metric used by Manual.
+        for constraint in requirements.constraints:
+            self.add_constraint(constraint.metric)
+            row = next(r for r in self.constraint_rows if r.metric == constraint.metric)
+            unit, display = metric_unit(constraint.metric, self.preferences)
+            for bound, value, choose in ((row.minimum, constraint.minimum, max),
+                                        (row.maximum, constraint.maximum, min)):
+                if value is not None:
+                    number = convert(value, unit, display)
+                    bound.value.setValue(choose(bound.value.value(), number) if bound.enabled.isChecked() else number)
+                    bound.enabled.setChecked(True)
+        self.rejectWarnings.setChecked(requirements.reject_warnings)
+        self.strategy.setCurrentIndex(self.strategy.findData("random"))
+        self.budget.setValue(budget)
+        self.seed.setValue(seed)
+        self.retranslate()
 
     def _input_table(self, columns):
         page = QWidget()
@@ -454,6 +504,7 @@ class DesignAssistantWindow(QDialog):
             if not baseline["grains"] or baseline["propellant"] is None:
                 raise ValueError("The current motor must contain grains and a propellant.")
             requirements = self.build_requirements()
+            self.controller.registry = self.registry
             self.controller.start(
                 requirements, strategy=self.strategy.currentData(), budget=self.budget.value(), seed=self.seed.value()
             )

@@ -13,7 +13,7 @@ from motorlib.motor import Motor
 from motorlib.properties import FloatProperty, IntProperty
 
 from .generator import CandidateGenerator
-from .metrics import MetricRegistry
+from .metrics import DEFAULT_METRICS, MetricRegistry
 from .models import DesignRequirements, DesignVariable, ParameterRange, Snapshot, finite_number
 from .paths import PropertyPath
 
@@ -52,9 +52,10 @@ class SmartDesignRequirements:
     seed: int = 1729
     top_n: int = 10
     reject_warnings: bool = False
+    metric_definitions: tuple = DEFAULT_METRICS
 
     def __post_init__(self):
-        for name in ("targets", "constraints", "library_keys", "geometries"):
+        for name in ("targets", "constraints", "library_keys", "geometries", "metric_definitions"):
             object.__setattr__(self, name, tuple(getattr(self, name)))
         if not finite_number(self.maximum_diameter) or self.maximum_diameter <= 0:
             raise ValueError("Enter a positive maximum outer diameter.")
@@ -63,7 +64,7 @@ class SmartDesignRequirements:
         requirements = DesignRequirements(
             targets=self.targets, constraints=self.constraints, reject_warnings=self.reject_warnings
         )
-        MetricRegistry().validate_requirements(requirements)
+        MetricRegistry(self.metric_definitions).validate_requirements(requirements)
         if any(t.value <= 0 for t in self.targets):
             raise ValueError("Smart Design target values must be positive.")
         if not self.library_keys or any(not isinstance(k, str) for k in self.library_keys):
@@ -108,6 +109,8 @@ class SmartDesignRequirements:
             seed=self.seed,
             top_n=self.top_n,
         )
+        if self.metric_definitions != DEFAULT_METRICS:
+            values["metrics"] = [vars(d) for d in self.metric_definitions]
         return Snapshot.from_dict(values).digest
 
 

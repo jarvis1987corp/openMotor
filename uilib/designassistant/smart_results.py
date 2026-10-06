@@ -204,10 +204,11 @@ class SmartResultsModel(QAbstractTableModel):
 
 
 class CandidateComparison(QDialog):
-    def __init__(self, preferences, parent=None):
+    def __init__(self, preferences, parent=None, *, registry=None):
         super().__init__(parent)
         self.preferences = preferences
         self.records = ()
+        self.definitions = (registry or MetricRegistry()).definitions
         self.table = QTableWidget()
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
         self.close_button = QPushButton()
@@ -243,7 +244,7 @@ class CandidateComparison(QDialog):
         if not self.records:
             self.table.setRowCount(0)
             return
-        definitions = MetricRegistry().definitions
+        definitions = self.definitions
         self.table.setRowCount(4 + len(definitions))
         for row, source in enumerate(("Score", "Geometry", "Warnings", "Ranking Explanation")):
             self._cell(row, 0, translate(source))

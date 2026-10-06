@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from PyQt6.QtCore import QCoreApplication
 
 from designassistant import MetricRegistry, OutcomeStatus, PropertyPath
+from designassistant.quick import QUICK_METRICS
 from motorlib.localization import QT_TRANSLATE_NOOP
 from motorlib.motor import Motor
 from motorlib.properties import FloatProperty, IntProperty
@@ -34,6 +35,10 @@ STATUS_LABELS = {
     "completed": QT_TRANSLATE_NOOP("DesignAssistant", "Completed"),
     "stopped": QT_TRANSLATE_NOOP("DesignAssistant", "Stopped"),
     "failed": QT_TRANSLATE_NOOP("DesignAssistant", "Failed"),
+}
+DIMENSION_LABELS = {
+    "propellant_length": QT_TRANSLATE_NOOP("DesignMetrics", "Propellant Stack Length"),
+    "maximum_diameter": QT_TRANSLATE_NOOP("DesignMetrics", "Maximum Propellant Diameter"),
 }
 
 # Core stays Qt-free. Mark its canonical English diagnostics/errors here so the
@@ -229,12 +234,12 @@ def available_variables(baseline, preferences):
 
 
 def metric_unit(key, preferences):
-    unit = MetricRegistry().definition(key).unit
+    unit = MetricRegistry(QUICK_METRICS).definition(key).unit
     return unit, preferences.getUnit(unit) if preferences is not None else unit
 
 
 def metric_label(key):
-    return display_text(METRIC_LABELS[key])
+    return display_text((METRIC_LABELS | DIMENSION_LABELS)[key])
 
 
 def candidate_status(evaluation):
@@ -251,7 +256,7 @@ def reason_text(reason):
             identity = reason[len(prefix) :]
             label = (
                 metric_label(identity)
-                if argument == "metric" and identity in METRIC_LABELS
+                if argument == "metric" and identity in (METRIC_LABELS | DIMENSION_LABELS)
                 else (display_text(CHANNEL_LABELS.get(identity, identity)))
             )
             return display_text(template).format(**{argument: label})
@@ -270,7 +275,7 @@ def diagnostic_text(diagnostic, options=()):
         values = {key: argument(value) for key, value in kwargs.items()}
         if "path" in values:
             values["path"] = labels.get(values["path"], values["path"])
-        if "metric" in values and values["metric"] in METRIC_LABELS:
+        if "metric" in values and values["metric"] in (METRIC_LABELS | DIMENSION_LABELS):
             values["metric"] = metric_label(values["metric"])
         if "reason" in values:
             values["reason"] = reason_text(str(values["reason"]))
