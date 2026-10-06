@@ -276,7 +276,11 @@ assistant.close()
 app.processEvents()
 
 # The Quick wizard delegates to that same Smart backend and comparison dialog.
-assert app.fileManager.load(str(saved_project))
+# The preceding handoff deliberately left an unsaved candidate. Choose Discard
+# explicitly in this isolated QA directory; an unattended test must not await
+# the real unsaved-changes modal before loading its saved baseline again.
+with patch.object(QMessageBox, "exec", return_value=QMessageBox.StandardButton.Discard):
+    assert app.fileManager.load(str(saved_project))
 app.window.postLoadUpdate()
 app.window.quickDesignAction.trigger()
 quick = app.window.quickDesign

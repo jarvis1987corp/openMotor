@@ -8,6 +8,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: windows-standalone-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   windows:
     runs-on: windows-2022
@@ -80,6 +84,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Validate frozen application and Design Assistant
+        timeout-minutes: 8
         env:
           QT_QPA_PLATFORM: windows
         shell: pwsh
