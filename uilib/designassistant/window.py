@@ -258,8 +258,15 @@ class DesignAssistantWindow(QDialog):
             row.weight.setValue(target.weight)
         # Merge repeated bounds into the one row per metric used by Manual.
         for constraint in requirements.constraints:
+            existing = any(row.metric == constraint.metric for row in self.constraint_rows)
             self.add_constraint(constraint.metric)
             row = next(r for r in self.constraint_rows if r.metric == constraint.metric)
+            if not existing:
+                # OptionalBound(True) is the interactive Manual default, not an
+                # imported constraint. Begin with no bounds, then merge only the
+                # values actually present in the transferred problem.
+                row.minimum.enabled.setChecked(False)
+                row.maximum.enabled.setChecked(False)
             unit, display = metric_unit(constraint.metric, self.preferences)
             for bound, value, choose in ((row.minimum, constraint.minimum, max),
                                         (row.maximum, constraint.maximum, min)):

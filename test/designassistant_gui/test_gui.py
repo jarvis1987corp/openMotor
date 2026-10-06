@@ -1169,6 +1169,18 @@ class QuickDesignGuiTests(unittest.TestCase):
 
     def test_quick_to_advanced_transfers_editable_problem_and_preserves_existing_window(self):
         self.configure()
+        self.window.other_group.setChecked(True)
+        low, high, _ = self.window.constraints["burn_time"]
+        low.enabled.setChecked(True)
+        low.value.setValue(0.001)
+        high.enabled.setChecked(True)
+        high.value.setValue(100)
+        mass_minimum = self.window.constraints["propellant_mass"][0]
+        mass_minimum.enabled.setChecked(True)
+        from uilib.designassistant.presentation import metric_unit
+
+        unit, display = metric_unit("propellant_mass", self.window.preferences)
+        mass_minimum.value.setValue(convert(0.1, unit, display))
         APP.window.designAssistantAction.trigger()
         original_advanced = APP.window.designAssistant
         window = self.window.open_advanced()
@@ -1180,6 +1192,21 @@ class QuickDesignGuiTests(unittest.TestCase):
         transferred = window.build_requirements()
         self.assertEqual([v.path for v in transferred.variables], [v.path for v in variant.requirements.variables])
         self.assertEqual([t.metric for t in transferred.targets], [t.metric for t in variant.requirements.targets])
+        bounds = {}
+        for constraint in variant.requirements.constraints:
+            low, high = bounds.get(constraint.metric, (None, None))
+            if constraint.minimum is not None:
+                low = constraint.minimum if low is None else max(low, constraint.minimum)
+            if constraint.maximum is not None:
+                high = constraint.maximum if high is None else min(high, constraint.maximum)
+            bounds[constraint.metric] = low, high
+        self.assertEqual({c.metric for c in transferred.constraints}, set(bounds))
+        for constraint in transferred.constraints:
+            for expected, actual in zip(bounds[constraint.metric], (constraint.minimum, constraint.maximum)):
+                if expected is None:
+                    self.assertIsNone(actual)
+                else:
+                    self.assertAlmostEqual(actual, expected, places=10)
         self.assertEqual(window.seed.value(), problem.requirements.seed)
         self.assertEqual(window.budget.value(), problem.requirements.simulation_budget)
         self.assertEqual(len(window.controller.registry.definitions), 10)

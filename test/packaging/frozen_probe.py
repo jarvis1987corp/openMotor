@@ -321,6 +321,10 @@ quick.comparison.hide()
 advanced = quick.open_advanced()
 assert advanced.mode.currentData() == "manual" and advanced.variable_rows
 assert advanced.build_requirements().targets[0].metric == "burn_time"
+transferred_bounds = {c.metric: c for c in advanced.build_requirements().constraints}
+expected_diameter = quick.problem.plan.requirements.maximum_diameter
+assert abs(transferred_bounds["maximum_diameter"].maximum - expected_diameter) < 1e-10
+assert transferred_bounds["maximum_diameter"].minimum is None
 assert app.fileManager.getCurrentMotor().getDict() == model
 advanced.close()
 app.processEvents()
