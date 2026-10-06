@@ -5,33 +5,31 @@ casing, nozzle length and inter-grain gaps; the UI explicitly states this limit.
 """
 
 import json
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 
-from motorlib.grains import grainTypes
 from motorlib.motor import Motor
-from motorlib.properties import FloatProperty
-from motorlib.simResult import SimulationResult
 
-from .generator import CandidateGenerator
-from .metrics import DEFAULT_METRICS, MetricDefinition, MetricRegistry
+from .metrics import DEFAULT_METRICS, ChannelMetricDefinition, MetricDefinition, MetricRegistry
 from .models import (
     DesignRequirements,
-    DesignVariable,
     MetricConstraint,
-    ParameterRange,
     Snapshot,
     Target,
     TextRecord,
     finite_number,
 )
-from .paths import PropertyPath
-from .smart import QUALITY_BUDGETS, SearchSpaceBuilder, SmartDesignRequirements, SmartSearchPlan
+from .quick_generation import QuickDesignGeometryFactory, QuickDesignSearchSpaceBuilder, QuickDimensions
+from .smart import QUALITY_BUDGETS, SmartDesignRequirements, SmartSearchPlan
 
 DIMENSION_METRICS = (
     MetricDefinition("propellant_length", "Propellant Stack Length", "m", "getPropellantLength"),
     MetricDefinition("maximum_diameter", "Maximum Propellant Diameter", "m", "getMaxPropellantDiameter"),
 )
-QUICK_METRICS = DEFAULT_METRICS + DIMENSION_METRICS
+QUICK_METRICS = (
+    DEFAULT_METRICS
+    + DIMENSION_METRICS
+    + (ChannelMetricDefinition("peak_thrust", "Peak Thrust", "N", "getMax", "force"),)
+)
 FIELD_METRICS = {
     "diameter": "maximum_diameter",
     "length": "propellant_length",
@@ -130,6 +128,8 @@ class QuickDesignProblem:
     plan: SmartSearchPlan
     diagnostics: tuple[TextRecord, ...]
     inferred_targets: bool = False
+    total_combinations: int = 0
+    target_warning: TextRecord | None = None
 
     @property
     def digest(self):
@@ -162,125 +162,54 @@ class QuickDesignProblemBuilder:
         if not isinstance(requirements, QuickDesignRequirements):
             raise QuickDesignError("Enter validated Quick Design requirements.")
         baseline = baseline if isinstance(baseline, Snapshot) else Snapshot.from_dict(baseline)
-        dimensions = [c for c in requirements.criteria if c.field in ("diameter", "length")]
-        performance = [c for c in requirements.criteria if c.field not in ("diameter", "length")]
-        if not dimensions or not performance:
-            if not dimensions and not performance:
-                raise QuickDesignError("Enter at least one dimensional requirement and one performance characteristic.")
-            if not dimensions:
-                raise QuickDesignError("Enable a diameter or length requirement before searching.")
-            raise QuickDesignError("Enable burn time, average thrust or total impulse before searching.")
-        motor = Motor(baseline.to_dict())
-        if not motor.grains:
-            raise QuickDesignError("Open a baseline motor containing at least one configured grain.")
-        sample = SimulationResult(motor)
-        diameter, length = sample.getMaxPropellantDiameter(), sample.getPropellantLength()
-        if diameter <= 0 or length <= 0 or any(g.getProperty("length") <= 0 for g in motor.grains):
-            raise QuickDesignError("Baseline grains need positive diameters and lengths before automatic design.")
-        targets, constraints = [], list(requirements.constraints)
-        explicit = [c for c in requirements.criteria if c.mode == "target"]
-        inferred = not any(c.field not in ("diameter", "length") for c in explicit)
-        for criterion in requirements.criteria:
-            metric = FIELD_METRICS[criterion.field]
-            if criterion.mode == "target":
-                targets.append(self._target(metric, criterion.value, requirements.priority))
-            else:
-                constraints.append(MetricConstraint(metric, **{criterion.mode: criterion.value}))
-        if inferred:
-            # Bounds stay hard constraints. A stated performance boundary also
-            # supplies the ranking goal when the user has not supplied a target.
-            criterion = (
-                next(c for c in performance if FIELD_METRICS[c.field] == PRIORITIES[requirements.priority])
-                if any(FIELD_METRICS[c.field] == PRIORITIES[requirements.priority] for c in performance)
-                else performance[0]
-            )
-            targets.append(self._target(FIELD_METRICS[criterion.field], criterion.value, requirements.priority))
+        fields = {c.field: c for c in requirements.criteria}
+        modes = {"diameter": "maximum", "length": "maximum", "burn_time": "target"}
+        if any(field not in fields for field in modes):
+            raise QuickDesignError("Enter maximum diameter, maximum length and desired burn time before searching.")
+        if len(fields) != len(requirements.criteria) or any(fields[k].mode != mode for k, mode in modes.items()):
+            raise QuickDesignError("Diameter and length must be maximum limits; burn time must be a target.")
+        if any(c.mode != "target" for c in requirements.criteria if c.field not in modes):
+            raise QuickDesignError("Optional thrust and impulse must be targets; use Other limits for bounds.")
+        dimensions = QuickDimensions(fields["diameter"].value, fields["length"].value)
+        targets = [
+            self._target(FIELD_METRICS[c.field], c.value, requirements.priority)
+            for c in requirements.criteria
+            if c.mode == "target"
+        ]
+        constraints = list(requirements.constraints) + [
+            MetricConstraint("maximum_diameter", maximum=dimensions.maximum_diameter),
+            MetricConstraint("propellant_length", maximum=dimensions.maximum_length),
+        ]
         self._check_bounds(targets, constraints)
-        entries, diagnostics = self._library(motor, requirements.library_keys, library_entries)
-        geometries = SearchSpaceBuilder.compatible_geometries(baseline)
-        for name in sorted(grainTypes):
-            if name not in geometries and tuple(g.geomName for g in motor.grains) != (name,) * len(motor.grains):
-                diagnostics.append(
-                    message("Skipped geometry {geometry}: baseline parameters cannot initialize it.", geometry=name)
+        entries, diagnostics = self._library(Motor(), requirements.library_keys, library_entries)
+        target_warning = None
+        if "average_thrust" in fields and "total_impulse" in fields:
+            estimated_impulse = fields["average_thrust"].value * fields["burn_time"].value
+            impulse = fields["total_impulse"].value
+            if abs(estimated_impulse - impulse) > 0.25 * max(estimated_impulse, impulse):
+                target_warning = message(
+                    "Average thrust × burn time differs substantially from the requested total impulse. "
+                    "These targets may conflict; simulation results will determine the trade-off."
                 )
-        # Place dimensional search centres using existing numeric setters and
-        # mandatory read-back. This is metadata/parameter placement, not physics.
-        centers = {"diameter": diameter, "length": length}
-        for field in centers:
-            options = [c for c in dimensions if c.field == field]
-            for mode in ("maximum", "minimum", "target"):
-                for c in options:
-                    if c.mode == mode:
-                        centers[field] = (
-                            min(centers[field], c.value)
-                            if mode == "maximum"
-                            else max(centers[field], c.value)
-                            if mode == "minimum"
-                            else c.value
-                        )
-        for i, grain in enumerate(motor.grains):
-            for key, prop in grain.props.items():
-                if isinstance(prop, FloatProperty) and prop.unit == "m":
-                    factor = centers["length"] / length if key == "length" else centers["diameter"] / diameter
-                    PropertyPath(f"grains.{i}.{key}").write_validated(motor, prop.getValue() * factor)
-        for key in ("throat", "exit"):
-            path = PropertyPath(f"nozzle.{key}")
-            path.write_validated(motor, path.read(motor) * centers["diameter"] / diameter)
-        maximums = {c.field: c.value for c in dimensions if c.mode == "maximum"}
-        maximum_diameter = maximums.get("diameter", max(centers["diameter"], motor.nozzle.getProperty("exit")) * 1.25)
+                diagnostics.append(target_warning)
         smart = SmartDesignRequirements(
-            maximum_diameter,
+            dimensions.maximum_diameter,
             tuple(targets),
             tuple(constraints),
             tuple(e.key for e in entries),
-            geometries,
+            tuple(sorted(QuickDesignGeometryFactory.PROFILES)),
             requirements.simulation_budget,
             requirements.seed,
             15,
             requirements.reject_warnings,
             QUICK_METRICS,
         )
-        variants = []
-        for entry in entries:
-            for geometry in geometries:
-                try:
-                    local = replace(smart, library_keys=(entry.key,), geometries=(geometry,))
-                    variant = SearchSpaceBuilder().build(motor.getDict(), local, entries).variants[0]
-                    if "length" in maximums:
-                        adjusted = []
-                        for variable in variant.requirements.variables:
-                            if variable.path.value.endswith(".length"):
-                                # Per-grain shares make the entire rectangular
-                                # search space obey the requested stack envelope.
-                                cap = variable.path.read(motor) * maximums["length"] / centers["length"]
-                                low, high = min(variable.range.minimum, cap), min(variable.range.maximum, cap)
-                                variable = DesignVariable(
-                                    variable.path, ParameterRange(low, high, 1 if low == high else 3)
-                                )
-                            adjusted.append(variable)
-                        design = replace(variant.requirements, variables=tuple(adjusted))
-                        CandidateGenerator(variant.baseline.to_dict(), design)
-                        key = Snapshot.from_dict(
-                            {"snapshot": variant.baseline.digest, "requirements": design.digest}
-                        ).digest
-                        variant = replace(variant, requirements=design, key=key)
-                    variants.append(variant)
-                except (ValueError, TypeError, KeyError) as error:
-                    diagnostics.append(
-                        message(
-                            "Skipped option {name} / {geometry}: {reason}",
-                            name=entry.name,
-                            geometry=geometry,
-                            reason=str(error),
-                        )
-                    )
-        if not variants:
-            raise QuickDesignError("No parameterizable library and geometry options satisfy the dimensional bounds.")
-        if len(variants) > requirements.simulation_budget:
-            raise QuickDesignError("Choose fewer library entries or a higher search quality.")
-        # Scheduling order must not change when only objective weights change.
-        plan = SmartSearchPlan(baseline, smart, tuple(sorted(variants, key=lambda v: (v.library_key, v.geometries))))
-        return QuickDesignProblem(requirements, plan, tuple(diagnostics), inferred)
+        try:
+            plan, skipped, total = QuickDesignSearchSpaceBuilder().build(baseline, smart, entries, dimensions)
+        except ValueError as error:
+            raise QuickDesignError("Cannot build a search space: {reason}", reason=str(error)) from error
+        diagnostics.extend(skipped)
+        return QuickDesignProblem(requirements, plan, tuple(diagnostics), False, total, target_warning)
 
     @staticmethod
     def _target(metric, value, priority):

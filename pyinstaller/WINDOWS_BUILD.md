@@ -151,8 +151,8 @@ The probe checks localization, Unicode paths, simulation/exports and the actual
 Design Assistant worker, deterministic random search, Stop and unsaved handoff.
 
 After a successful run, open **Actions → Windows Standalone Build → the run →
-Artifacts → openMotor-QuickDesign-Windows-x64**. GitHub downloads
-**`openMotor-QuickDesign-Windows-x64.zip`**. Extract the entire ZIP; its root contains
+Artifacts → openMotor-QuickDesign-V2-Windows-x64**. GitHub downloads
+**`openMotor-QuickDesign-V2-Windows-x64.zip`**. Extract the entire ZIP; its root contains
 `openMotor.exe` and `_internal/`. Run `openMotor.exe`; do not extract only the EXE.
 The ZIP is produced by GitHub's artifact service from the standalone folder,
 so there is no second nested ZIP to unpack. Build/test reports are available as

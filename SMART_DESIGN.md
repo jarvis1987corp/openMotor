@@ -90,7 +90,7 @@ multiprocessing, caching and comparison curves are not implemented. Detailed
 graphs/export remain available through the ordinary Motor Editor workflow.
 
 Windows builds include the new Python modules and English/Russian catalogs.
-Download **openMotor-QuickDesign-Windows-x64** (including Manual, Smart and Quick)
+Download **openMotor-QuickDesign-V2-Windows-x64** (including Manual, Smart and Quick)
 from the successful
 **Windows Standalone Build** run's Artifacts section, extract the whole ZIP,
 and start `openMotor.exe` with `_internal` alongside it. Python is not required.

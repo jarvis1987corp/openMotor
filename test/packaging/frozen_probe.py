@@ -7,6 +7,7 @@ Run first, restart and english phases as separate processes with the same
 # UI imports must follow directory/backend setup.
 # ruff: noqa: E402
 import argparse
+import copy
 import hashlib
 import json
 import os
@@ -39,6 +40,8 @@ from PyQt6.QtGui import QFontMetrics
 from PyQt6.QtWidgets import QMessageBox
 
 from app import App
+from motorlib.motor import Motor
+from motorlib.units import convert
 from uilib.converters import BurnSimExporter, BurnSimImporter, CsvExporter, EngExporter
 from uilib.fileIO import fileTypes, loadFile
 from uilib.localization import TRANSLATIONS_PATH
@@ -282,13 +285,29 @@ app.processEvents()
 with patch.object(QMessageBox, "exec", return_value=QMessageBox.StandardButton.Discard):
     assert app.fileManager.load(str(saved_project))
 app.window.postLoadUpdate()
+# A real blank Motor Editor project: Quick must create its own grains/nozzle.
+empty_model = Motor().getDict()
+empty_model["config"] = copy.deepcopy(model["config"])
+empty_model = Motor(empty_model).getDict()
+app.fileManager.startFromMotor(Motor(empty_model), None, checkPropellant=False)
+app.window.postLoadUpdate()
+empty_baseline = Snapshot.from_dict(empty_model)
 app.window.quickDesignAction.trigger()
 quick = app.window.quickDesign
 quick.allowed_keys = smart_requirements.library_keys
-quick.rows["burn_time"].enabled.setChecked(True)
-quick.rows["burn_time"].value.setValue(result.getBurnTime())
+for field, value in (("diameter", 0.1), ("length", 0.8), ("burn_time", 15)):
+    row = quick.rows[field]
+    row.value.setValue(convert(value, row.unit, row.display_unit))
 quick.next()
 assert quick.pages.currentIndex() == 1 and quick.problem is not None
+from motorlib.grains import grainTypes
+
+assert {v.geometries[0] for v in quick.problem.plan.variants} == set(grainTypes)
+assert {len(v.geometries) for v in quick.problem.plan.variants} == {1, 2, 3, 4, 5, 6}
+assert [t.metric for t in quick.problem.plan.requirements.targets] == ["burn_time"]
+for field, value in (("diameter", 0.05), ("length", 0.02), ("burn_time", 2)):
+    row = quick.rows[field]
+    row.value.setValue(convert(value, row.unit, row.display_unit))
 quick.start_search(budget=16)
 deadline = time.monotonic() + 60
 while quick.controller.is_running and time.monotonic() < deadline:
@@ -304,8 +323,8 @@ for language in ("en", "ru", "en"):
     assert quick.windowTitle() == ("Быстрое проектирование" if language == "ru" else "Quick Design")
     assert quick.build_requirements() == quick_requirements
     assert quick.recommendations == quick_ranked
-    assert quick.controller.baseline == baseline
-    assert app.fileManager.getCurrentMotor().getDict() == model
+    assert quick.controller.baseline == empty_baseline
+    assert app.fileManager.getCurrentMotor().getDict() == empty_model
     assert result_digest() == original_digest
 quick.start_search(budget=16)
 deadline = time.monotonic() + 60
@@ -325,12 +344,14 @@ transferred_bounds = {c.metric: c for c in advanced.build_requirements().constra
 expected_diameter = quick.problem.plan.requirements.maximum_diameter
 assert abs(transferred_bounds["maximum_diameter"].maximum - expected_diameter) < 1e-10
 assert transferred_bounds["maximum_diameter"].minimum is None
-assert app.fileManager.getCurrentMotor().getDict() == model
+assert app.fileManager.getCurrentMotor().getDict() == empty_model
+assert advanced.controller.baseline == quick.controller.request_for(quick_ranked[0].proposal.candidate_id).snapshot
 advanced.close()
 app.processEvents()
 quick_id = quick_ranked[0].proposal.candidate_id
 quick_candidate = quick.controller.request_for(quick_id).snapshot
-quick.open_candidate_id(quick_id)
+with patch.object(QMessageBox, "exec", return_value=QMessageBox.StandardButton.Discard):
+    quick.open_candidate_id(quick_id)
 assert app.fileManager.fileName is None and app.fileManager.savedVersion == -1
 assert Snapshot.from_dict(app.fileManager.getCurrentMotor().getDict()) == quick_candidate
 assert saved_project.read_bytes() == source_bytes
@@ -386,9 +407,9 @@ report = {
         "Smart Design seeded reproducibility and finalist recheck",
         "Smart Design language round trip and comparison",
         "Smart Design Start/Stop and unchanged baseline",
-        "Quick Design wizard and existing Smart backend",
+        "Quick Design V2 from blank Motor Editor, all 11 geometries and variable grain count",
         "Quick Design language round trip and seeded reproducibility",
-        "Quick Design cards, comparison and Advanced handoff",
+        "Quick Design cards, comparison and Advanced handoff from selected calculated candidate",
         "Quick Design Start/Stop, unsaved handoff and unchanged source",
         "candidate unsaved handoff",
         "unchanged source project",

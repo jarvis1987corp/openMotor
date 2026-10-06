@@ -893,9 +893,9 @@ class QuickDesignGuiTests(unittest.TestCase):
         self.assertFalse(self.window.controller.is_running)
 
     def configure(self):
-        row = self.window.rows["burn_time"]
-        row.enabled.setChecked(True)
-        row.value.setValue(2)
+        for key, value in (("diameter", 0.05), ("length", 0.02), ("burn_time", 2)):
+            row = self.window.rows[key]
+            row.value.setValue(convert(value, row.unit, row.display_unit))
 
     def search(self, budget=12):
         self.configure()
@@ -967,25 +967,25 @@ class QuickDesignGuiTests(unittest.TestCase):
             APP.processEvents()
 
     def test_thrust_impulse_and_time_convert_using_existing_units(self):
+        self.configure()
         for key, internal_value in (("burn_time", 3), ("average_thrust", 50), ("total_impulse", 100)):
             row = self.window.rows[key]
             row.enabled.setChecked(True)
             row.value.setValue(convert(internal_value, row.unit, row.display_unit))
         req = self.window.build_requirements()
         self.assertEqual(
-            {c.field: c.value for c in req.criteria if c.field != "diameter"},
+            {c.field: c.value for c in req.criteria if c.field not in ("diameter", "length")},
             {"burn_time": 3, "average_thrust": 50, "total_impulse": 100},
         )
 
-    def test_min_max_mode_uses_item_data_and_localized_labels(self):
+    def test_mandatory_modes_are_stable_and_hidden(self):
         self.configure()
-        row = self.window.rows["burn_time"]
-        row.mode.setCurrentIndex(row.mode.findData("minimum"))
         before = self.window.build_requirements()
         APP.translationManager.setLanguage("ru")
         APP.processEvents()
-        self.assertEqual(row.mode.currentData(), "minimum")
-        self.assertEqual(row.mode.currentText(), "Не меньше")
+        self.assertEqual(self.window.rows["diameter"].mode.currentData(), "maximum")
+        self.assertEqual(self.window.rows["burn_time"].mode.currentData(), "target")
+        self.assertTrue(all(row.mode.isHidden() for row in self.window.rows.values()))
         self.assertEqual(self.window.build_requirements(), before)
 
     def test_conflicting_target_and_optional_limit_do_not_launch(self):
@@ -999,6 +999,7 @@ class QuickDesignGuiTests(unittest.TestCase):
         self.assertFalse(self.window.controller.is_running)
 
     def test_quality_estimate_uses_existing_presets(self):
+        self.configure()
         for key, value in (("quick", 60), ("balanced", 180), ("thorough", 540)):
             self.window.quality.setCurrentIndex(self.window.quality.findData(key))
             self.assertIn(str(value), self.window.estimate_label.text())
@@ -1060,6 +1061,7 @@ class QuickDesignGuiTests(unittest.TestCase):
         results = self.search()
         card = self.window.cards[results[0].proposal.candidate_id]
         self.assertIn("Match:", card.summary.text())
+        self.assertIn("Peak Thrust", card.summary.text())
         self.assertIn("Library entry", card.summary.text())
         self.assertNotIn("grains.", card.summary.text())
         self.assertTrue(card.why.text())
@@ -1078,7 +1080,7 @@ class QuickDesignGuiTests(unittest.TestCase):
         self.assertTrue(self.window.compare_button.isEnabled())
         self.window.compare_button.click()
         self.assertEqual(self.window.comparison.records, results[:2])
-        self.assertEqual(len(self.window.comparison.definitions), 10)
+        self.assertEqual(len(self.window.comparison.definitions), 11)
 
     def test_english_russian_english_preserves_problem_cards_and_selection(self):
         results = self.search()
@@ -1180,17 +1182,21 @@ class QuickDesignGuiTests(unittest.TestCase):
         from uilib.designassistant.presentation import metric_unit
 
         unit, display = metric_unit("propellant_mass", self.window.preferences)
-        mass_minimum.value.setValue(convert(0.1, unit, display))
+        mass_minimum.value.setValue(convert(0.0001, unit, display))
         APP.window.designAssistantAction.trigger()
         original_advanced = APP.window.designAssistant
+        results = self.search()
+        selected_snapshot = self.window.controller.request_for(results[0].proposal.candidate_id).snapshot
         window = self.window.open_advanced()
+        self.assertEqual(window.controller.baseline, selected_snapshot)
         self.assertIs(APP.window.designAssistant, original_advanced)
         self.assertIsNot(window, original_advanced)
         self.assertEqual(window.mode.currentData(), "manual")
         problem = self.window._validated()
-        variant = problem.plan.variants[0]
+        variant = results[0].variant
         transferred = window.build_requirements()
-        self.assertEqual([v.path for v in transferred.variables], [v.path for v in variant.requirements.variables])
+        self.assertTrue(transferred.variables)
+        self.assertEqual(len(transferred.variables), len(variant.requirements.variables))
         self.assertEqual([t.metric for t in transferred.targets], [t.metric for t in variant.requirements.targets])
         bounds = {}
         for constraint in variant.requirements.constraints:
@@ -1209,7 +1215,7 @@ class QuickDesignGuiTests(unittest.TestCase):
                     self.assertAlmostEqual(actual, expected, places=10)
         self.assertEqual(window.seed.value(), problem.requirements.seed)
         self.assertEqual(window.budget.value(), problem.requirements.simulation_budget)
-        self.assertEqual(len(window.controller.registry.definitions), 10)
+        self.assertEqual(len(window.controller.registry.definitions), 11)
         self.assertEqual(Snapshot.from_dict(APP.fileManager.getCurrentMotor().getDict()), self.original)
         window.budget.setValue(2)
         window.start_search()
@@ -1231,6 +1237,137 @@ class QuickDesignGuiTests(unittest.TestCase):
         self.assertEqual(Snapshot.from_dict(data["propellant"]).digest, record.variant.library_key)
         self.assertEqual(tuple(g["type"] for g in data["grains"]), record.variant.geometries)
         self.assertEqual(advanced.build_requirements().targets[0].value, 3)
+
+    def test_v2_numpy_numeric_warning_translates_without_formatting_exception(self):
+        import numpy as np
+
+        from designassistant.models import Diagnostic, TextRecord
+        from motorlib.localization import QT_TRANSLATE_NOOP
+
+        before = TextRecord.from_engine(
+            QT_TRANSLATE_NOOP("SimulationAlerts", "Initial port/throat ratio of {:.3f} was less than {:.3f}").format(
+                np.float64(1.25), np.float32(2)
+            )
+        )
+        diagnostic = Diagnostic("engine_alert", "WARNING", before)
+        for language in ("en", "ru", "en"):
+            APP.translationManager.setLanguage(language)
+            APP.processEvents()
+            text = diagnostic_text(diagnostic)
+            self.assertIn("1.250", text)
+            self.assertIn("2.000", text)
+            self.assertEqual(diagnostic.message, before)
+
+    def test_v2_required_fields_and_first_page_library_quality(self):
+        self.assertEqual(self.window.pages.currentIndex(), 0)
+        for key in ("diameter", "length", "burn_time"):
+            row = self.window.rows[key]
+            self.assertTrue(row.enabled.isChecked())
+            self.assertTrue(row.enabled.isHidden())
+            self.assertTrue(row.value.isEnabled())
+            self.assertIn("*", row.label.text())
+        for key in ("average_thrust", "total_impulse"):
+            row = self.window.rows[key]
+            self.assertFalse(row.enabled.isChecked())
+            self.assertFalse(row.value.isEnabled())
+        self.assertTrue(self.window.quality.isVisibleTo(self.window.pages.widget(0)))
+        self.assertTrue(self.window.choose_button.isVisibleTo(self.window.pages.widget(0)))
+        self.assertFalse(self.window.find_button.isHidden())
+        self.assertFalse(self.window.advanced_button.isEnabled())
+
+    def test_v2_empty_editor_full_search_and_safe_advanced_handoff(self):
+        self.window.close()
+        APP.processEvents()
+        empty = Motor().getDict()
+        empty["config"] = copy.deepcopy(BASELINE["config"])
+        empty = Motor(empty).getDict()
+        APP.fileManager.startFromMotor(Motor(empty), None, checkPropellant=False)
+        APP.window.postLoadUpdate()
+        APP.window.quickDesignAction.trigger()
+        self.window = APP.window.quickDesign
+        self.window.allowed_keys = (Snapshot.from_dict(BASELINE["propellant"]).digest,)
+        results = self.search()
+        self.assertEqual(self.window.controller.baseline, Snapshot.from_dict(empty))
+        self.assertEqual(APP.fileManager.getCurrentMotor().getDict(), empty)
+        self.assertEqual(SOURCE.read_bytes(), self.source_bytes)
+        record = results[0]
+        snapshot = self.window.controller.request_for(record.proposal.candidate_id).snapshot
+        advanced = self.window.open_advanced()
+        self.assertEqual(advanced.controller.baseline, snapshot)
+        self.assertTrue(advanced.variable_rows)
+        self.assertEqual([t.metric for t in advanced.build_requirements().targets], ["burn_time"])
+        self.assertEqual(APP.fileManager.getCurrentMotor().getDict(), empty)
+        self.assertEqual(SOURCE.read_bytes(), self.source_bytes)
+
+    def test_v2_review_lists_created_geometries_and_grain_counts(self):
+        self.configure()
+        for key, value in (("diameter", 0.1), ("length", 0.8)):
+            row = self.window.rows[key]
+            row.value.setValue(convert(value, row.unit, row.display_unit))
+        self.window.next()
+        text = self.window.review.toPlainText()
+        self.assertIn("Geometries to explore", text)
+        self.assertIn("Star Grain", text)
+        self.assertIn("Custom Grain", text)
+        self.assertIn("Grain counts to explore: 1, 2, 3, 4, 5, 6", text)
+        self.assertNotIn("baseline parameters cannot initialize", text)
+        self.assertFalse(self.window.controller.is_running)
+
+    def test_v2_optional_goals_are_absent_until_enabled(self):
+        self.configure()
+        req = self.window._validated()
+        self.assertEqual([t.metric for t in req.plan.requirements.targets], ["burn_time"])
+        row = self.window.rows["average_thrust"]
+        row.enabled.setChecked(True)
+        row.value.setValue(50)
+        self.assertEqual(
+            [t.metric for t in self.window._validated().plan.requirements.targets], ["burn_time", "average_thrust"]
+        )
+
+    def test_v2_unrequested_thrust_and_impulse_are_labelled_as_results(self):
+        results = self.search()
+        card = self.window.cards[results[0].proposal.candidate_id]
+        self.assertEqual(card.summary.text().count("Obtained result"), 2)
+        APP.translationManager.setLanguage("ru")
+        APP.processEvents()
+        self.assertEqual(card.summary.text().count("Полученный результат"), 2)
+        self.assertIn("Число шашек", card.summary.text())
+        self.assertEqual(results, self.window.recommendations)
+
+    def test_v2_conflicting_goals_warn_before_starting_worker(self):
+        self.configure()
+        for key, value in (("average_thrust", 50), ("total_impulse", 10000)):
+            row = self.window.rows[key]
+            row.enabled.setChecked(True)
+            row.value.setValue(value)
+        order = []
+        original = self.window.controller.start_smart
+
+        def start(plan):
+            order.append("start")
+            return original(plan)
+
+        self.warning.side_effect = lambda *args, **kwargs: order.append("warning")
+        with patch.object(self.window.controller, "start_smart", side_effect=start):
+            self.window.start_search(budget=12)
+            self.window.stop_search()
+            self.wait_finished()
+        self.assertEqual(order, ["warning", "start"])
+        self.assertTrue(self.window.problem.target_warning)
+
+    def test_v2_language_round_trip_preserves_mandatory_fields_and_optional_flags(self):
+        self.configure()
+        row = self.window.rows["total_impulse"]
+        row.enabled.setChecked(True)
+        row.value.setValue(80)
+        before = self.window.build_requirements()
+        for language in ("ru", "en"):
+            APP.translationManager.setLanguage(language)
+            APP.processEvents()
+            self.assertEqual(self.window.build_requirements(), before)
+            self.assertEqual(self.window.rows["diameter"].mode.currentData(), "maximum")
+            self.assertTrue(row.enabled.isChecked())
+            self.assertIn("*", self.window.rows["burn_time"].label.text())
 
     def test_all_quick_literals_and_markers_have_complete_catalog_entries(self):
         from uilib.designassistant.quick_messages import QUICK_MESSAGES

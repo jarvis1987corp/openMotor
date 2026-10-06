@@ -2,7 +2,7 @@
 
 import json
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 from PyQt6.QtCore import QCoreApplication, QEvent, Qt, QTimer, pyqtSignal
 from PyQt6.QtWidgets import (
@@ -37,7 +37,7 @@ from designassistant.quick import (
     match_percentage,
     recommended_designs,
 )
-from designassistant.smart import QUALITY_BUDGETS
+from designassistant.smart import CURRENT_GEOMETRY, QUALITY_BUDGETS, SearchSpaceBuilder
 from motorlib.units import convert
 from uilib.localization import geometry_name
 
@@ -64,7 +64,9 @@ def render(record):
             else quick_translate("Current geometry")
         )
     if "reason" in kwargs:
-        kwargs["reason"] = translate(kwargs["reason"])
+        kwargs["reason"] = quick_translate(kwargs["reason"])
+        if kwargs["reason"] == data["kwargs"]["reason"]:
+            kwargs["reason"] = translate(kwargs["reason"])
     return QCoreApplication.translate(record.context, record.source).format(*data.get("args", []), **kwargs)
 
 
@@ -76,6 +78,7 @@ class KnownRow:
     value: object
     unit: str
     display_unit: str
+    label: object = None
 
 
 class LibraryChooser(QDialog):
@@ -162,15 +165,27 @@ class RecommendationCard(QGroupBox):
         self.summary.setToolTip(
             quick_translate("Match is 100 / (1 + normalized score), not a probability or guarantee.")
         )
-        for key in ("burn_time", "average_thrust", "total_impulse", "propellant_length", "maximum_diameter"):
+        for key in (
+            "burn_time",
+            "average_thrust",
+            "peak_thrust",
+            "total_impulse",
+            "propellant_length",
+            "maximum_diameter",
+        ):
             unit, display = metric_unit(key, preferences)
+            obtained = key in ("average_thrust", "total_impulse") and not any(
+                target.metric == key for target in record.analysis.targets
+            )
             lines.append(
                 f"{metric_label(key)}: {display_number(record.evaluation.outcome.metric(key), unit, display)} {display}"
+                + (" — " + quick_translate("Obtained result") if obtained else "")
             )
         lines.extend(
             (
                 quick_translate("Library entry: {name}").format(name=record.variant.library_name),
                 quick_translate("Geometry: {geometry}").format(geometry=geometry_label(record.variant)),
+                quick_translate("Grains: {count}").format(count=len(record.variant.geometries)),
             )
         )
         self.summary.setText("\n".join(lines))
@@ -283,14 +298,10 @@ class QuickDesignWindow(QDialog):
         self.known_group = QGroupBox()
         form = QFormLayout(self.known_group)
         layout.addWidget(self.known_group)
-        data = self.controller.baseline.to_dict()
-        values = {
-            "diameter": max([g["properties"]["diameter"] for g in data["grains"]] + [0.001]),
-            "length": sum(g["properties"]["length"] for g in data["grains"]),
-            "burn_time": 2.0,
-            "average_thrust": 50.0,
-            "total_impulse": 100.0,
-        }
+        self.requirements_layout = layout
+        self.optional_group = QGroupBox()
+        optional_form = QFormLayout(self.optional_group)
+        layout.addWidget(self.optional_group)
         for field, source in (
             ("diameter", "Maximum diameter"),
             ("length", "Maximum motor length"),
@@ -298,22 +309,24 @@ class QuickDesignWindow(QDialog):
             ("average_thrust", "Desired average thrust"),
             ("total_impulse", "Desired total impulse"),
         ):
+            required = field in ("diameter", "length", "burn_time")
             unit, display = metric_unit(FIELD_METRICS[field], self.preferences)
-            row = KnownRow(
-                source, QCheckBox(), QComboBox(), number_editor(convert(values[field], unit, display), 0), unit, display
-            )
+            row = KnownRow(source, QCheckBox(), QComboBox(), number_editor(0, 0), unit, display, QLabel())
+            row.enabled.setParent(self.known_group if required else self.optional_group)
+            row.mode.setParent(self.known_group if required else self.optional_group)
             for mode in ("target", "maximum", "minimum"):
                 row.mode.addItem("", mode)
             row.mode.setCurrentIndex(row.mode.findData("maximum" if field in ("diameter", "length") else "target"))
-            row.enabled.setChecked(field == "diameter" and bool(data["grains"]))
-            row.value.setEnabled(row.enabled.isChecked())
-            row.mode.setEnabled(row.enabled.isChecked())
+            row.mode.hide()
+            row.enabled.setChecked(required)
+            row.enabled.setVisible(not required)
+            row.value.setEnabled(required)
             row.enabled.toggled.connect(row.value.setEnabled)
-            row.enabled.toggled.connect(row.mode.setEnabled)
             controls = QHBoxLayout()
-            for widget in (row.enabled, row.mode, row.value):
-                controls.addWidget(widget)
-            form.addRow(controls)
+            if not required:
+                controls.addWidget(row.enabled)
+            controls.addWidget(row.value)
+            (form if required else optional_form).addRow(row.label, controls)
             self.rows[field] = row
         self.other_group = QGroupBox()
         self.other_group.setCheckable(True)
@@ -340,7 +353,7 @@ class QuickDesignWindow(QDialog):
         layout = self._page()
         self.options_group = QGroupBox()
         form = QFormLayout(self.options_group)
-        layout.addWidget(self.options_group)
+        self.requirements_layout.insertWidget(4, self.options_group)
         self.library_label, self.library_status = QLabel(), QLabel()
         self.library_status.setWordWrap(True)
         self.choose_button = QPushButton()
@@ -363,7 +376,7 @@ class QuickDesignWindow(QDialog):
         self.review = QPlainTextEdit()
         self.review.setReadOnly(True)
         self.estimate_label.setWordWrap(True)
-        layout.addWidget(self.estimate_label)
+        form.addRow(self.estimate_label)
         layout.addWidget(self.review_label)
         layout.addWidget(self.review, 1)
 
@@ -467,6 +480,10 @@ class QuickDesignWindow(QDialog):
         problem = self._validated(budget)
         if problem is None:
             return
+        if problem.target_warning is not None:
+            QMessageBox.warning(
+                self, quick_translate("Potentially conflicting targets"), render(problem.target_warning)
+            )
         self.problem = problem
         self.controller.start_smart(problem.plan)
         self.model.reset(self.controller.smart_store)
@@ -579,17 +596,28 @@ class QuickDesignWindow(QDialog):
             return
         ids = self.selected_ids()
         record = next((r for r in self.recommendations if ids and r.proposal.candidate_id == ids[0]), None)
-        # A selected result chooses its existing library/geometry; the ranges,
-        # targets and constraints stay editable in the ordinary manual editor.
-        variant = next(
-            (
-                v
-                for v in problem.plan.variants
-                if record and (v.library_key, v.geometries) == (record.variant.library_key, record.variant.geometries)
-            ),
-            problem.plan.variants[0],
+        record = record or (self.recommendations[0] if self.recommendations else None)
+        if record is None:
+            QMessageBox.warning(
+                self,
+                quick_translate("Cannot open design"),
+                quick_translate("Run the search before opening a recommendation in Design Assistant."),
+            )
+            return
+        request = self.controller.request_for(record.proposal.candidate_id)
+        if not request.valid or request.snapshot is None:
+            return
+        # Advanced improves the actual selected result, with its full geometry,
+        # count, nozzle and exact existing propellant. Smart's baseline-relative
+        # ranges intentionally start here rather than at the Quick preset.
+        smart = replace(
+            problem.plan.requirements, library_keys=(record.variant.library_key,), geometries=(CURRENT_GEOMETRY,)
         )
-        return self.open_advanced_callback(problem, variant)
+        try:
+            variant = SearchSpaceBuilder().build(request.snapshot, smart, self.library_entries).variants[0]
+            return self.open_advanced_callback(problem, variant)
+        except (ValueError, TypeError) as error:
+            QMessageBox.warning(self, quick_translate("Cannot open design"), translate(str(error)))
 
     def _estimate(self):
         self.estimate_label.setText(
@@ -616,13 +644,24 @@ class QuickDesignWindow(QDialog):
                 variants=len(self.problem.plan.variants),
             )
         )
-        if self.problem.inferred_targets:
-            lines.append(
-                quick_translate(
-                    "No performance Target was entered. Ranking aims at an entered performance limit; "
-                    "limits remain mandatory."
+        lines.append(
+            quick_translate("Geometries to explore: {geometries}").format(
+                geometries=", ".join(
+                    geometry_name(g) for g in sorted({v.geometries[0] for v in self.problem.plan.variants})
                 )
             )
+        )
+        lines.append(
+            quick_translate("Grain counts to explore: {counts}").format(
+                counts=", ".join(str(n) for n in sorted({len(v.geometries) for v in self.problem.plan.variants}))
+            )
+        )
+        lines.append(
+            quick_translate(
+                "The budget covers {selected} of {total} possible library/geometry/count combinations."
+            ).format(selected=len(self.problem.plan.variants), total=self.problem.total_combinations)
+        )
+        lines.append(self.estimate_label.text())
         lines.extend(render(d) for d in self.problem.diagnostics)
         self.review.setPlainText("\n".join(lines))
 
@@ -637,8 +676,9 @@ class QuickDesignWindow(QDialog):
         self.step_label.setText(quick_translate(sources[self.pages.currentIndex()]))
         self.requirements_help.setText(
             quick_translate(
-                "Enable the values you know. Enter at least one dimensional requirement "
-                "and one performance characteristic."
+                "Enter maximum diameter, maximum length and desired burn time. "
+                "Quick Design creates grains and a nozzle automatically; "
+                "the current motor provides only general settings."
             )
         )
         self.dimension_notice.setText(
@@ -647,9 +687,12 @@ class QuickDesignWindow(QDialog):
                 "Mass limits cover propellant only."
             )
         )
-        self.known_group.setTitle(quick_translate("Known requirements"))
-        for row in self.rows.values():
-            row.enabled.setText(quick_translate(row.source) + f" ({row.display_unit})")
+        self.known_group.setTitle(quick_translate("Required"))
+        self.optional_group.setTitle(quick_translate("Optional targets"))
+        for key, row in self.rows.items():
+            required = key in ("diameter", "length", "burn_time")
+            row.label.setText(quick_translate(row.source) + (" *" if required else "") + f" ({row.display_unit})")
+            row.enabled.setText(quick_translate("Set target value"))
             for i, mode in enumerate(("Target", "Maximum", "Minimum")):
                 row.mode.setItemText(i, quick_translate(mode))
         self.other_group.setTitle(quick_translate("Other limits (optional)"))
@@ -691,9 +734,9 @@ class QuickDesignWindow(QDialog):
         running, page = self.controller.is_running, self.pages.currentIndex()
         self.back_button.setEnabled(not running and page > 0)
         self.next_button.setVisible(page == 0)
-        self.find_button.setVisible(page != 0)
+        self.find_button.setVisible(True)
         self.find_button.setEnabled(not running)
-        self.advanced_button.setEnabled(not running)
+        self.advanced_button.setEnabled(not running and bool(self.recommendations))
         self.pages.widget(0).setEnabled(not running)
         self.pages.widget(1).setEnabled(not running)
         self.results_label.setText(quick_translate("Recommended designs"))

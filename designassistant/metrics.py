@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 
-from motorlib.simResult import SimulationResult
+from motorlib.simResult import LogChannel, SimulationResult, multiValueChannels, singleValueChannels
 
 from .models import MetricValue, finite_number
 
@@ -13,6 +13,13 @@ class MetricDefinition:
     source: str
     unit: str
     getter: str
+
+
+@dataclass(frozen=True)
+class ChannelMetricDefinition(MetricDefinition):
+    """Summary through an existing LogChannel getter; no new calculation."""
+
+    channel: str
 
 
 DEFAULT_METRICS = (
@@ -33,10 +40,13 @@ class MetricRegistry:
         if not self.definitions or len({d.key for d in self.definitions}) != len(self.definitions):
             raise ValueError("Metrics must be nonempty and have unique stable keys.")
         for definition in self.definitions:
+            channel_metric = isinstance(definition, ChannelMetricDefinition)
             if not isinstance(definition, MetricDefinition) or not callable(
-                getattr(SimulationResult, definition.getter, None)
+                getattr(LogChannel if channel_metric else SimulationResult, definition.getter, None)
             ):
                 raise ValueError("Metrics must refer to an existing SimulationResult getter.")
+            if channel_metric and definition.channel not in (*singleValueChannels, *multiValueChannels):
+                raise ValueError("Unknown metric: " + definition.key)
         self._by_key = {d.key: d for d in self.definitions}
 
     def definition(self, key):
@@ -50,7 +60,8 @@ class MetricRegistry:
     def extract(self, result):
         values = []
         for definition in self.definitions:
-            value = getattr(result, definition.getter)()
+            source = result.channels[definition.channel] if isinstance(definition, ChannelMetricDefinition) else result
+            value = getattr(source, definition.getter)()
             # NumPy scalar getters are converted at the boundary; booleans are invalid.
             if isinstance(value, bool):
                 raise ValueError("Metric is boolean: " + definition.key)

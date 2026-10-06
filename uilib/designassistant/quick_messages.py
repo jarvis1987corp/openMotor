@@ -118,3 +118,45 @@ QUICK_MESSAGES = (
     QT_TRANSLATE_NOOP("QuickDesign", "Warnings: {count}"),
     QT_TRANSLATE_NOOP("QuickDesign", "Why this design?"),
 )
+
+QUICK_V2_MESSAGES = (
+    QT_TRANSLATE_NOOP("QuickDesign", "A match index requires a finite nonnegative score."),
+    QT_TRANSLATE_NOOP("QuickDesign", "Automatic ranges require numeric engine metadata."),
+    QT_TRANSLATE_NOOP(
+        "QuickDesign",
+        "Average thrust × burn time differs substantially from the requested total impulse. "
+        "These targets may conflict; simulation results will determine the trade-off.",
+    ),
+    QT_TRANSLATE_NOOP("QuickDesign", "Diameter and length must be maximum limits; burn time must be a target."),
+    QT_TRANSLATE_NOOP("QuickDesign", "Dimensions do not allow an engine property range."),
+    QT_TRANSLATE_NOOP("QuickDesign", "Dimensions must be positive finite values."),
+    QT_TRANSLATE_NOOP("QuickDesign", "Engine setter read-back rejected an initial property."),
+    QT_TRANSLATE_NOOP("QuickDesign", "Engine setter rejected generated design or project configuration."),
+    QT_TRANSLATE_NOOP("QuickDesign", "Enter maximum diameter, maximum length and desired burn time before searching."),
+    QT_TRANSLATE_NOOP(
+        "QuickDesign",
+        "Enter maximum diameter, maximum length and desired burn time. "
+        "Quick Design creates grains and a nozzle automatically; the current motor provides only general settings.",
+    ),
+    QT_TRANSLATE_NOOP("QuickDesign", "Geometries to explore: {geometries}"),
+    QT_TRANSLATE_NOOP("QuickDesign", "Grain count is outside the dimension-driven exploration range."),
+    QT_TRANSLATE_NOOP("QuickDesign", "Grain counts to explore: {counts}"),
+    QT_TRANSLATE_NOOP("QuickDesign", "Grains: {count}"),
+    QT_TRANSLATE_NOOP("QuickDesign", "Increase search quality or select fewer existing library entries."),
+    QT_TRANSLATE_NOOP("QuickDesign", "Library data failed existing engine validation."),
+    QT_TRANSLATE_NOOP("QuickDesign", "Obtained result"),
+    QT_TRANSLATE_NOOP("QuickDesign", "Optional targets"),
+    QT_TRANSLATE_NOOP("QuickDesign", "Optional thrust and impulse must be targets; use Other limits for bounds."),
+    QT_TRANSLATE_NOOP("QuickDesign", "Potentially conflicting targets"),
+    QT_TRANSLATE_NOOP("QuickDesign", "Recommendations require a limit of 1–5 and diversity between 0 and 1."),
+    QT_TRANSLATE_NOOP("QuickDesign", "Required"),
+    QT_TRANSLATE_NOOP("QuickDesign", "Run the search before opening a recommendation in Design Assistant."),
+    QT_TRANSLATE_NOOP("QuickDesign", "Set target value"),
+    QT_TRANSLATE_NOOP("QuickDesign", "Skipped geometry {geometry}, {count} grains: {reason}"),
+    QT_TRANSLATE_NOOP(
+        "QuickDesign", "The budget covers {selected} of {total} possible library/geometry/count combinations."
+    ),
+    QT_TRANSLATE_NOOP("QuickDesign", "The existing engine requires an end burner to be the forward-most grain."),
+    QT_TRANSLATE_NOOP("QuickDesign", "This geometry has no automatic parameterization."),
+)
+QUICK_MESSAGES += QUICK_V2_MESSAGES

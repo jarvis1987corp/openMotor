@@ -38,7 +38,12 @@ from test.designassistant.test_smart import fake_evaluation, plan
 
 def inputs(**changes):
     values = dict(
-        criteria=(QuickCriterion("diameter", "maximum", 0.15), QuickCriterion("burn_time", "target", 2.0)), budget=12
+        criteria=(
+            QuickCriterion("diameter", "maximum", 0.05),
+            QuickCriterion("length", "maximum", 0.02),
+            QuickCriterion("burn_time", "target", 2.0),
+        ),
+        budget=12,
     )
     values.update(changes)
     return QuickDesignRequirements(**values)
@@ -103,10 +108,9 @@ class QuickRequirementsTests(unittest.TestCase):
         with self.assertRaises(QuickDesignError):
             inputs(criteria=(QuickCriterion("burn_time", "target", 2),) * 2)
 
-    def test_partial_requirements_one_dimension_and_one_goal(self):
-        self.assertEqual(len(problem().plan.requirements.targets), 1)
-        p = problem(criteria=(QuickCriterion("length", "maximum", 0.5), QuickCriterion("total_impulse", "target", 100)))
-        self.assertEqual(p.plan.requirements.targets[0].metric, "total_impulse")
+    def test_required_dimensions_and_time_need_no_optional_goals(self):
+        self.assertEqual([t.metric for t in problem().plan.requirements.targets], ["burn_time"])
+        self.assertFalse(problem().inferred_targets)
 
     def test_underdefined_input_never_simulates(self):
         baseline = fixture_snapshot()
@@ -125,30 +129,26 @@ class QuickRequirementsTests(unittest.TestCase):
                 simulation.assert_not_called()
 
     def test_target_and_both_bounds_convert_to_existing_contracts(self):
-        p = problem(
-            criteria=inputs().criteria
-            + (QuickCriterion("burn_time", "minimum", 1), QuickCriterion("burn_time", "maximum", 3))
-        )
+        p = problem(constraints=(MetricConstraint("burn_time", minimum=1), MetricConstraint("burn_time", maximum=3)))
         targets, constraints = p.plan.requirements.targets, p.plan.requirements.constraints
         self.assertEqual(targets[0].value, 2)
         self.assertEqual(targets[0].scale, 0.2)
         self.assertIn(MetricConstraint("burn_time", minimum=1), constraints)
         self.assertIn(MetricConstraint("burn_time", maximum=3), constraints)
 
-    def test_limits_alone_infer_one_disclosed_performance_ranking_goal(self):
-        p = problem(
-            criteria=(QuickCriterion("diameter", "maximum", 0.15), QuickCriterion("average_thrust", "minimum", 10))
-        )
-        self.assertTrue(p.inferred_targets)
-        self.assertEqual(p.plan.requirements.targets[0].metric, "average_thrust")
-        self.assertEqual(p.plan.requirements.targets[0].value, 10)
+    def test_no_invented_thrust_or_impulse_targets(self):
+        p = problem(constraints=(MetricConstraint("average_thrust", minimum=10),))
+        self.assertFalse(p.inferred_targets)
+        self.assertEqual([t.metric for t in p.plan.requirements.targets], ["burn_time"])
         self.assertIn(MetricConstraint("average_thrust", minimum=10), p.plan.requirements.constraints)
 
     def test_conflicting_bounds(self):
         with self.assertRaisesRegex(QuickDesignError, "contradict"):
             problem(
-                criteria=inputs().criteria
-                + (QuickCriterion("length", "minimum", 0.6), QuickCriterion("length", "maximum", 0.5))
+                constraints=(
+                    MetricConstraint("propellant_length", minimum=0.6),
+                    MetricConstraint("propellant_length", maximum=0.5),
+                )
             )
 
     def test_target_outside_constraints(self):
@@ -180,10 +180,13 @@ class QuickRequirementsTests(unittest.TestCase):
 
 
 class QuickProblemTests(unittest.TestCase):
-    def test_geometry_selection_reuses_compatibility_and_reports_skipped_types(self):
+    def test_geometry_creation_covers_existing_types_without_baseline_compatibility(self):
         p = problem()
         self.assertGreater(len(p.plan.variants), 1)
-        self.assertTrue(any("Skipped geometry" in d.source for d in p.diagnostics))
+        from motorlib.grains import grainTypes
+
+        self.assertEqual({v.geometries[0] for v in p.plan.variants}, set(grainTypes))
+        self.assertFalse(any("Skipped geometry" in d.source for d in p.diagnostics))
         self.assertEqual(p.plan.variants[0].baseline.to_dict()["config"], fixture_snapshot()["config"])
 
     def test_library_all_subset_and_fixed_are_exact_snapshots(self):
@@ -224,39 +227,39 @@ class QuickProblemTests(unittest.TestCase):
         original = FloatProperty.setValue
 
         def reject_diameter(prop, value):
-            if prop.unit == "m" and value == 0.12:
+            if prop.unit == "m" and value == 0.05 * 0.90:
                 return
             return original(prop, value)
 
         baseline = fixture_snapshot()
         entry = LibraryEntry.from_dict(baseline["propellant"])
-        criteria = (QuickCriterion("diameter", "target", 0.12), QuickCriterion("burn_time", "target", 2))
+        criteria = inputs().criteria
         with (
             patch.object(FloatProperty, "setValue", reject_diameter),
             patch.object(Motor, "runSimulation") as run_engine,
         ):
             validation = QuickDesignRequirementsValidator().validate(baseline, inputs(criteria=criteria), (entry,))
         self.assertFalse(validation.valid)
-        self.assertIn("Setter read-back", validation.diagnostics[0].arguments_json)
+        self.assertIn("setter read-back", validation.diagnostics[0].arguments_json)
         run_engine.assert_not_called()
 
-    def test_unconfigured_baseline_rejected_before_search(self):
+    def test_unconfigured_baseline_successfully_builds_before_search(self):
         baseline = fixture_snapshot()
         entries = (LibraryEntry.from_dict(baseline["propellant"]),)
         baseline["grains"] = []
-        self.assertFalse(QuickDesignRequirementsValidator().validate(baseline, inputs(), entries).valid)
+        self.assertTrue(QuickDesignRequirementsValidator().validate(baseline, inputs(), entries).valid)
 
-    def test_dimension_target_and_minimum_can_place_a_larger_space(self):
+    def test_dimensions_place_a_space_without_using_source_geometry(self):
         p = problem(
             criteria=(
-                QuickCriterion("diameter", "target", 0.12),
-                QuickCriterion("length", "minimum", 0.4),
+                QuickCriterion("diameter", "maximum", 0.12),
+                QuickCriterion("length", "maximum", 0.4),
                 QuickCriterion("burn_time", "target", 2),
             )
         )
         motor = Motor(p.plan.variants[0].baseline.to_dict())
-        self.assertAlmostEqual(SimulationResult(motor).getMaxPropellantDiameter(), 0.12)
-        self.assertAlmostEqual(SimulationResult(motor).getPropellantLength(), 0.4)
+        self.assertAlmostEqual(SimulationResult(motor).getMaxPropellantDiameter(), 0.12 * 0.9)
+        self.assertAlmostEqual(SimulationResult(motor).getPropellantLength(), 0.4 * 0.7)
 
     def test_small_dimension_caps_apply_to_every_candidate(self):
         p = problem(
@@ -389,7 +392,9 @@ class QuickRecommendationsTests(unittest.TestCase):
         from designassistant import MetricValue
 
         outcome = dataclasses.replace(
-            evaluation.outcome, metrics=evaluation.outcome.metrics + (MetricValue("maximum_diameter", 0.1, "m"),)
+            evaluation.outcome,
+            metrics=evaluation.outcome.metrics
+            + (MetricValue("maximum_diameter", 0.03, "m"), MetricValue("propellant_length", 0.01, "m")),
         )
         evaluated = Objective(MetricRegistry(QUICK_METRICS)).evaluate(outcome, p.plan.variants[0].requirements)
         self.assertFalse(evaluated.constraints.feasible)

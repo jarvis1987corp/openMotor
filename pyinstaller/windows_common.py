@@ -52,6 +52,7 @@ def analysis(entry=None):
             "designassistant.smart",
             "designassistant.smart_results",
             "designassistant.quick",
+            "designassistant.quick_generation",
             "uilib.designassistant.window",
             "uilib.designassistant.controller",
             "uilib.designassistant.smart_form",

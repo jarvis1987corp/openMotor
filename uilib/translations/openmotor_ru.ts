@@ -328,13 +328,13 @@ The rest of the motor will be imported.</source>
             <translation>Фактическое значение</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="89" />
+            <location filename="../designassistant/presentation.py" line="90" />
             <location filename="../designassistant/smart_messages.py" line="20" />
             <source>Add at least one target before starting the search.</source>
             <translation>Перед началом поиска добавьте хотя бы одну цель.</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="164" />
+            <location filename="../designassistant/presentation.py" line="165" />
             <location filename="../designassistant/smart_messages.py" line="21" />
             <source>All Candidates</source>
             <translation>Все кандидаты</translation>
@@ -390,7 +390,7 @@ The rest of the motor will be imported.</source>
             <translation>Исходный двигатель: {name}. Количество шашек и настройки симуляции фиксированы; варианты используют существующие записи библиотеки.</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="127" />
+            <location filename="../designassistant/presentation.py" line="128" />
             <location filename="../designassistant/smart_messages.py" line="38" />
             <source>Candidate Details</source>
             <translation>Подробности кандидата</translation>
@@ -411,19 +411,19 @@ The rest of the motor will be imported.</source>
             <translation>Невозможно сравнить кандидатов</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="167" />
+            <location filename="../designassistant/presentation.py" line="168" />
             <location filename="../designassistant/smart_messages.py" line="42" />
             <source>Cannot Open Candidate</source>
             <translation>Не удалось открыть кандидата</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="166" />
+            <location filename="../designassistant/presentation.py" line="167" />
             <location filename="../designassistant/smart_messages.py" line="43" />
             <source>Cannot Start Search</source>
             <translation>Не удалось начать поиск</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="128" />
+            <location filename="../designassistant/presentation.py" line="129" />
             <location filename="../designassistant/smart_messages.py" line="44" />
             <source>Close</source>
             <translation>Закрыть</translation>
@@ -449,7 +449,7 @@ The rest of the motor will be imported.</source>
             <translation>Ограничения одной метрики противоречат друг другу.</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="183" />
+            <location filename="../designassistant/presentation.py" line="184" />
             <location filename="../designassistant/smart_messages.py" line="49" />
             <source>Current candidate: %p%</source>
             <translation>Текущий кандидат: %p%</translation>
@@ -460,7 +460,7 @@ The rest of the motor will be imported.</source>
             <translation>Свой бюджет</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="120" />
+            <location filename="../designassistant/presentation.py" line="121" />
             <location filename="../designassistant/smart_messages.py" line="51" />
             <source>Design Assistant</source>
             <translation>Помощник проектирования</translation>
@@ -471,13 +471,13 @@ The rest of the motor will be imported.</source>
             <translation>Отклонение</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="136" />
+            <location filename="../designassistant/presentation.py" line="137" />
             <location filename="../designassistant/smart_messages.py" line="53" />
             <source>Diagnostics</source>
             <translation>Диагностика</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="154" />
+            <location filename="../designassistant/presentation.py" line="155" />
             <location filename="../designassistant/smart_messages.py" line="54" />
             <source>ERROR always rejects a candidate. WARNING is retained in diagnostics.</source>
             <translation>Ошибка (ERROR) всегда исключает кандидата. Предупреждение (WARNING) сохраняется в диагностике.</translation>
@@ -513,7 +513,7 @@ The rest of the motor will be imported.</source>
             <translation>Исследование пространства</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="165" />
+            <location filename="../designassistant/presentation.py" line="166" />
             <location filename="../designassistant/smart_messages.py" line="63" />
             <source>Filter results…</source>
             <translation>Фильтр результатов…</translation>
@@ -534,13 +534,13 @@ The rest of the motor will be imported.</source>
             <translation>Геометрия</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="157" />
+            <location filename="../designassistant/presentation.py" line="158" />
             <location filename="../designassistant/smart_messages.py" line="67" />
             <source>Grid Search</source>
             <translation>Перебор по сетке</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="172" />
+            <location filename="../designassistant/presentation.py" line="173" />
             <location filename="../designassistant/smart_messages.py" line="68" />
             <source>Grid contains {count} candidates; this run is limited to {budget}.</source>
             <translation>Сетка содержит {count} кандидатов; лимит текущего поиска — {budget}.</translation>
@@ -581,7 +581,7 @@ The rest of the motor will be imported.</source>
             <translation>Ручной</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="162" />
+            <location filename="../designassistant/presentation.py" line="163" />
             <location filename="../designassistant/smart_messages.py" line="76" />
             <source>Maximum candidates for either strategy (1–10000).</source>
             <translation>Максимальное число кандидатов для любой стратегии (1–10000).</translation>
@@ -607,13 +607,13 @@ The rest of the motor will be imported.</source>
             <translation>Допустимых кандидатов пока нет. Проверьте цели, ограничения и допустимые варианты.</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="184" />
+            <location filename="../designassistant/presentation.py" line="185" />
             <location filename="../designassistant/smart_messages.py" line="81" />
             <source>No candidate running</source>
             <translation>Нет активного кандидата</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="131" />
+            <location filename="../designassistant/presentation.py" line="132" />
             <location filename="../designassistant/smart_messages.py" line="82" />
             <source>No diagnostics.</source>
             <translation>Диагностических сообщений нет.</translation>
@@ -634,13 +634,13 @@ The rest of the motor will be imported.</source>
             <translation>Параметры</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="178" />
+            <location filename="../designassistant/presentation.py" line="179" />
             <location filename="../designassistant/smart_messages.py" line="86" />
             <source>Processed: {processed}/{total}   Feasible: {feasible}   Rejected: {rejected}   Errors: {errors}</source>
             <translation>Обработано: {processed}/{total}   Допустимых: {feasible}   Отклонённых: {rejected}   Ошибок: {errors}</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="125" />
+            <location filename="../designassistant/presentation.py" line="126" />
             <location filename="../designassistant/smart_messages.py" line="90" />
             <source>Progress</source>
             <translation>Ход поиска</translation>
@@ -656,13 +656,13 @@ The rest of the motor will be imported.</source>
             <translation>Быстрый</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="158" />
+            <location filename="../designassistant/presentation.py" line="159" />
             <location filename="../designassistant/smart_messages.py" line="93" />
             <source>Random Search</source>
             <translation>Случайная выборка</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="88" />
+            <location filename="../designassistant/presentation.py" line="89" />
             <location filename="../designassistant/smart_messages.py" line="94" />
             <source>Random seed must be an integer.</source>
             <translation>Начальное значение генератора случайных чисел должно быть целым.</translation>
@@ -688,13 +688,13 @@ The rest of the motor will be imported.</source>
             <translation>Уточнение поиска</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="155" />
+            <location filename="../designassistant/presentation.py" line="156" />
             <location filename="../designassistant/smart_messages.py" line="99" />
             <source>Reject candidates with WARNING alerts</source>
             <translation>Отклонять кандидатов с предупреждениями (WARNING)</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="126" />
+            <location filename="../designassistant/presentation.py" line="127" />
             <location filename="../designassistant/smart_messages.py" line="100" />
             <source>Results</source>
             <translation>Результаты</translation>
@@ -705,19 +705,19 @@ The rest of the motor will be imported.</source>
             <translation>Начать подбор</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="129" />
+            <location filename="../designassistant/presentation.py" line="130" />
             <location filename="../designassistant/smart_messages.py" line="102" />
             <source>Score: {score}</source>
             <translation>Оценка: {score}</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="168" />
+            <location filename="../designassistant/presentation.py" line="169" />
             <location filename="../designassistant/smart_messages.py" line="103" />
             <source>Search Failed</source>
             <translation>Сбой поиска</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="182" />
+            <location filename="../designassistant/presentation.py" line="183" />
             <location filename="../designassistant/smart_messages.py" line="104" />
             <source>Search: %v/%m</source>
             <translation>Поиск: %v/%m</translation>
@@ -738,7 +738,7 @@ The rest of the motor will be imported.</source>
             <translation>Выберите от 2 до 5 разных кандидатов из рейтинга для сравнения.</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="87" />
+            <location filename="../designassistant/presentation.py" line="88" />
             <location filename="../designassistant/smart_messages.py" line="108" />
             <source>Select a search strategy and a budget between 1 and 10000.</source>
             <translation>Выберите стратегию поиска и лимит кандидатов от 1 до 10000.</translation>
@@ -799,7 +799,7 @@ The rest of the motor will be imported.</source>
             <translation>Этап: {stage}   Лучшая оценка: {score}   Прошло: {seconds} s</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="130" />
+            <location filename="../designassistant/presentation.py" line="131" />
             <location filename="../designassistant/smart_messages.py" line="123" />
             <source>Summary Metrics</source>
             <translation>Основные характеристики</translation>
@@ -810,7 +810,7 @@ The rest of the motor will be imported.</source>
             <translation>Отклонения от целей</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="143" />
+            <location filename="../designassistant/presentation.py" line="144" />
             <location filename="../designassistant/smart_messages.py" line="125" />
             <source>Target Value</source>
             <translation>Целевое значение</translation>
@@ -826,13 +826,13 @@ The rest of the motor will be imported.</source>
             <translation>Предел диаметра выходит за допустимые границы свойства движка.</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="163" />
+            <location filename="../designassistant/presentation.py" line="164" />
             <location filename="../designassistant/smart_messages.py" line="128" />
             <source>The same baseline, requirements and seed reproduce a random search.</source>
             <translation>Одинаковые исходный двигатель, требования и начальное значение воспроизводят случайный поиск.</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="91" />
+            <location filename="../designassistant/presentation.py" line="92" />
             <location filename="../designassistant/smart_messages.py" line="129" />
             <source>This candidate has no valid simulation and cannot be opened.</source>
             <translation>Кандидата нельзя открыть: для него нет корректной симуляции.</translation>
@@ -868,7 +868,7 @@ The rest of the motor will be imported.</source>
             <translation>Лучшие {shown} из {count} допустимых вариантов. Чем ниже оценка, тем ближе результат к заданным целям.</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="177" />
+            <location filename="../designassistant/presentation.py" line="178" />
             <location filename="../designassistant/smart_messages.py" line="138" />
             <source>Unsaved motor</source>
             <translation>Несохранённый двигатель</translation>
@@ -879,19 +879,19 @@ The rest of the motor will be imported.</source>
             <translation>До {count} симуляций, включая повторную проверку лучших вариантов. Точность движка не изменяется.</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="121" />
+            <location filename="../designassistant/presentation.py" line="122" />
             <location filename="../designassistant/smart_messages.py" line="142" />
             <source>Variables</source>
             <translation>Переменные</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="156" />
+            <location filename="../designassistant/presentation.py" line="157" />
             <location filename="../designassistant/smart_messages.py" line="143" />
             <source>Warnings are accepted unless this constraint is enabled.</source>
             <translation>Предупреждения допускаются, если это ограничение выключено.</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="144" />
+            <location filename="../designassistant/presentation.py" line="145" />
             <location filename="../designassistant/smart_messages.py" line="144" />
             <source>Weight</source>
             <translation>Вес</translation>
@@ -962,377 +962,377 @@ The rest of the motor will be imported.</source>
             <translation>Сбой</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="47" />
+            <location filename="../designassistant/presentation.py" line="48" />
             <source>Invalid assignment for {path}: {reason}</source>
             <translation>Недопустимое значение параметра {path}: {reason}</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="48" />
+            <location filename="../designassistant/presentation.py" line="49" />
             <source>Missing assignment for {path}.</source>
             <translation>Не задано значение параметра {path}.</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="49" />
+            <location filename="../designassistant/presentation.py" line="50" />
             <source>Simulation was cancelled.</source>
             <translation>Симуляция отменена.</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="50" />
+            <location filename="../designassistant/presentation.py" line="51" />
             <source>Simulation did not complete.</source>
             <translation>Симуляция не завершена.</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="51" />
+            <location filename="../designassistant/presentation.py" line="52" />
             <source>At least two simulation samples are required.</source>
             <translation>Для симуляции необходимы как минимум два отсчёта.</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="52" />
+            <location filename="../designassistant/presentation.py" line="53" />
             <source>Simulation times must start at zero and increase strictly.</source>
             <translation>Время симуляции должно начинаться с нуля и строго возрастать.</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="53" />
+            <location filename="../designassistant/presentation.py" line="54" />
             <source>Nonfinite score.</source>
             <translation>Получена неконечная оценка.</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="54" />
+            <location filename="../designassistant/presentation.py" line="55" />
             <source>Invalid simulation data: {reason}</source>
             <translation>Некорректные данные симуляции: {reason}</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="55" />
+            <location filename="../designassistant/presentation.py" line="56" />
             <source>Simulation failed: {reason}</source>
             <translation>Сбой симуляции: {reason}</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="56" />
+            <location filename="../designassistant/presentation.py" line="57" />
             <source>Candidate failed: {reason}</source>
             <translation>Сбой обработки кандидата: {reason}</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="57" />
+            <location filename="../designassistant/presentation.py" line="58" />
             <source>Candidate has no valid completed simulation.</source>
             <translation>Для кандидата нет корректно завершённой симуляции.</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="58" />
+            <location filename="../designassistant/presentation.py" line="59" />
             <source>Candidate has simulation warnings.</source>
             <translation>Симуляция кандидата содержит предупреждения.</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="59" />
+            <location filename="../designassistant/presentation.py" line="60" />
             <source>Required metric is missing: {metric}.</source>
             <translation>Отсутствует необходимая характеристика: {metric}.</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="60" />
+            <location filename="../designassistant/presentation.py" line="61" />
             <source>Metric {metric} is below its minimum.</source>
             <translation>Характеристика «{metric}» ниже минимального значения.</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="61" />
+            <location filename="../designassistant/presentation.py" line="62" />
             <source>Metric {metric} exceeds its maximum.</source>
             <translation>Характеристика «{metric}» превышает максимальное значение.</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="62" />
+            <location filename="../designassistant/presentation.py" line="63" />
             <source>Cannot score candidate: {reason}</source>
             <translation>Невозможно оценить кандидата: {reason}</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="63" />
+            <location filename="../designassistant/presentation.py" line="64" />
             <source>Range bounds must be finite and ordered.</source>
             <translation>Границы диапазона должны быть конечными и заданы по возрастанию.</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="64" />
+            <location filename="../designassistant/presentation.py" line="65" />
             <source>Range span must be finite.</source>
             <translation>Ширина диапазона должна быть конечной.</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="65" />
+            <location filename="../designassistant/presentation.py" line="66" />
             <source>Range points must be a positive integer; integer must be boolean.</source>
             <translation>Количество значений должно быть положительным целым числом; признак целочисленности должен быть логическим.</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="66" />
+            <location filename="../designassistant/presentation.py" line="67" />
             <source>A one-point range must have identical bounds.</source>
             <translation>Для одного значения минимальная и максимальная границы должны совпадать.</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="67" />
+            <location filename="../designassistant/presentation.py" line="68" />
             <source>A fixed range must contain exactly one point.</source>
             <translation>Фиксированный диапазон должен содержать ровно одно значение.</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="68" />
+            <location filename="../designassistant/presentation.py" line="69" />
             <source>Integer ranges require integral bounds.</source>
             <translation>Границы целочисленного диапазона должны быть целыми числами.</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="69" />
+            <location filename="../designassistant/presentation.py" line="70" />
             <source>Integer grid points must be distinct.</source>
             <translation>Целочисленные значения сетки должны различаться.</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="70" />
+            <location filename="../designassistant/presentation.py" line="71" />
             <source>Grid points collapse at floating-point precision.</source>
             <translation>Значения сетки совпадают при доступной точности чисел.</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="71" />
+            <location filename="../designassistant/presentation.py" line="72" />
             <source>Variable range exceeds the engine bounds.</source>
             <translation>Диапазон переменной выходит за границы, допустимые движком.</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="72" />
+            <location filename="../designassistant/presentation.py" line="73" />
             <source>Integer engine properties require integer ranges.</source>
             <translation>Целочисленные параметры движка требуют целочисленных диапазонов.</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="73" />
+            <location filename="../designassistant/presentation.py" line="74" />
             <source>Target values must be finite and metric must be identified.</source>
             <translation>Значения цели должны быть конечными; необходимо выбрать характеристику.</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="74" />
+            <location filename="../designassistant/presentation.py" line="75" />
             <source>Target scale must be positive and weight nonnegative.</source>
             <translation>Масштаб нормализации должен быть положительным, а вес — неотрицательным.</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="75" />
+            <location filename="../designassistant/presentation.py" line="76" />
             <source>Total target weight must be finite and positive.</source>
             <translation>Суммарный вес целей должен быть конечным и положительным.</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="76" />
+            <location filename="../designassistant/presentation.py" line="77" />
             <source>A constraint requires a metric and at least one bound.</source>
             <translation>Для ограничения необходимы характеристика и хотя бы одна граница.</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="77" />
+            <location filename="../designassistant/presentation.py" line="78" />
             <source>Constraint bounds must be finite.</source>
             <translation>Границы ограничения должны быть конечными.</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="78" />
+            <location filename="../designassistant/presentation.py" line="79" />
             <source>Constraint bounds must be ordered.</source>
             <translation>Минимальная граница ограничения не должна превышать максимальную.</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="79" />
+            <location filename="../designassistant/presentation.py" line="80" />
             <source>Variable paths must be unique.</source>
             <translation>Каждый параметр можно добавить только один раз.</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="80" />
+            <location filename="../designassistant/presentation.py" line="81" />
             <source>Target metrics must be unique.</source>
             <translation>Для каждой характеристики можно задать только одну цель.</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="81" />
+            <location filename="../designassistant/presentation.py" line="82" />
             <source>Assignment is outside the declared parameter range.</source>
             <translation>Значение выходит за заданный диапазон параметра.</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="82" />
+            <location filename="../designassistant/presentation.py" line="83" />
             <source>Setter read-back differs from the requested value.</source>
             <translation>Установленное значение отличается от запрошенного.</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="83" />
+            <location filename="../designassistant/presentation.py" line="84" />
             <source>Property value must be a finite number.</source>
             <translation>Значение параметра должно быть конечным числом.</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="84" />
+            <location filename="../designassistant/presentation.py" line="85" />
             <source>Integer properties require integral values.</source>
             <translation>Для целочисленных параметров необходимы целые значения.</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="85" />
+            <location filename="../designassistant/presentation.py" line="86" />
             <source>Property value is outside the engine bounds.</source>
             <translation>Значение параметра выходит за границы, допустимые движком.</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="86" />
+            <location filename="../designassistant/presentation.py" line="87" />
             <source>A search is already running.</source>
             <translation>Поиск уже выполняется.</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="90" />
+            <location filename="../designassistant/presentation.py" line="91" />
             <source>Stop the search before opening a candidate.</source>
             <translation>Перед открытием кандидата остановите поиск.</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="97" />
+            <location filename="../designassistant/presentation.py" line="98" />
             <source>Missing or inconsistent channel samples: {channel}</source>
             <translation>Отсутствуют или не согласованы отсчёты канала: {channel}</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="101" />
+            <location filename="../designassistant/presentation.py" line="102" />
             <source>Invalid grain channel width: {channel}</source>
             <translation>Неверное число шашек в канале: {channel}</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="105" />
+            <location filename="../designassistant/presentation.py" line="106" />
             <source>Nonfinite or nonnumeric channel data: {channel}</source>
             <translation>Неконечные или нечисловые данные в канале: {channel}</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="107" />
+            <location filename="../designassistant/presentation.py" line="108" />
             <source>Metric is boolean: {metric}</source>
             <translation>Характеристика имеет логическое значение: {metric}</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="108" />
+            <location filename="../designassistant/presentation.py" line="109" />
             <source>Metric is nonfinite: {metric}</source>
             <translation>Характеристика имеет неконечное значение: {metric}</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="122" />
+            <location filename="../designassistant/presentation.py" line="123" />
             <source>Targets</source>
             <translation>Цели</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="123" />
+            <location filename="../designassistant/presentation.py" line="124" />
             <source>Constraints</source>
             <translation>Ограничения</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="124" />
+            <location filename="../designassistant/presentation.py" line="125" />
             <source>Search Settings</source>
             <translation>Настройки поиска</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="132" />
+            <location filename="../designassistant/presentation.py" line="133" />
             <source>Rank</source>
             <translation>Место</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="133" />
+            <location filename="../designassistant/presentation.py" line="134" />
             <source>Candidate</source>
             <translation>Кандидат</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="134" />
+            <location filename="../designassistant/presentation.py" line="135" />
             <source>Score</source>
             <translation>Оценка</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="135" />
+            <location filename="../designassistant/presentation.py" line="136" />
             <source>Status</source>
             <translation>Статус</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="137" />
+            <location filename="../designassistant/presentation.py" line="138" />
             <source>Parameter</source>
             <translation>Параметр</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="138" />
+            <location filename="../designassistant/presentation.py" line="139" />
             <source>Minimum</source>
             <translation>Минимум</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="139" />
+            <location filename="../designassistant/presentation.py" line="140" />
             <source>Maximum</source>
             <translation>Максимум</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="140" />
+            <location filename="../designassistant/presentation.py" line="141" />
             <source>Values</source>
             <translation>Количество значений</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="141" />
+            <location filename="../designassistant/presentation.py" line="142" />
             <source>Unit</source>
             <translation>Единица</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="142" />
+            <location filename="../designassistant/presentation.py" line="143" />
             <source>Metric</source>
             <translation>Характеристика</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="145" />
+            <location filename="../designassistant/presentation.py" line="146" />
             <source>Normalization / Tolerance</source>
             <translation>Нормализация / допуск</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="146" />
+            <location filename="../designassistant/presentation.py" line="147" />
             <source>Add Variable</source>
             <translation>Добавить переменную</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="147" />
+            <location filename="../designassistant/presentation.py" line="148" />
             <source>Add Target</source>
             <translation>Добавить цель</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="148" />
+            <location filename="../designassistant/presentation.py" line="149" />
             <source>Add Constraint</source>
             <translation>Добавить ограничение</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="149" />
+            <location filename="../designassistant/presentation.py" line="150" />
             <source>Remove Selected</source>
             <translation>Удалить выбранное</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="150" />
+            <location filename="../designassistant/presentation.py" line="151" />
             <source>Start</source>
             <translation>Начать</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="151" />
+            <location filename="../designassistant/presentation.py" line="152" />
             <source>Stop</source>
             <translation>Остановить</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="152" />
+            <location filename="../designassistant/presentation.py" line="153" />
             <source>Details</source>
             <translation>Подробности</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="153" />
+            <location filename="../designassistant/presentation.py" line="154" />
             <source>Open in Motor Editor</source>
             <translation>Открыть в редакторе двигателя</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="159" />
+            <location filename="../designassistant/presentation.py" line="160" />
             <source>Strategy</source>
             <translation>Стратегия</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="160" />
+            <location filename="../designassistant/presentation.py" line="161" />
             <source>Candidate Budget</source>
             <translation>Лимит кандидатов</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="161" />
+            <location filename="../designassistant/presentation.py" line="162" />
             <source>Random Seed</source>
             <translation>Начальное значение генератора</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="169" />
+            <location filename="../designassistant/presentation.py" line="170" />
             <source>The current motor must contain grains and a propellant.</source>
             <translation>В текущем двигателе должны быть шашки и топливо.</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="170" />
+            <location filename="../designassistant/presentation.py" line="171" />
             <source>Nozzle — {parameter}</source>
             <translation>Сопло — {parameter}</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="171" />
+            <location filename="../designassistant/presentation.py" line="172" />
             <source>Grain {index} ({geometry}) — {parameter}</source>
             <translation>Шашка {index} ({geometry}) — {parameter}</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="173" />
+            <location filename="../designassistant/presentation.py" line="174" />
             <source>Baseline: {name}. Grain types, grain count, propellant and simulation settings remain fixed.</source>
             <translation>Исходный двигатель: {name}. Типы и количество шашек, топливо и настройки симуляции фиксированы.</translation>
         </message>
@@ -1381,11 +1381,16 @@ The rest of the motor will be imported.</source>
         </message>
         <message>
             <location filename="../designassistant/presentation.py" line="40" />
+            <source>Peak Thrust</source>
+            <translation>Пиковая тяга</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/presentation.py" line="41" />
             <source>Propellant Stack Length</source>
             <translation>Длина топливного заряда</translation>
         </message>
         <message>
-            <location filename="../designassistant/presentation.py" line="41" />
+            <location filename="../designassistant/presentation.py" line="42" />
             <source>Maximum Propellant Diameter</source>
             <translation>Максимальный диаметр топливного заряда</translation>
         </message>
@@ -2671,12 +2676,6 @@ The rest of the motor will be imported.</source>
     <context>
         <name>QuickDesign</name>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="68" />
-            <location filename="../widgets/mainWindow.py" line="184" />
-            <source>Quick Design requirements</source>
-            <translation>Требования быстрого проектирования</translation>
-        </message>
-        <message>
             <location filename="../designassistant/quick_messages.py" line="6" />
             <source>1. What is known?</source>
             <translation>1. Что вам известно?</translation>
@@ -2722,424 +2721,569 @@ The rest of the motor will be imported.</source>
             <translation>Автоматически выбрано: {libraries} записей библиотеки, {variants} сочетаний записи и геометрии.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="15" />
+            <location filename="../designassistant/quick_messages.py" line="17" />
             <source>Back</source>
             <translation>Назад</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="16" />
+            <location filename="../designassistant/quick_messages.py" line="18" />
             <source>Balanced</source>
             <translation>Сбалансированный</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="17" />
+            <location filename="../designassistant/quick_messages.py" line="19" />
             <source>Baseline grains need positive diameters and lengths before automatic design.</source>
             <translation>Для автоматического проектирования исходные шашки должны иметь положительные диаметры и длины.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="18" />
+            <location filename="../designassistant/quick_messages.py" line="20" />
             <source>Best matches found; similar designs are filtered. Up to five recommendations.</source>
             <translation>Лучшие найденные соответствия; похожие варианты отфильтрованы. Не более пяти рекомендаций.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="19" />
+            <location filename="../designassistant/quick_messages.py" line="21" />
             <source>Candidate budget must be between 1 and 10000.</source>
             <translation>Бюджет вариантов должен быть от 1 до 10000.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="20" />
+            <location filename="../designassistant/quick_messages.py" line="22" />
             <source>Cannot build a search space: {reason}</source>
             <translation>Невозможно построить пространство поиска: {reason}</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="21" />
+            <location filename="../designassistant/quick_messages.py" line="23" />
             <source>Cannot find designs</source>
             <translation>Невозможно подобрать варианты</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="22" />
+            <location filename="../designassistant/quick_messages.py" line="24" />
             <source>Cannot open design</source>
             <translation>Невозможно открыть вариант</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="23" />
+            <location filename="../designassistant/quick_messages.py" line="25" />
             <source>Choose at least one existing library entry.</source>
             <translation>Выберите хотя бы одну существующую запись библиотеки.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="24" />
+            <location filename="../designassistant/quick_messages.py" line="26" />
             <source>Choose fewer library entries or a higher search quality.</source>
             <translation>Выберите меньше записей библиотеки или более высокое качество поиска.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="25" />
+            <location filename="../designassistant/quick_messages.py" line="27" />
             <source>Choose...</source>
             <translation>Выбрать...</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="26" />
+            <location filename="../designassistant/quick_messages.py" line="28" />
             <source>Close</source>
             <translation>Закрыть</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="27" />
+            <location filename="../designassistant/quick_messages.py" line="29" />
             <source>Compare</source>
             <translation>Сравнить</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="28" />
+            <location filename="../designassistant/quick_messages.py" line="30" />
             <source>Current geometry</source>
             <translation>Текущая геометрия</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="29" />
+            <location filename="../designassistant/quick_messages.py" line="31" />
             <source>Design priority</source>
             <translation>Приоритет</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="30" />
+            <location filename="../designassistant/quick_messages.py" line="32" />
             <source>Desired average thrust</source>
             <translation>Желаемая средняя тяга</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="31" />
+            <location filename="../designassistant/quick_messages.py" line="33" />
             <source>Desired burn time</source>
             <translation>Желаемое время работы</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="32" />
+            <location filename="../designassistant/quick_messages.py" line="34" />
             <source>Desired total impulse</source>
             <translation>Желаемый суммарный импульс</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="33" />
+            <location filename="../designassistant/quick_messages.py" line="35" />
             <source>Dimensions describe the propellant envelope. Allow extra space for casing, nozzle and gaps. Mass limits cover propellant only.</source>
             <translation>Габариты относятся к топливному заряду. Предусмотрите дополнительное место для корпуса, сопла и зазоров. Ограничение массы относится только к топливу.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="34" />
+            <location filename="../designassistant/quick_messages.py" line="40" />
             <source>Enable a diameter or length requirement before searching.</source>
             <translation>Перед поиском включите требование к диаметру или длине.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="35" />
+            <location filename="../designassistant/quick_messages.py" line="41" />
             <source>Enable burn time, average thrust or total impulse before searching.</source>
             <translation>Перед поиском задайте время работы, среднюю тягу или суммарный импульс.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="36" />
+            <location filename="../designassistant/quick_messages.py" line="42" />
             <source>Enable the values you know. Enter at least one dimensional requirement and one performance characteristic.</source>
             <translation>Включите известные значения. Задайте хотя бы одно габаритное требование и одну требуемую характеристику.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="37" />
+            <location filename="../designassistant/quick_messages.py" line="46" />
             <source>Enter a positive finite value for {requirement}.</source>
             <translation>Введите положительное конечное значение: {requirement}.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="38" />
+            <location filename="../designassistant/quick_messages.py" line="47" />
             <source>Enter at least one dimensional requirement and one performance characteristic.</source>
             <translation>Задайте хотя бы одно габаритное требование и одну требуемую характеристику.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="39" />
+            <location filename="../designassistant/quick_messages.py" line="48" />
             <source>Enter validated Quick Design requirements.</source>
             <translation>Введите проверенные требования быстрого проектирования.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="40" />
+            <location filename="../designassistant/quick_messages.py" line="49" />
             <source>Estimated budget: up to {count} simulations, including rechecks.</source>
             <translation>Ожидаемый бюджет: до {count} расчётов, включая повторные проверки.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="41" />
+            <location filename="../designassistant/quick_messages.py" line="50" />
             <source>Find Designs</source>
             <translation>Подобрать варианты</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="42" />
+            <location filename="../designassistant/quick_messages.py" line="51" />
             <source>Geometry: {geometry}</source>
             <translation>Геометрия: {geometry}</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="43" />
+            <location filename="../designassistant/quick_messages.py" line="52" />
             <source>Known requirements</source>
             <translation>Известные требования</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="44" />
+            <location filename="../designassistant/quick_messages.py" line="53" />
             <source>Library entry: {name}</source>
             <translation>Запись библиотеки: {name}</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="45" />
+            <location filename="../designassistant/quick_messages.py" line="54" />
             <source>Match burn time</source>
             <translation>Время работы</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="46" />
+            <location filename="../designassistant/quick_messages.py" line="55" />
             <source>Match is 100 / (1 + normalized score), not a probability or guarantee.</source>
             <translation>Соответствие равно 100 / (1 + нормализованная оценка); это не вероятность и не гарантия.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="47" />
+            <location filename="../designassistant/quick_messages.py" line="56" />
             <source>Match thrust</source>
             <translation>Тяга</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="48" />
+            <location filename="../designassistant/quick_messages.py" line="57" />
             <source>Match total impulse</source>
             <translation>Суммарный импульс</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="49" />
+            <location filename="../designassistant/quick_messages.py" line="58" />
             <source>Match: {percent}%</source>
             <translation>Соответствие: {percent}%</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="50" />
+            <location filename="../designassistant/quick_messages.py" line="59" />
             <source>Maximum</source>
             <translation>Не больше</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="51" />
+            <location filename="../designassistant/quick_messages.py" line="60" />
             <source>Maximum diameter</source>
             <translation>Максимальный диаметр</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="52" />
+            <location filename="../designassistant/quick_messages.py" line="61" />
             <source>Maximum motor length</source>
             <translation>Максимальная длина двигателя</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="53" />
+            <location filename="../designassistant/quick_messages.py" line="62" />
             <source>Meets configured constraints</source>
             <translation>Соответствует заданным ограничениям</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="54" />
+            <location filename="../designassistant/quick_messages.py" line="63" />
             <source>Minimum</source>
             <translation>Не меньше</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="55" />
+            <location filename="../designassistant/quick_messages.py" line="64" />
             <source>Minimum and maximum requirements contradict each other.</source>
             <translation>Минимальное и максимальное требования противоречат друг другу.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="56" />
+            <location filename="../designassistant/quick_messages.py" line="65" />
             <source>Next</source>
             <translation>Далее</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="57" />
+            <location filename="../designassistant/quick_messages.py" line="66" />
             <source>No admissible designs yet. Review requirements or allowed options.</source>
             <translation>Допустимых вариантов пока нет. Проверьте требования и разрешённые записи.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="58" />
+            <location filename="../designassistant/quick_messages.py" line="67" />
             <source>No compatible existing library entries are available.</source>
             <translation>Нет совместимых существующих записей библиотеки.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="59" />
+            <location filename="../designassistant/quick_messages.py" line="68" />
             <source>No parameterizable library and geometry options satisfy the dimensional bounds.</source>
             <translation>Нет сочетаний записи и геометрии, которые можно настроить в заданных габаритных пределах.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="60" />
+            <location filename="../designassistant/quick_messages.py" line="69" />
             <source>No performance Target was entered. Ranking aims at an entered performance limit; limits remain mandatory.</source>
             <translation>Целевая характеристика не задана. Для ранжирования используется введённая граница характеристики; ограничения остаются обязательными.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="61" />
+            <location filename="../designassistant/quick_messages.py" line="73" />
             <source>Open a baseline motor containing at least one configured grain.</source>
             <translation>Откройте исходный двигатель хотя бы с одной настроенной топливной шашкой.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="62" />
+            <location filename="../designassistant/quick_messages.py" line="74" />
             <source>Open in Design Assistant</source>
             <translation>Открыть в Design Assistant</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="63" />
+            <location filename="../designassistant/quick_messages.py" line="75" />
             <source>Open in Motor Editor</source>
             <translation>Открыть в редакторе</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="64" />
+            <location filename="../designassistant/quick_messages.py" line="76" />
             <source>Other limits (optional)</source>
             <translation>Другие ограничения (необязательно)</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="65" />
+            <location filename="../designassistant/quick_messages.py" line="77" />
             <source>Priority changes only weights of enabled targets; it does not create missing targets.</source>
             <translation>Приоритет меняет только веса включённых целей и не создаёт отсутствующие цели.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="66" />
+            <location filename="../designassistant/quick_messages.py" line="80" />
             <source>Quick</source>
             <translation>Быстрый</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="67" />
+            <location filename="../designassistant/quick_messages.py" line="81" />
             <source>Quick Design</source>
             <translation>Быстрое проектирование</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="69" />
+            <location filename="../designassistant/quick_messages.py" line="82" />
+            <source>Quick Design requirements</source>
+            <translation>Требования быстрого проектирования</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/quick_messages.py" line="83" />
             <source>Ready</source>
             <translation>Готово</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="70" />
+            <location filename="../designassistant/quick_messages.py" line="84" />
             <source>Recommended Design {number}</source>
             <translation>Рекомендуемый вариант {number}</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="71" />
+            <location filename="../designassistant/quick_messages.py" line="85" />
             <source>Recommended designs</source>
             <translation>Рекомендуемые варианты</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="72" />
+            <location filename="../designassistant/quick_messages.py" line="86" />
             <source>Reject candidates with WARNING alerts</source>
             <translation>Исключать варианты с предупреждениями WARNING</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="73" />
+            <location filename="../designassistant/quick_messages.py" line="87" />
             <source>Results are simulation-based and depend on the entered model, material data and constraints.</source>
             <translation>Результаты основаны на моделировании и зависят от введённых данных, свойств материалов и заданных ограничений.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="74" />
+            <location filename="../designassistant/quick_messages.py" line="90" />
             <source>Search completed</source>
             <translation>Поиск завершён</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="75" />
+            <location filename="../designassistant/quick_messages.py" line="91" />
             <source>Search failed</source>
             <translation>Ошибка поиска</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="76" />
+            <location filename="../designassistant/quick_messages.py" line="92" />
             <source>Search problem and skipped options</source>
             <translation>Постановка задачи и пропущенные варианты</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="77" />
+            <location filename="../designassistant/quick_messages.py" line="93" />
             <source>Search quality</source>
             <translation>Качество поиска</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="78" />
+            <location filename="../designassistant/quick_messages.py" line="94" />
             <source>Search seed must be an integer and warning policy must be boolean.</source>
             <translation>Seed поиска должен быть целым числом, а политика предупреждений — логическим значением.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="79" />
+            <location filename="../designassistant/quick_messages.py" line="95" />
             <source>Search stopped</source>
             <translation>Поиск остановлен</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="80" />
+            <location filename="../designassistant/quick_messages.py" line="96" />
             <source>Searching for suitable designs...</source>
             <translation>Поиск подходящих вариантов...</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="81" />
+            <location filename="../designassistant/quick_messages.py" line="97" />
             <source>Select a supported design priority and search quality.</source>
             <translation>Выберите поддерживаемый приоритет и качество поиска.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="82" />
+            <location filename="../designassistant/quick_messages.py" line="98" />
             <source>Select a supported requirement and Target, Minimum or Maximum.</source>
             <translation>Выберите поддерживаемое требование и режим «Цель», «Не меньше» или «Не больше».</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="83" />
+            <location filename="../designassistant/quick_messages.py" line="99" />
             <source>Select for comparison</source>
             <translation>Выбрать для сравнения</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="84" />
+            <location filename="../designassistant/quick_messages.py" line="100" />
             <source>Select supported project requirements.</source>
             <translation>Выберите поддерживаемые требования проекта.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="85" />
+            <location filename="../designassistant/quick_messages.py" line="101" />
             <source>Selected library entries: {count}</source>
             <translation>Выбрано записей библиотеки: {count}</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="86" />
+            <location filename="../designassistant/quick_messages.py" line="102" />
             <source>Simulations: {completed}/{total}   Valid: {valid}   Rejected: {rejected}   Best match: {match}   Elapsed: {seconds} s</source>
             <translation>Расчёты: {completed}/{total}   Допустимых: {valid}   Отклонено: {rejected}   Лучшее соответствие: {match}   Прошло: {seconds} s</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="87" />
+            <location filename="../designassistant/quick_messages.py" line="107" />
             <source>Skipped geometry {geometry}: baseline parameters cannot initialize it.</source>
             <translation>Геометрия {geometry} пропущена: исходных параметров недостаточно для её настройки.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="88" />
+            <location filename="../designassistant/quick_messages.py" line="108" />
             <source>Skipped library entry {name}: stored data failed engine validation.</source>
             <translation>Запись библиотеки {name} пропущена: сохранённые данные не прошли проверку движка.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="89" />
+            <location filename="../designassistant/quick_messages.py" line="109" />
             <source>Skipped option {name} / {geometry}: {reason}</source>
             <translation>Вариант {name} / {geometry} пропущен: {reason}</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="90" />
+            <location filename="../designassistant/quick_messages.py" line="110" />
             <source>Stop</source>
             <translation>Остановить</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="91" />
+            <location filename="../designassistant/quick_messages.py" line="111" />
             <source>Stopped results may be provisional.</source>
             <translation>Результаты остановленного поиска могут быть предварительными.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="92" />
+            <location filename="../designassistant/quick_messages.py" line="112" />
             <source>Stopping...</source>
             <translation>Остановка...</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="93" />
+            <location filename="../designassistant/quick_messages.py" line="113" />
             <source>Target</source>
             <translation>Цель</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="94" />
+            <location filename="../designassistant/quick_messages.py" line="114" />
             <source>Technical details</source>
             <translation>Технические детали</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="95" />
+            <location filename="../designassistant/quick_messages.py" line="115" />
             <source>The same requirement and mode cannot be entered twice.</source>
             <translation>Одно требование в одном режиме нельзя задавать дважды.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="96" />
+            <location filename="../designassistant/quick_messages.py" line="116" />
             <source>Thorough</source>
             <translation>Тщательный</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="97" />
+            <location filename="../designassistant/quick_messages.py" line="117" />
             <source>Use compatible library entries</source>
             <translation>Использовать совместимые записи</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="98" />
+            <location filename="../designassistant/quick_messages.py" line="118" />
             <source>Warnings: {count}</source>
             <translation>Предупреждения: {count}</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="99" />
+            <location filename="../designassistant/quick_messages.py" line="119" />
             <source>Why this design?</source>
             <translation>Почему этот вариант?</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/quick_messages.py" line="123" />
+            <source>A match index requires a finite nonnegative score.</source>
+            <translation>Индекс соответствия требует конечной неотрицательной оценки.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/quick_messages.py" line="124" />
+            <source>Automatic ranges require numeric engine metadata.</source>
+            <translation>Для автоматических диапазонов нужны числовые параметры движка.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/quick_messages.py" line="125" />
+            <source>Average thrust × burn time differs substantially from the requested total impulse. These targets may conflict; simulation results will determine the trade-off.</source>
+            <translation>Произведение средней тяги и времени работы существенно отличается от заданного суммарного импульса. Эти цели могут противоречить друг другу; компромисс будет определён по результатам моделирования.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/quick_messages.py" line="130" />
+            <source>Diameter and length must be maximum limits; burn time must be a target.</source>
+            <translation>Диаметр и длина должны быть верхними пределами, а время работы — целевым значением.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/quick_messages.py" line="131" />
+            <source>Dimensions do not allow an engine property range.</source>
+            <translation>При заданных габаритах невозможно построить допустимый диапазон параметра движка.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/quick_messages.py" line="132" />
+            <source>Dimensions must be positive finite values.</source>
+            <translation>Габариты должны быть положительными конечными числами.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/quick_messages.py" line="133" />
+            <source>Engine setter read-back rejected an initial property.</source>
+            <translation>Проверка после установки параметра показала, что движок отклонил исходное значение.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/quick_messages.py" line="134" />
+            <source>Engine setter rejected generated design or project configuration.</source>
+            <translation>Движок отклонил параметры созданного варианта или настройки проекта.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/quick_messages.py" line="135" />
+            <source>Enter maximum diameter, maximum length and desired burn time before searching.</source>
+            <translation>Перед поиском задайте максимальный диаметр, максимальную длину и желаемое время работы.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/quick_messages.py" line="136" />
+            <source>Enter maximum diameter, maximum length and desired burn time. Quick Design creates grains and a nozzle automatically; the current motor provides only general settings.</source>
+            <translation>Задайте максимальный диаметр, максимальную длину и желаемое время работы. Быстрое проектирование создаёт шашки и сопло автоматически; из текущего двигателя берутся только общие настройки.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/quick_messages.py" line="141" />
+            <source>Geometries to explore: {geometries}</source>
+            <translation>Исследуемые геометрии: {geometries}</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/quick_messages.py" line="142" />
+            <source>Grain count is outside the dimension-driven exploration range.</source>
+            <translation>Число шашек выходит за диапазон исследования для заданных габаритов.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/quick_messages.py" line="143" />
+            <source>Grain counts to explore: {counts}</source>
+            <translation>Исследуемое число шашек: {counts}</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/quick_messages.py" line="144" />
+            <source>Grains: {count}</source>
+            <translation>Число шашек: {count}</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/quick_messages.py" line="145" />
+            <source>Increase search quality or select fewer existing library entries.</source>
+            <translation>Увеличьте качество поиска или выберите меньше существующих записей библиотеки.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/quick_messages.py" line="146" />
+            <source>Library data failed existing engine validation.</source>
+            <translation>Данные библиотеки не прошли штатную проверку движка.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/quick_messages.py" line="147" />
+            <source>Obtained result</source>
+            <translation>Полученный результат</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/quick_messages.py" line="148" />
+            <source>Optional targets</source>
+            <translation>Дополнительные цели</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/quick_messages.py" line="149" />
+            <source>Optional thrust and impulse must be targets; use Other limits for bounds.</source>
+            <translation>Дополнительные значения тяги и импульса должны быть целями; пределы задаются в разделе других ограничений.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/quick_messages.py" line="150" />
+            <source>Potentially conflicting targets</source>
+            <translation>Возможное противоречие целей</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/quick_messages.py" line="151" />
+            <source>Recommendations require a limit of 1–5 and diversity between 0 and 1.</source>
+            <translation>Число рекомендаций должно быть от 1 до 5, а порог разнообразия — от 0 до 1.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/quick_messages.py" line="152" />
+            <source>Required</source>
+            <translation>Обязательно</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/quick_messages.py" line="153" />
+            <source>Run the search before opening a recommendation in Design Assistant.</source>
+            <translation>Выполните поиск перед открытием рекомендации в помощнике проектирования.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/quick_messages.py" line="154" />
+            <source>Set target value</source>
+            <translation>Задать целевое значение</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/quick_messages.py" line="155" />
+            <source>Skipped geometry {geometry}, {count} grains: {reason}</source>
+            <translation>Геометрия {geometry}, число шашек {count}, пропущена: {reason}</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/quick_messages.py" line="156" />
+            <source>The budget covers {selected} of {total} possible library/geometry/count combinations.</source>
+            <translation>Бюджет охватывает {selected} из {total} возможных сочетаний библиотеки, геометрии и числа шашек.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/quick_messages.py" line="159" />
+            <source>The existing engine requires an end burner to be the forward-most grain.</source>
+            <translation>Штатный движок требует, чтобы шашка торцевого горения была первой со стороны передней крышки.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/quick_messages.py" line="160" />
+            <source>This geometry has no automatic parameterization.</source>
+            <translation>Для этой геометрии нет автоматической параметризации.</translation>
         </message>
     </context>
     <context>

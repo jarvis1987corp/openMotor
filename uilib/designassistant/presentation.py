@@ -36,7 +36,8 @@ STATUS_LABELS = {
     "stopped": QT_TRANSLATE_NOOP("DesignAssistant", "Stopped"),
     "failed": QT_TRANSLATE_NOOP("DesignAssistant", "Failed"),
 }
-DIMENSION_LABELS = {
+QUICK_LABELS = {
+    "peak_thrust": QT_TRANSLATE_NOOP("DesignMetrics", "Peak Thrust"),
     "propellant_length": QT_TRANSLATE_NOOP("DesignMetrics", "Propellant Stack Length"),
     "maximum_diameter": QT_TRANSLATE_NOOP("DesignMetrics", "Maximum Propellant Diameter"),
 }
@@ -239,7 +240,7 @@ def metric_unit(key, preferences):
 
 
 def metric_label(key):
-    return display_text((METRIC_LABELS | DIMENSION_LABELS)[key])
+    return display_text((METRIC_LABELS | QUICK_LABELS)[key])
 
 
 def candidate_status(evaluation):
@@ -256,7 +257,7 @@ def reason_text(reason):
             identity = reason[len(prefix) :]
             label = (
                 metric_label(identity)
-                if argument == "metric" and identity in (METRIC_LABELS | DIMENSION_LABELS)
+                if argument == "metric" and identity in (METRIC_LABELS | QUICK_LABELS)
                 else (display_text(CHANNEL_LABELS.get(identity, identity)))
             )
             return display_text(template).format(**{argument: label})
@@ -275,7 +276,7 @@ def diagnostic_text(diagnostic, options=()):
         values = {key: argument(value) for key, value in kwargs.items()}
         if "path" in values:
             values["path"] = labels.get(values["path"], values["path"])
-        if "metric" in values and values["metric"] in (METRIC_LABELS | DIMENSION_LABELS):
+        if "metric" in values and values["metric"] in (METRIC_LABELS | QUICK_LABELS):
             values["metric"] = metric_label(values["metric"])
         if "reason" in values:
             values["reason"] = reason_text(str(values["reason"]))

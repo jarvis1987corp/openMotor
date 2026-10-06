@@ -10,7 +10,10 @@ in [SMART_DESIGN.md](../SMART_DESIGN.md).
 `quick.py` adds `QuickCriterion`, `QuickDesignRequirements`,
 `QuickDesignRequirementsValidator` and `QuickDesignProblemBuilder`. These compile
 simple requirements into the same Smart plan and engine API. Its scoped metric
-registry adds two existing envelope getters without changing default metrics.
+registry adds two existing envelope getters and peak thrust through the existing
+force channel getter, without changing default metrics.
+The Qt-free `quick_generation.py` creates dimension-driven geometry/nozzle
+snapshots from scratch and explores grain counts independently of baseline.
 See [QUICK_DESIGN.md](../QUICK_DESIGN.md) for assumptions and limits.
 
 ## Pipeline and public API

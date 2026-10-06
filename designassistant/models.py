@@ -6,6 +6,7 @@ import json
 import math
 from dataclasses import dataclass
 from enum import Enum
+from numbers import Integral, Real
 
 from .paths import PropertyPath
 
@@ -250,6 +251,10 @@ class TextRecord:
             if item is None or type(item) in (str, bool, int, float):
                 # Nonfinite diagnostics remain text; they are not numeric results.
                 return str(item) if isinstance(item, float) and not math.isfinite(item) else item
+            if isinstance(item, Real):
+                # NumPy scalars must retain numbers for translated {:.3f} alerts.
+                value = int(item) if isinstance(item, Integral) else float(item)
+                return value if math.isfinite(value) else str(item)
             return str(item)
 
         return cls(
