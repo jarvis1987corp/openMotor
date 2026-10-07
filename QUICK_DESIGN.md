@@ -116,7 +116,10 @@ thickness. Nozzle exit also fits the entered diameter. Mass is propellant only.
 The wizard states this prominently because the existing engine has no hardware
 layout model. Reserve hardware space when entering limits.
 
-Match (%) is `100 / (1 + normalized score)`, a display index rather than a
+Match (%) is `100 × exp(-3 × score)`, with equal weighted-mean/worst-relative-error
+terms in score. Target status is separate from constraints; reporting tolerances
+are centralized at 10% (MATCHED) and 20% (NEAR). See `SEARCH_INFRASTRUCTURE.md`.
+Match remains a display index rather than a
 probability, safety claim or separate objective. The existing hard constraints
 precede scoring. A deterministic 3% diversity filter avoids nearly identical
 same-library/geometry results; there can be fewer than five recommendations.
@@ -132,7 +135,7 @@ outside this implementation.
 
 ## Windows
 
-**Windows Standalone Build** publishes **openMotor-QuickDesign-V2-Windows-x64**
+**Windows Standalone Build** publishes **openMotor-QuickDesign-V2-SearchInfrastructure-Windows-x64**
 after source suites and native frozen checks pass. Download the artifact ZIP,
 extract it completely, then run `openMotor.exe` with `_internal` alongside it.
 Python is not required. Frozen checks start Quick from an empty Motor Editor,

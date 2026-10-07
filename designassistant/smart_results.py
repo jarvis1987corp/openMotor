@@ -4,6 +4,7 @@ import json
 from dataclasses import dataclass
 
 from .models import TextRecord
+from .objectives import TargetStatus, target_errors, target_status
 
 
 @dataclass(frozen=True)
@@ -21,6 +22,9 @@ class TargetDeviation:
     deviation: float
     normalized_deviation: float
     contribution: float
+    relative_error: float
+    status: TargetStatus
+    weight: float
 
 
 @dataclass(frozen=True)
@@ -37,6 +41,7 @@ class CandidateAnalysis:
     targets: tuple[TargetDeviation, ...]
     constraints: tuple[ConstraintMargin, ...]
     explanations: tuple[TextRecord, ...]
+    target_status: TargetStatus
 
 
 def _message(source, **arguments):
@@ -46,13 +51,17 @@ def _message(source, **arguments):
 def analyze_candidate(evaluation, requirements, *, verified=False):
     targets, margins, explanations = [], [], []
     weight = sum(t.weight for t in requirements.targets)
-    for target in requirements.targets:
-        actual = evaluation.outcome.metric(target.metric)
+    errors = target_errors(requirements.targets, evaluation.outcome.metric)
+    by_metric = {t.metric: t for t in requirements.targets}
+    for error in errors:
+        target = by_metric[error.metric]
+        actual = error.actual
         deviation = actual - target.value
-        normalized = abs(deviation) / target.scale
+        normalized = error.relative_error
         targets.append(
             TargetDeviation(
-                target.metric, target.value, actual, deviation, normalized, target.weight / weight * normalized
+                target.metric, target.value, actual, deviation, normalized, target.weight / weight * normalized,
+                error.relative_error, error.status, target.weight,
             )
         )
     for constraint in requirements.constraints:
@@ -73,7 +82,7 @@ def analyze_candidate(evaluation, requirements, *, verified=False):
                 deviation="{:.6g}".format(closest.normalized_deviation),
             )
         )
-        if all(t.normalized_deviation <= 1 for t in active):
+        if target_status(errors) == TargetStatus.MATCHED:
             explanations.append(_message("All active targets are within their specified tolerance."))
         if len(active) > 1:
             explanations.append(_message("Weighted trade-off between {count} targets.", count=len(active)))
@@ -88,7 +97,7 @@ def analyze_candidate(evaluation, requirements, *, verified=False):
         )
     if verified:
         explanations.append(_message("Rechecked with unchanged simulation settings."))
-    return CandidateAnalysis(tuple(targets), tuple(margins), tuple(explanations))
+    return CandidateAnalysis(tuple(targets), tuple(margins), tuple(explanations), target_status(errors))
 
 
 @dataclass(frozen=True)

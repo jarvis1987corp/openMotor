@@ -847,6 +847,50 @@ class SmartGuiTests(unittest.TestCase):
                         self.assertIn(("DesignAssistant", node.args[0].value), messages)
 
 
+class SyntheticAssessmentGuiTests(unittest.TestCase):
+    """Only dimensionless goal data is used by these presentation checks."""
+
+    def tearDown(self):
+        APP.translationManager.setLanguage("en")
+
+    def analysis(self):
+        from types import SimpleNamespace
+
+        from designassistant.models import Target
+        from designassistant.smart_results import analyze_candidate
+
+        values = {"quality": 18.0}
+        requirements = SimpleNamespace(targets=(Target("quality", 100, 10),), constraints=())
+        evaluation = SimpleNamespace(outcome=SimpleNamespace(metric=values.__getitem__))
+        return analyze_candidate(evaluation, requirements)
+
+    def test_constraint_and_target_status_have_separate_labels(self):
+        from PyQt6.QtWidgets import QLabel
+
+        from uilib.designassistant.assessment import assessment_lines
+
+        analysis = self.analysis()
+        for language in ("en", "ru", "en"):
+            APP.translationManager.setLanguage(language)
+            label = QLabel("\n".join(assessment_lines(analysis, True)))
+            self.assertIn("Статус ограничений:" if language == "ru" else "Constraint status:", label.text())
+            self.assertIn("Статус целей:" if language == "ru" else "Target status:", label.text())
+            self.assertIn("НЕ ДОСТИГНУТО" if language == "ru" else "MISSED", label.text())
+            self.assertIn("-82.0%", label.text())
+            label.deleteLater()
+
+    def test_no_target_match_is_presented_as_closest_candidates(self):
+        from types import SimpleNamespace
+
+        from uilib.designassistant.assessment import closest_only, tr
+
+        self.assertTrue(closest_only((SimpleNamespace(analysis=self.analysis()),)))
+        for language in ("en", "ru", "en"):
+            APP.translationManager.setLanguage(language)
+            self.assertEqual(tr("Closest candidates"),
+                             "Ближайшие найденные варианты" if language == "ru" else "Closest candidates")
+
+
 class QuickDesignGuiTests(unittest.TestCase):
     def setUp(self):
         APP.translationManager.setLanguage("en")

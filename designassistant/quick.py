@@ -18,6 +18,7 @@ from .models import (
     TextRecord,
     finite_number,
 )
+from .objectives import match_percentage as match_percentage
 from .quick_generation import QuickDesignGeometryFactory, QuickDesignSearchSpaceBuilder, QuickDimensions
 from .smart import QUALITY_BUDGETS, SmartDesignRequirements, SmartSearchPlan
 
@@ -261,13 +262,6 @@ class QuickDesignProblemBuilder:
         if not entries:
             raise QuickDesignError("No compatible existing library entries are available.")
         return tuple(entries), diagnostics
-
-
-def match_percentage(score):
-    """Display index only: monotonic in the existing score, not a probability."""
-    if not finite_number(score) or score < 0:
-        raise ValueError("A match index requires a finite nonnegative score.")
-    return 100.0 / (1.0 + score)
 
 
 def recommended_designs(store, limit=5, diversity=0.03):

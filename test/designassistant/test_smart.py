@@ -395,7 +395,7 @@ class SmartResultsTests(unittest.TestCase):
         analysis = analyze_candidate(evaluation, req, verified=True)
         self.assertAlmostEqual(analysis.targets[0].deviation, 0.1)
         self.assertEqual(analysis.targets[1].deviation, -10)
-        self.assertAlmostEqual(analysis.targets[1].contribution, 2 / 3)
+        self.assertAlmostEqual(analysis.targets[1].contribution, 1 / 6)
         self.assertGreater(analysis.constraints[0].normalized_margin, 0)
         sources = [m.source for m in analysis.explanations]
         self.assertTrue(any("Closest target" in m for m in sources))
@@ -458,8 +458,8 @@ class SmartEngineTests(unittest.TestCase):
     def test_rejected_setter_stays_before_simulation(self):
         search = SmartSearchStrategy(plan())
         first = search.ask()
-        second = search.ask()
         search.tell(fake_evaluation(first))
+        second = search.ask()
         original = Motor
 
         def reject(data):

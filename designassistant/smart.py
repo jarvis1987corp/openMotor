@@ -13,11 +13,11 @@ from motorlib.motor import Motor
 from motorlib.properties import FloatProperty, IntProperty
 
 from .generator import CandidateGenerator
+from .hierarchical import QUALITY_BUDGETS as QUALITY_BUDGETS
 from .metrics import DEFAULT_METRICS, MetricRegistry
 from .models import DesignRequirements, DesignVariable, ParameterRange, Snapshot, finite_number
 from .paths import PropertyPath
 
-QUALITY_BUDGETS = {"quick": 60, "balanced": 180, "thorough": 540}
 CURRENT_GEOMETRY = "current"
 
 

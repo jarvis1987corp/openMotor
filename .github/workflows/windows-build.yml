@@ -115,7 +115,7 @@ jobs:
       - name: Upload runnable Windows distribution
         uses: actions/upload-artifact@v4
         with:
-          name: openMotor-QuickDesign-V2-Windows-x64
+          name: openMotor-QuickDesign-V2-SearchInfrastructure-Windows-x64
           path: dist/windows/onedir/openMotor/
           include-hidden-files: true
           if-no-files-found: error

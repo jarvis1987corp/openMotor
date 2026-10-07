@@ -183,21 +183,10 @@ The rest of the motor will be imported.</source>
             <translation>Не выполнено необходимое условие!</translation>
         </message>
         <message>
-            <location filename="../converters/burnsimExporter.py" line="41" />
             <location filename="../converters/burnsimImporter.py" line="67" />
+            <location filename="../converters/burnsimExporter.py" line="41" />
             <source>BurnSim File</source>
             <translation>Файл BurnSim</translation>
-        </message>
-        <message>
-            <location filename="../converters/burnsimImporter.py" line="67" />
-            <source>Loads motor files for BurnSim 3.0</source>
-            <translation>Загружает файлы двигателей BurnSim 3.0</translation>
-        </message>
-        <message>
-            <location filename="../converters/burnsimExporter.py" line="42" />
-            <location filename="../converters/burnsimImporter.py" line="67" />
-            <source>BurnSim Files</source>
-            <translation>Файлы BurnSim</translation>
         </message>
         <message>
             <location filename="../converters/burnsimExporter.py" line="42" />
@@ -205,9 +194,35 @@ The rest of the motor will be imported.</source>
             <translation>Экспортирует текущий двигатель для использования в BurnSim 3.0</translation>
         </message>
         <message>
+            <location filename="../converters/burnsimImporter.py" line="67" />
+            <location filename="../converters/burnsimExporter.py" line="42" />
+            <source>BurnSim Files</source>
+            <translation>Файлы BurnSim</translation>
+        </message>
+        <message>
             <location filename="../converters/burnsimExporter.py" line="43" />
             <source>Current motor must have a propellant set to export as a BurnSim file.</source>
             <translation>Для экспорта в файл BurnSim необходимо выбрать топливо двигателя.</translation>
+        </message>
+        <message>
+            <location filename="../converters/engExporter.py" line="45" />
+            <source>ENG File</source>
+            <translation>Файл ENG</translation>
+        </message>
+        <message>
+            <location filename="../converters/engExporter.py" line="46" />
+            <source>Exports the results of a simulation in the RASP ENG format</source>
+            <translation>Экспортирует результаты симуляции в формате RASP ENG</translation>
+        </message>
+        <message>
+            <location filename="../converters/engExporter.py" line="46" />
+            <source>RASP Files</source>
+            <translation>Файлы RASP</translation>
+        </message>
+        <message>
+            <location filename="../converters/engExporter.py" line="48" />
+            <source>Must have run a simulation to export a .ENG file.</source>
+            <translation>Для экспорта файла .ENG необходимо выполнить симуляцию.</translation>
         </message>
         <message>
             <location filename="../converters/csvExporter.py" line="31" />
@@ -230,6 +245,11 @@ The rest of the motor will be imported.</source>
             <translation>Для экспорта файла .CSV необходимо выполнить симуляцию.</translation>
         </message>
         <message>
+            <location filename="../converters/burnsimImporter.py" line="67" />
+            <source>Loads motor files for BurnSim 3.0</source>
+            <translation>Загружает файлы двигателей BurnSim 3.0</translation>
+        </message>
+        <message>
             <location filename="../converters/imageExporter.py" line="47" />
             <source>Image File</source>
             <translation>Изображение</translation>
@@ -248,26 +268,6 @@ The rest of the motor will be imported.</source>
             <location filename="../converters/imageExporter.py" line="50" />
             <source>Must have run a simulation to export a .PNG file.</source>
             <translation>Для экспорта файла .PNG необходимо выполнить симуляцию.</translation>
-        </message>
-        <message>
-            <location filename="../converters/engExporter.py" line="45" />
-            <source>ENG File</source>
-            <translation>Файл ENG</translation>
-        </message>
-        <message>
-            <location filename="../converters/engExporter.py" line="46" />
-            <source>Exports the results of a simulation in the RASP ENG format</source>
-            <translation>Экспортирует результаты симуляции в формате RASP ENG</translation>
-        </message>
-        <message>
-            <location filename="../converters/engExporter.py" line="46" />
-            <source>RASP Files</source>
-            <translation>Файлы RASP</translation>
-        </message>
-        <message>
-            <location filename="../converters/engExporter.py" line="48" />
-            <source>Must have run a simulation to export a .ENG file.</source>
-            <translation>Для экспорта файла .ENG необходимо выполнить симуляцию.</translation>
         </message>
     </context>
     <context>
@@ -1336,6 +1336,76 @@ The rest of the motor will be imported.</source>
             <source>Baseline: {name}. Grain types, grain count, propellant and simulation settings remain fixed.</source>
             <translation>Исходный двигатель: {name}. Типы и количество шашек, топливо и настройки симуляции фиксированы.</translation>
         </message>
+        <message>
+            <location filename="../designassistant/assessment.py" line="8" />
+            <source>Constraint status: {status}</source>
+            <translation>Статус ограничений: {status}</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/assessment.py" line="9" />
+            <source>Target status: {status}</source>
+            <translation>Статус целей: {status}</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/assessment.py" line="10" />
+            <source>Satisfied</source>
+            <translation>Соблюдены</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/assessment.py" line="11" />
+            <source>Not satisfied</source>
+            <translation>Не соблюдены</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/assessment.py" line="12" />
+            <source>MATCHED</source>
+            <translation>СОВПАДАЕТ</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/assessment.py" line="13" />
+            <source>NEAR</source>
+            <translation>БЛИЗКО</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/assessment.py" line="14" />
+            <source>MISSED</source>
+            <translation>НЕ ДОСТИГНУТО</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/assessment.py" line="15" />
+            <source>Closest candidates</source>
+            <translation>Ближайшие найденные варианты</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/assessment.py" line="16" />
+            <source>Closest candidate {number}</source>
+            <translation>Ближайший вариант {number}</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/assessment.py" line="17" />
+            <source>No candidate matched all targets within this search. Closest candidates follow.</source>
+            <translation>В пределах выполненного поиска вариант, соответствующий всем заданным целям, не найден. Ниже показаны ближайшие найденные варианты.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/assessment.py" line="20" />
+            <source>{metric}: target {target}; actual {actual}; error {error}; {status}</source>
+            <translation>{metric}: цель {target}; результат {actual}; ошибка {error}; {status}</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/assessment.py" line="21" />
+            <source>Match = 100 × exp(-3 × score); score includes a worst-objective penalty.</source>
+            <translation>Соответствие = 100 × exp(-3 × оценка); оценка включает штраф за наибольшую ошибку цели.</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/assessment.py" line="22" />
+            <source>Combinations screened: {screened}/{available}</source>
+            <translation>Проверено комбинаций: {screened}/{available}</translation>
+        </message>
+        <message>
+            <location filename="../designassistant/assessment.py" line="23" />
+            <source>Broad screening</source>
+            <translation>Широкий первичный поиск</translation>
+        </message>
     </context>
     <context>
         <name>DesignMetrics</name>
@@ -1504,16 +1574,11 @@ The rest of the motor will be imported.</source>
             <translation>Критическое сечение: {}</translation>
         </message>
         <message>
-            <location filename="../../motorlib/grains/cGrain.py" line="31" />
             <location filename="../../motorlib/grains/conical.py" line="190" />
+            <location filename="../../motorlib/grains/cGrain.py" line="31" />
             <location filename="../../motorlib/grain.py" line="131" />
             <source>Length: {}</source>
             <translation>Длина: {}</translation>
-        </message>
-        <message>
-            <location filename="../../motorlib/grains/star.py" line="38" />
-            <source>Length: {}, Points: {}</source>
-            <translation>Длина: {}, лучей: {}</translation>
         </message>
         <message>
             <location filename="../../motorlib/grains/moonBurner.py" line="26" />
@@ -1527,9 +1592,9 @@ The rest of the motor will be imported.</source>
             <translation>Длина: {}, пазы: {} на {}</translation>
         </message>
         <message>
-            <location filename="../../motorlib/grains/finocyl.py" line="53" />
-            <source>Length: {}, Core: {}, Fins: {}</source>
-            <translation>Длина: {}, канал: {}, рёбер (Fins): {}</translation>
+            <location filename="../../motorlib/grains/star.py" line="38" />
+            <source>Length: {}, Points: {}</source>
+            <translation>Длина: {}, лучей: {}</translation>
         </message>
         <message>
             <location filename="../../motorlib/grains/dGrain.py" line="26" />
@@ -1540,6 +1605,11 @@ The rest of the motor will be imported.</source>
             <location filename="../../motorlib/grains/rodTube.py" line="59" />
             <source>Length: {}, Core: {}, Rod: {}</source>
             <translation>Длина: {}, канал: {}, стержень: {}</translation>
+        </message>
+        <message>
+            <location filename="../../motorlib/grains/finocyl.py" line="53" />
+            <source>Length: {}, Core: {}, Fins: {}</source>
+            <translation>Длина: {}, канал: {}, рёбер (Fins): {}</translation>
         </message>
     </context>
     <context>
@@ -2093,20 +2163,11 @@ The rest of the motor will be imported.</source>
             <translation>Существующий файл</translation>
         </message>
         <message>
-            <location filename="../tools/nozzleCoeff.py" line="16" />
-            <source>Post-Fire Throat Diameter</source>
-            <translation>Диаметр критического сечения после испытания</translation>
-        </message>
-        <message>
-            <location filename="../tools/nozzleCoeff.py" line="19" />
-            <source>Convergence Threshold</source>
-            <translation>Порог сходимости</translation>
-        </message>
-        <message>
-            <location filename="../../motorlib/units.py" line="13" />
-            <location filename="../tools/maxPressure.py" line="9" />
-            <source>Pressure</source>
-            <translation>Давление</translation>
+            <location filename="../tools/initialKN.py" line="9" />
+            <location filename="../tools/maxKN.py" line="9" />
+            <source>Kn</source>
+            <translation>Kn</translation>
+            <translatorcomment>Intentionally unchanged: symbol, shortcut, notation or established proper name.</translatorcomment>
         </message>
         <message>
             <location filename="../../motorlib/grain.py" line="37" />
@@ -2135,11 +2196,60 @@ The rest of the motor will be imported.</source>
             <translation>Начальный Kn</translation>
         </message>
         <message>
-            <location filename="../tools/maxKN.py" line="9" />
-            <location filename="../tools/initialKN.py" line="9" />
-            <source>Kn</source>
-            <translation>Kn</translation>
-            <translatorcomment>Intentionally unchanged: symbol, shortcut, notation or established proper name.</translatorcomment>
+            <location filename="../tools/nozzleCoeff.py" line="16" />
+            <source>Post-Fire Throat Diameter</source>
+            <translation>Диаметр критического сечения после испытания</translation>
+        </message>
+        <message>
+            <location filename="../tools/nozzleCoeff.py" line="19" />
+            <source>Convergence Threshold</source>
+            <translation>Порог сходимости</translation>
+        </message>
+        <message>
+            <location filename="../../motorlib/units.py" line="13" />
+            <location filename="../tools/maxPressure.py" line="9" />
+            <source>Pressure</source>
+            <translation>Давление</translation>
+        </message>
+        <message>
+            <location filename="../../motorlib/nozzle.py" line="21" />
+            <source>Throat Diameter</source>
+            <translation>Диаметр критического сечения</translation>
+        </message>
+        <message>
+            <location filename="../../motorlib/nozzle.py" line="22" />
+            <source>Exit Diameter</source>
+            <translation>Диаметр выходного сечения</translation>
+        </message>
+        <message>
+            <location filename="../../motorlib/nozzle.py" line="23" />
+            <source>Efficiency</source>
+            <translation>Эффективность</translation>
+        </message>
+        <message>
+            <location filename="../../motorlib/nozzle.py" line="24" />
+            <source>Divergence Half Angle</source>
+            <translation>Полуугол расширяющейся части</translation>
+        </message>
+        <message>
+            <location filename="../../motorlib/nozzle.py" line="25" />
+            <source>Convergence Half Angle</source>
+            <translation>Полуугол сужающейся части</translation>
+        </message>
+        <message>
+            <location filename="../../motorlib/nozzle.py" line="26" />
+            <source>Throat Length</source>
+            <translation>Длина критического сечения</translation>
+        </message>
+        <message>
+            <location filename="../../motorlib/nozzle.py" line="27" />
+            <source>Slag Buildup Coefficient</source>
+            <translation>Коэффициент отложения шлака</translation>
+        </message>
+        <message>
+            <location filename="../../motorlib/nozzle.py" line="28" />
+            <source>Throat Erosion Coefficient</source>
+            <translation>Коэффициент эрозии критического сечения</translation>
         </message>
         <message>
             <location filename="../../motorlib/propellant.py" line="15" />
@@ -2191,46 +2301,6 @@ The rest of the motor will be imported.</source>
             <location filename="../../motorlib/propellant.py" line="32" />
             <source>Properties</source>
             <translation>Свойства</translation>
-        </message>
-        <message>
-            <location filename="../../motorlib/nozzle.py" line="21" />
-            <source>Throat Diameter</source>
-            <translation>Диаметр критического сечения</translation>
-        </message>
-        <message>
-            <location filename="../../motorlib/nozzle.py" line="22" />
-            <source>Exit Diameter</source>
-            <translation>Диаметр выходного сечения</translation>
-        </message>
-        <message>
-            <location filename="../../motorlib/nozzle.py" line="23" />
-            <source>Efficiency</source>
-            <translation>Эффективность</translation>
-        </message>
-        <message>
-            <location filename="../../motorlib/nozzle.py" line="24" />
-            <source>Divergence Half Angle</source>
-            <translation>Полуугол расширяющейся части</translation>
-        </message>
-        <message>
-            <location filename="../../motorlib/nozzle.py" line="25" />
-            <source>Convergence Half Angle</source>
-            <translation>Полуугол сужающейся части</translation>
-        </message>
-        <message>
-            <location filename="../../motorlib/nozzle.py" line="26" />
-            <source>Throat Length</source>
-            <translation>Длина критического сечения</translation>
-        </message>
-        <message>
-            <location filename="../../motorlib/nozzle.py" line="27" />
-            <source>Slag Buildup Coefficient</source>
-            <translation>Коэффициент отложения шлака</translation>
-        </message>
-        <message>
-            <location filename="../../motorlib/nozzle.py" line="28" />
-            <source>Throat Erosion Coefficient</source>
-            <translation>Коэффициент эрозии критического сечения</translation>
         </message>
         <message>
             <location filename="../../motorlib/motor.py" line="27" />
@@ -2350,31 +2420,6 @@ The rest of the motor will be imported.</source>
             <translation>Бронированные торцы</translation>
         </message>
         <message>
-            <location filename="../../motorlib/grains/star.py" line="17" />
-            <source>Number of points</source>
-            <translation>Число лучей</translation>
-        </message>
-        <message>
-            <location filename="../../motorlib/grains/star.py" line="18" />
-            <source>Point length</source>
-            <translation>Длина луча</translation>
-        </message>
-        <message>
-            <location filename="../../motorlib/grains/star.py" line="19" />
-            <source>Point base width</source>
-            <translation>Ширина основания луча</translation>
-        </message>
-        <message>
-            <location filename="../../motorlib/grains/custom.py" line="19" />
-            <source>Core geometry</source>
-            <translation>Геометрия канала</translation>
-        </message>
-        <message>
-            <location filename="../../motorlib/grains/custom.py" line="20" />
-            <source>DXF Unit</source>
-            <translation>Единица измерения DXF</translation>
-        </message>
-        <message>
             <location filename="../../motorlib/grains/rodTube.py" line="21" />
             <location filename="../../motorlib/grains/bates.py" line="20" />
             <source>Core Diameter</source>
@@ -2390,6 +2435,37 @@ The rest of the motor will be imported.</source>
             <location filename="../../motorlib/grains/xCore.py" line="18" />
             <source>Slot length</source>
             <translation>Длина паза</translation>
+        </message>
+        <message>
+            <location filename="../../motorlib/grains/star.py" line="17" />
+            <source>Number of points</source>
+            <translation>Число лучей</translation>
+        </message>
+        <message>
+            <location filename="../../motorlib/grains/star.py" line="18" />
+            <source>Point length</source>
+            <translation>Длина луча</translation>
+        </message>
+        <message>
+            <location filename="../../motorlib/grains/star.py" line="19" />
+            <source>Point base width</source>
+            <translation>Ширина основания луча</translation>
+        </message>
+        <message>
+            <location filename="../../motorlib/grains/cGrain.py" line="20" />
+            <location filename="../../motorlib/grains/dGrain.py" line="16" />
+            <source>Slot offset</source>
+            <translation>Смещение паза</translation>
+        </message>
+        <message>
+            <location filename="../../motorlib/grains/rodTube.py" line="22" />
+            <source>Rod Diameter</source>
+            <translation>Диаметр стержня</translation>
+        </message>
+        <message>
+            <location filename="../../motorlib/grains/rodTube.py" line="23" />
+            <source>Support Diameter</source>
+            <translation>Диаметр опоры</translation>
         </message>
         <message>
             <location filename="../../motorlib/grains/finocyl.py" line="18" />
@@ -2418,10 +2494,19 @@ The rest of the motor will be imported.</source>
             <translation>Инвертированные рёбра (Inverted fins)</translation>
         </message>
         <message>
-            <location filename="../../motorlib/grains/cGrain.py" line="20" />
-            <location filename="../../motorlib/grains/dGrain.py" line="16" />
-            <source>Slot offset</source>
-            <translation>Смещение паза</translation>
+            <location filename="../../motorlib/grains/moonBurner.py" line="15" />
+            <source>Core offset</source>
+            <translation>Смещение канала</translation>
+        </message>
+        <message>
+            <location filename="../../motorlib/grains/custom.py" line="19" />
+            <source>Core geometry</source>
+            <translation>Геометрия канала</translation>
+        </message>
+        <message>
+            <location filename="../../motorlib/grains/custom.py" line="20" />
+            <source>DXF Unit</source>
+            <translation>Единица измерения DXF</translation>
         </message>
         <message>
             <location filename="../../motorlib/grains/conical.py" line="18" />
@@ -2432,21 +2517,6 @@ The rest of the motor will be imported.</source>
             <location filename="../../motorlib/grains/conical.py" line="19" />
             <source>Aft Core Diameter</source>
             <translation>Диаметр канала у заднего торца</translation>
-        </message>
-        <message>
-            <location filename="../../motorlib/grains/moonBurner.py" line="15" />
-            <source>Core offset</source>
-            <translation>Смещение канала</translation>
-        </message>
-        <message>
-            <location filename="../../motorlib/grains/rodTube.py" line="22" />
-            <source>Rod Diameter</source>
-            <translation>Диаметр стержня</translation>
-        </message>
-        <message>
-            <location filename="../../motorlib/grains/rodTube.py" line="23" />
-            <source>Support Diameter</source>
-            <translation>Диаметр опоры</translation>
         </message>
     </context>
     <context>
@@ -2877,411 +2947,406 @@ The rest of the motor will be imported.</source>
         </message>
         <message>
             <location filename="../designassistant/quick_messages.py" line="55" />
-            <source>Match is 100 / (1 + normalized score), not a probability or guarantee.</source>
-            <translation>Соответствие равно 100 / (1 + нормализованная оценка); это не вероятность и не гарантия.</translation>
-        </message>
-        <message>
-            <location filename="../designassistant/quick_messages.py" line="56" />
             <source>Match thrust</source>
             <translation>Тяга</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="57" />
+            <location filename="../designassistant/quick_messages.py" line="56" />
             <source>Match total impulse</source>
             <translation>Суммарный импульс</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="58" />
+            <location filename="../designassistant/quick_messages.py" line="57" />
             <source>Match: {percent}%</source>
             <translation>Соответствие: {percent}%</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="59" />
+            <location filename="../designassistant/quick_messages.py" line="58" />
             <source>Maximum</source>
             <translation>Не больше</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="60" />
+            <location filename="../designassistant/quick_messages.py" line="59" />
             <source>Maximum diameter</source>
             <translation>Максимальный диаметр</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="61" />
+            <location filename="../designassistant/quick_messages.py" line="60" />
             <source>Maximum motor length</source>
             <translation>Максимальная длина двигателя</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="62" />
+            <location filename="../designassistant/quick_messages.py" line="61" />
             <source>Meets configured constraints</source>
             <translation>Соответствует заданным ограничениям</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="63" />
+            <location filename="../designassistant/quick_messages.py" line="62" />
             <source>Minimum</source>
             <translation>Не меньше</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="64" />
+            <location filename="../designassistant/quick_messages.py" line="63" />
             <source>Minimum and maximum requirements contradict each other.</source>
             <translation>Минимальное и максимальное требования противоречат друг другу.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="65" />
+            <location filename="../designassistant/quick_messages.py" line="64" />
             <source>Next</source>
             <translation>Далее</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="66" />
+            <location filename="../designassistant/quick_messages.py" line="65" />
             <source>No admissible designs yet. Review requirements or allowed options.</source>
             <translation>Допустимых вариантов пока нет. Проверьте требования и разрешённые записи.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="67" />
+            <location filename="../designassistant/quick_messages.py" line="66" />
             <source>No compatible existing library entries are available.</source>
             <translation>Нет совместимых существующих записей библиотеки.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="68" />
+            <location filename="../designassistant/quick_messages.py" line="67" />
             <source>No parameterizable library and geometry options satisfy the dimensional bounds.</source>
             <translation>Нет сочетаний записи и геометрии, которые можно настроить в заданных габаритных пределах.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="69" />
+            <location filename="../designassistant/quick_messages.py" line="68" />
             <source>No performance Target was entered. Ranking aims at an entered performance limit; limits remain mandatory.</source>
             <translation>Целевая характеристика не задана. Для ранжирования используется введённая граница характеристики; ограничения остаются обязательными.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="73" />
+            <location filename="../designassistant/quick_messages.py" line="72" />
             <source>Open a baseline motor containing at least one configured grain.</source>
             <translation>Откройте исходный двигатель хотя бы с одной настроенной топливной шашкой.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="74" />
+            <location filename="../designassistant/quick_messages.py" line="73" />
             <source>Open in Design Assistant</source>
             <translation>Открыть в Design Assistant</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="75" />
+            <location filename="../designassistant/quick_messages.py" line="74" />
             <source>Open in Motor Editor</source>
             <translation>Открыть в редакторе</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="76" />
+            <location filename="../designassistant/quick_messages.py" line="75" />
             <source>Other limits (optional)</source>
             <translation>Другие ограничения (необязательно)</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="77" />
+            <location filename="../designassistant/quick_messages.py" line="76" />
             <source>Priority changes only weights of enabled targets; it does not create missing targets.</source>
             <translation>Приоритет меняет только веса включённых целей и не создаёт отсутствующие цели.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="80" />
+            <location filename="../designassistant/quick_messages.py" line="79" />
             <source>Quick</source>
             <translation>Быстрый</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="81" />
+            <location filename="../designassistant/quick_messages.py" line="80" />
             <source>Quick Design</source>
             <translation>Быстрое проектирование</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="82" />
+            <location filename="../designassistant/quick_messages.py" line="81" />
             <source>Quick Design requirements</source>
             <translation>Требования быстрого проектирования</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="83" />
+            <location filename="../designassistant/quick_messages.py" line="82" />
             <source>Ready</source>
             <translation>Готово</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="84" />
+            <location filename="../designassistant/quick_messages.py" line="83" />
             <source>Recommended Design {number}</source>
             <translation>Рекомендуемый вариант {number}</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="85" />
+            <location filename="../designassistant/quick_messages.py" line="84" />
             <source>Recommended designs</source>
             <translation>Рекомендуемые варианты</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="86" />
+            <location filename="../designassistant/quick_messages.py" line="85" />
             <source>Reject candidates with WARNING alerts</source>
             <translation>Исключать варианты с предупреждениями WARNING</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="87" />
+            <location filename="../designassistant/quick_messages.py" line="86" />
             <source>Results are simulation-based and depend on the entered model, material data and constraints.</source>
             <translation>Результаты основаны на моделировании и зависят от введённых данных, свойств материалов и заданных ограничений.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="90" />
+            <location filename="../designassistant/quick_messages.py" line="89" />
             <source>Search completed</source>
             <translation>Поиск завершён</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="91" />
+            <location filename="../designassistant/quick_messages.py" line="90" />
             <source>Search failed</source>
             <translation>Ошибка поиска</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="92" />
+            <location filename="../designassistant/quick_messages.py" line="91" />
             <source>Search problem and skipped options</source>
             <translation>Постановка задачи и пропущенные варианты</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="93" />
+            <location filename="../designassistant/quick_messages.py" line="92" />
             <source>Search quality</source>
             <translation>Качество поиска</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="94" />
+            <location filename="../designassistant/quick_messages.py" line="93" />
             <source>Search seed must be an integer and warning policy must be boolean.</source>
             <translation>Seed поиска должен быть целым числом, а политика предупреждений — логическим значением.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="95" />
+            <location filename="../designassistant/quick_messages.py" line="94" />
             <source>Search stopped</source>
             <translation>Поиск остановлен</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="96" />
+            <location filename="../designassistant/quick_messages.py" line="95" />
             <source>Searching for suitable designs...</source>
             <translation>Поиск подходящих вариантов...</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="97" />
+            <location filename="../designassistant/quick_messages.py" line="96" />
             <source>Select a supported design priority and search quality.</source>
             <translation>Выберите поддерживаемый приоритет и качество поиска.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="98" />
+            <location filename="../designassistant/quick_messages.py" line="97" />
             <source>Select a supported requirement and Target, Minimum or Maximum.</source>
             <translation>Выберите поддерживаемое требование и режим «Цель», «Не меньше» или «Не больше».</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="99" />
+            <location filename="../designassistant/quick_messages.py" line="98" />
             <source>Select for comparison</source>
             <translation>Выбрать для сравнения</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="100" />
+            <location filename="../designassistant/quick_messages.py" line="99" />
             <source>Select supported project requirements.</source>
             <translation>Выберите поддерживаемые требования проекта.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="101" />
+            <location filename="../designassistant/quick_messages.py" line="100" />
             <source>Selected library entries: {count}</source>
             <translation>Выбрано записей библиотеки: {count}</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="102" />
+            <location filename="../designassistant/quick_messages.py" line="101" />
             <source>Simulations: {completed}/{total}   Valid: {valid}   Rejected: {rejected}   Best match: {match}   Elapsed: {seconds} s</source>
             <translation>Расчёты: {completed}/{total}   Допустимых: {valid}   Отклонено: {rejected}   Лучшее соответствие: {match}   Прошло: {seconds} s</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="107" />
+            <location filename="../designassistant/quick_messages.py" line="106" />
             <source>Skipped geometry {geometry}: baseline parameters cannot initialize it.</source>
             <translation>Геометрия {geometry} пропущена: исходных параметров недостаточно для её настройки.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="108" />
+            <location filename="../designassistant/quick_messages.py" line="107" />
             <source>Skipped library entry {name}: stored data failed engine validation.</source>
             <translation>Запись библиотеки {name} пропущена: сохранённые данные не прошли проверку движка.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="109" />
+            <location filename="../designassistant/quick_messages.py" line="108" />
             <source>Skipped option {name} / {geometry}: {reason}</source>
             <translation>Вариант {name} / {geometry} пропущен: {reason}</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="110" />
+            <location filename="../designassistant/quick_messages.py" line="109" />
             <source>Stop</source>
             <translation>Остановить</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="111" />
+            <location filename="../designassistant/quick_messages.py" line="110" />
             <source>Stopped results may be provisional.</source>
             <translation>Результаты остановленного поиска могут быть предварительными.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="112" />
+            <location filename="../designassistant/quick_messages.py" line="111" />
             <source>Stopping...</source>
             <translation>Остановка...</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="113" />
+            <location filename="../designassistant/quick_messages.py" line="112" />
             <source>Target</source>
             <translation>Цель</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="114" />
+            <location filename="../designassistant/quick_messages.py" line="113" />
             <source>Technical details</source>
             <translation>Технические детали</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="115" />
+            <location filename="../designassistant/quick_messages.py" line="114" />
             <source>The same requirement and mode cannot be entered twice.</source>
             <translation>Одно требование в одном режиме нельзя задавать дважды.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="116" />
+            <location filename="../designassistant/quick_messages.py" line="115" />
             <source>Thorough</source>
             <translation>Тщательный</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="117" />
+            <location filename="../designassistant/quick_messages.py" line="116" />
             <source>Use compatible library entries</source>
             <translation>Использовать совместимые записи</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="118" />
+            <location filename="../designassistant/quick_messages.py" line="117" />
             <source>Warnings: {count}</source>
             <translation>Предупреждения: {count}</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="119" />
+            <location filename="../designassistant/quick_messages.py" line="118" />
             <source>Why this design?</source>
             <translation>Почему этот вариант?</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="123" />
+            <location filename="../designassistant/quick_messages.py" line="122" />
             <source>A match index requires a finite nonnegative score.</source>
             <translation>Индекс соответствия требует конечной неотрицательной оценки.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="124" />
+            <location filename="../designassistant/quick_messages.py" line="123" />
             <source>Automatic ranges require numeric engine metadata.</source>
             <translation>Для автоматических диапазонов нужны числовые параметры движка.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="125" />
+            <location filename="../designassistant/quick_messages.py" line="124" />
             <source>Average thrust × burn time differs substantially from the requested total impulse. These targets may conflict; simulation results will determine the trade-off.</source>
             <translation>Произведение средней тяги и времени работы существенно отличается от заданного суммарного импульса. Эти цели могут противоречить друг другу; компромисс будет определён по результатам моделирования.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="130" />
+            <location filename="../designassistant/quick_messages.py" line="129" />
             <source>Diameter and length must be maximum limits; burn time must be a target.</source>
             <translation>Диаметр и длина должны быть верхними пределами, а время работы — целевым значением.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="131" />
+            <location filename="../designassistant/quick_messages.py" line="130" />
             <source>Dimensions do not allow an engine property range.</source>
             <translation>При заданных габаритах невозможно построить допустимый диапазон параметра движка.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="132" />
+            <location filename="../designassistant/quick_messages.py" line="131" />
             <source>Dimensions must be positive finite values.</source>
             <translation>Габариты должны быть положительными конечными числами.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="133" />
+            <location filename="../designassistant/quick_messages.py" line="132" />
             <source>Engine setter read-back rejected an initial property.</source>
             <translation>Проверка после установки параметра показала, что движок отклонил исходное значение.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="134" />
+            <location filename="../designassistant/quick_messages.py" line="133" />
             <source>Engine setter rejected generated design or project configuration.</source>
             <translation>Движок отклонил параметры созданного варианта или настройки проекта.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="135" />
+            <location filename="../designassistant/quick_messages.py" line="134" />
             <source>Enter maximum diameter, maximum length and desired burn time before searching.</source>
             <translation>Перед поиском задайте максимальный диаметр, максимальную длину и желаемое время работы.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="136" />
+            <location filename="../designassistant/quick_messages.py" line="135" />
             <source>Enter maximum diameter, maximum length and desired burn time. Quick Design creates grains and a nozzle automatically; the current motor provides only general settings.</source>
             <translation>Задайте максимальный диаметр, максимальную длину и желаемое время работы. Быстрое проектирование создаёт шашки и сопло автоматически; из текущего двигателя берутся только общие настройки.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="141" />
+            <location filename="../designassistant/quick_messages.py" line="140" />
             <source>Geometries to explore: {geometries}</source>
             <translation>Исследуемые геометрии: {geometries}</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="142" />
+            <location filename="../designassistant/quick_messages.py" line="141" />
             <source>Grain count is outside the dimension-driven exploration range.</source>
             <translation>Число шашек выходит за диапазон исследования для заданных габаритов.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="143" />
+            <location filename="../designassistant/quick_messages.py" line="142" />
             <source>Grain counts to explore: {counts}</source>
             <translation>Исследуемое число шашек: {counts}</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="144" />
+            <location filename="../designassistant/quick_messages.py" line="143" />
             <source>Grains: {count}</source>
             <translation>Число шашек: {count}</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="145" />
+            <location filename="../designassistant/quick_messages.py" line="144" />
             <source>Increase search quality or select fewer existing library entries.</source>
             <translation>Увеличьте качество поиска или выберите меньше существующих записей библиотеки.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="146" />
+            <location filename="../designassistant/quick_messages.py" line="145" />
             <source>Library data failed existing engine validation.</source>
             <translation>Данные библиотеки не прошли штатную проверку движка.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="147" />
+            <location filename="../designassistant/quick_messages.py" line="146" />
             <source>Obtained result</source>
             <translation>Полученный результат</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="148" />
+            <location filename="../designassistant/quick_messages.py" line="147" />
             <source>Optional targets</source>
             <translation>Дополнительные цели</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="149" />
+            <location filename="../designassistant/quick_messages.py" line="148" />
             <source>Optional thrust and impulse must be targets; use Other limits for bounds.</source>
             <translation>Дополнительные значения тяги и импульса должны быть целями; пределы задаются в разделе других ограничений.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="150" />
+            <location filename="../designassistant/quick_messages.py" line="149" />
             <source>Potentially conflicting targets</source>
             <translation>Возможное противоречие целей</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="151" />
+            <location filename="../designassistant/quick_messages.py" line="150" />
             <source>Recommendations require a limit of 1–5 and diversity between 0 and 1.</source>
             <translation>Число рекомендаций должно быть от 1 до 5, а порог разнообразия — от 0 до 1.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="152" />
+            <location filename="../designassistant/quick_messages.py" line="151" />
             <source>Required</source>
             <translation>Обязательно</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="153" />
+            <location filename="../designassistant/quick_messages.py" line="152" />
             <source>Run the search before opening a recommendation in Design Assistant.</source>
             <translation>Выполните поиск перед открытием рекомендации в помощнике проектирования.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="154" />
+            <location filename="../designassistant/quick_messages.py" line="153" />
             <source>Set target value</source>
             <translation>Задать целевое значение</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="155" />
+            <location filename="../designassistant/quick_messages.py" line="154" />
             <source>Skipped geometry {geometry}, {count} grains: {reason}</source>
             <translation>Геометрия {geometry}, число шашек {count}, пропущена: {reason}</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="156" />
+            <location filename="../designassistant/quick_messages.py" line="155" />
             <source>The budget covers {selected} of {total} possible library/geometry/count combinations.</source>
             <translation>Бюджет охватывает {selected} из {total} возможных сочетаний библиотеки, геометрии и числа шашек.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="159" />
+            <location filename="../designassistant/quick_messages.py" line="158" />
             <source>The existing engine requires an end burner to be the forward-most grain.</source>
             <translation>Штатный движок требует, чтобы шашка торцевого горения была первой со стороны передней крышки.</translation>
         </message>
         <message>
-            <location filename="../designassistant/quick_messages.py" line="160" />
+            <location filename="../designassistant/quick_messages.py" line="159" />
             <source>This geometry has no automatic parameterization.</source>
             <translation>Для этой геометрии нет автоматической параметризации.</translation>
         </message>
@@ -3537,34 +3602,27 @@ The rest of the motor will be imported.</source>
     <context>
         <name>SimulationAlerts</name>
         <message>
-            <location filename="../../motorlib/simResult.py" line="32" />
-            <source>Error</source>
-            <translation>Ошибка</translation>
+            <location filename="../../motorlib/nozzle.py" line="109" />
+            <source>Throat diameter must not be 0</source>
+            <translation>Диаметр критического сечения не должен быть равен 0</translation>
         </message>
         <message>
-            <location filename="../../motorlib/simResult.py" line="33" />
-            <source>Warning</source>
-            <translation>Предупреждение</translation>
+            <location filename="../../motorlib/motor.py" line="430" />
+            <location filename="../../motorlib/nozzle.py" line="116" />
+            <location filename="../../motorlib/nozzle.py" line="113" />
+            <location filename="../../motorlib/nozzle.py" line="110" />
+            <source>Nozzle</source>
+            <translation>Сопло</translation>
         </message>
         <message>
-            <location filename="../../motorlib/simResult.py" line="34" />
-            <source>Message</source>
-            <translation>Сообщение</translation>
+            <location filename="../../motorlib/nozzle.py" line="112" />
+            <source>Exit diameter must not be smaller than throat diameter</source>
+            <translation>Диаметр выходного сечения не должен быть меньше диаметра критического сечения</translation>
         </message>
         <message>
-            <location filename="../../motorlib/simResult.py" line="38" />
-            <source>Geometry</source>
-            <translation>Геометрия</translation>
-        </message>
-        <message>
-            <location filename="../../motorlib/simResult.py" line="39" />
-            <source>Constraint</source>
-            <translation>Ограничение</translation>
-        </message>
-        <message>
-            <location filename="../../motorlib/simResult.py" line="40" />
-            <source>Value</source>
-            <translation>Значение</translation>
+            <location filename="../../motorlib/nozzle.py" line="115" />
+            <source>Efficiency must not be 0</source>
+            <translation>Эффективность не должна быть равна 0</translation>
         </message>
         <message>
             <location filename="../../motorlib/propellant.py" line="108" />
@@ -3595,27 +3653,34 @@ The rest of the motor will be imported.</source>
             <translation>Давление в камере вышло за пределы заданных диапазонов топлива. Результаты могут быть неточными.</translation>
         </message>
         <message>
-            <location filename="../../motorlib/nozzle.py" line="109" />
-            <source>Throat diameter must not be 0</source>
-            <translation>Диаметр критического сечения не должен быть равен 0</translation>
+            <location filename="../../motorlib/simResult.py" line="32" />
+            <source>Error</source>
+            <translation>Ошибка</translation>
         </message>
         <message>
-            <location filename="../../motorlib/motor.py" line="430" />
-            <location filename="../../motorlib/nozzle.py" line="116" />
-            <location filename="../../motorlib/nozzle.py" line="113" />
-            <location filename="../../motorlib/nozzle.py" line="110" />
-            <source>Nozzle</source>
-            <translation>Сопло</translation>
+            <location filename="../../motorlib/simResult.py" line="33" />
+            <source>Warning</source>
+            <translation>Предупреждение</translation>
         </message>
         <message>
-            <location filename="../../motorlib/nozzle.py" line="112" />
-            <source>Exit diameter must not be smaller than throat diameter</source>
-            <translation>Диаметр выходного сечения не должен быть меньше диаметра критического сечения</translation>
+            <location filename="../../motorlib/simResult.py" line="34" />
+            <source>Message</source>
+            <translation>Сообщение</translation>
         </message>
         <message>
-            <location filename="../../motorlib/nozzle.py" line="115" />
-            <source>Efficiency must not be 0</source>
-            <translation>Эффективность не должна быть равна 0</translation>
+            <location filename="../../motorlib/simResult.py" line="38" />
+            <source>Geometry</source>
+            <translation>Геометрия</translation>
+        </message>
+        <message>
+            <location filename="../../motorlib/simResult.py" line="39" />
+            <source>Constraint</source>
+            <translation>Ограничение</translation>
+        </message>
+        <message>
+            <location filename="../../motorlib/simResult.py" line="40" />
+            <source>Value</source>
+            <translation>Значение</translation>
         </message>
         <message>
             <location filename="../../motorlib/motor.py" line="207" />
@@ -3700,34 +3765,9 @@ The rest of the motor will be imported.</source>
             <translation>Длина не должна быть равна 0</translation>
         </message>
         <message>
-            <location filename="../../motorlib/grains/star.py" line="44" />
-            <source>Star grain has 0 points</source>
-            <translation>Число лучей звёздчатой шашки равно 0</translation>
-        </message>
-        <message>
-            <location filename="../../motorlib/grains/star.py" line="47" />
-            <source>Point length must not be 0</source>
-            <translation>Длина луча не должна быть равна 0</translation>
-        </message>
-        <message>
-            <location filename="../../motorlib/grains/star.py" line="49" />
-            <source>Point length should be less than or equal to grain radius</source>
-            <translation>Длина луча не должна превышать радиус шашки</translation>
-        </message>
-        <message>
-            <location filename="../../motorlib/grains/star.py" line="53" />
-            <source>Point width must not be 0</source>
-            <translation>Ширина луча не должна быть равна 0</translation>
-        </message>
-        <message>
-            <location filename="../../motorlib/grains/custom.py" line="34" />
-            <source>Support for custom grains with multiple cores is experimental</source>
-            <translation>Поддержка произвольных шашек с несколькими каналами является экспериментальной</translation>
-        </message>
-        <message>
-            <location filename="../../motorlib/grains/rodTube.py" line="66" />
             <location filename="../../motorlib/grains/moonBurner.py" line="32" />
             <location filename="../../motorlib/grains/finocyl.py" line="60" />
+            <location filename="../../motorlib/grains/rodTube.py" line="66" />
             <location filename="../../motorlib/grains/bates.py" line="40" />
             <source>Core diameter must not be 0</source>
             <translation>Диаметр канала не должен быть равен 0</translation>
@@ -3758,6 +3798,41 @@ The rest of the motor will be imported.</source>
             <location filename="../../motorlib/grains/xCore.py" line="43" />
             <source>Slot length should be less than or equal to grain radius</source>
             <translation>Длина паза не должна превышать радиус шашки</translation>
+        </message>
+        <message>
+            <location filename="../../motorlib/grains/star.py" line="44" />
+            <source>Star grain has 0 points</source>
+            <translation>Число лучей звёздчатой шашки равно 0</translation>
+        </message>
+        <message>
+            <location filename="../../motorlib/grains/star.py" line="47" />
+            <source>Point length must not be 0</source>
+            <translation>Длина луча не должна быть равна 0</translation>
+        </message>
+        <message>
+            <location filename="../../motorlib/grains/star.py" line="49" />
+            <source>Point length should be less than or equal to grain radius</source>
+            <translation>Длина луча не должна превышать радиус шашки</translation>
+        </message>
+        <message>
+            <location filename="../../motorlib/grains/star.py" line="53" />
+            <source>Point width must not be 0</source>
+            <translation>Ширина луча не должна быть равна 0</translation>
+        </message>
+        <message>
+            <location filename="../../motorlib/grains/dGrain.py" line="33" />
+            <source>Core offset must not be greater than grain radius</source>
+            <translation>Смещение канала не должно превышать радиус шашки</translation>
+        </message>
+        <message>
+            <location filename="../../motorlib/grains/dGrain.py" line="36" />
+            <source>Core offset must be greater than negative grain radius</source>
+            <translation>Смещение канала должно быть больше отрицательного значения радиуса шашки</translation>
+        </message>
+        <message>
+            <location filename="../../motorlib/grains/rodTube.py" line="71" />
+            <source>Rod diameter must be less than core diameter</source>
+            <translation>Диаметр стержня должен быть меньше диаметра канала</translation>
         </message>
         <message>
             <location filename="../../motorlib/grains/moonBurner.py" line="34" />
@@ -3796,34 +3871,14 @@ The rest of the motor will be imported.</source>
             <translation>Концы рёбер (Fins) пересекаются</translation>
         </message>
         <message>
-            <location filename="../../motorlib/grains/dGrain.py" line="33" />
-            <source>Core offset must not be greater than grain radius</source>
-            <translation>Смещение канала не должно превышать радиус шашки</translation>
-        </message>
-        <message>
-            <location filename="../../motorlib/grains/dGrain.py" line="36" />
-            <source>Core offset must be greater than negative grain radius</source>
-            <translation>Смещение канала должно быть больше отрицательного значения радиуса шашки</translation>
-        </message>
-        <message>
-            <location filename="../../motorlib/grains/conical.py" line="199" />
-            <source>Core diameters cannot be the same, use a BATES for this case.</source>
-            <translation>Диаметры канала не могут совпадать; в этом случае используйте BATES.</translation>
-        </message>
-        <message>
-            <location filename="../../motorlib/grains/conical.py" line="201" />
-            <source>Aft core diameter cannot be larger than grain diameter.</source>
-            <translation>Диаметр канала у заднего торца не может превышать диаметр шашки.</translation>
-        </message>
-        <message>
-            <location filename="../../motorlib/grains/conical.py" line="203" />
-            <source>Forward core diameter cannot be larger than grain diameter.</source>
-            <translation>Диаметр канала у переднего торца не может превышать диаметр шашки.</translation>
-        </message>
-        <message>
             <location filename="../../motorlib/grains/moonBurner.py" line="38" />
             <source>Core offset should be less than or equal to grain radius</source>
             <translation>Смещение канала не должно превышать радиус шашки</translation>
+        </message>
+        <message>
+            <location filename="../../motorlib/grains/custom.py" line="34" />
+            <source>Support for custom grains with multiple cores is experimental</source>
+            <translation>Поддержка произвольных шашек с несколькими каналами является экспериментальной</translation>
         </message>
         <message>
             <location filename="../../motorlib/grains/cGrain.py" line="37" />
@@ -3841,9 +3896,19 @@ The rest of the motor will be imported.</source>
             <translation>Ширина паза не должна превышать диаметр шашки</translation>
         </message>
         <message>
-            <location filename="../../motorlib/grains/rodTube.py" line="71" />
-            <source>Rod diameter must be less than core diameter</source>
-            <translation>Диаметр стержня должен быть меньше диаметра канала</translation>
+            <location filename="../../motorlib/grains/conical.py" line="199" />
+            <source>Core diameters cannot be the same, use a BATES for this case.</source>
+            <translation>Диаметры канала не могут совпадать; в этом случае используйте BATES.</translation>
+        </message>
+        <message>
+            <location filename="../../motorlib/grains/conical.py" line="201" />
+            <source>Aft core diameter cannot be larger than grain diameter.</source>
+            <translation>Диаметр канала у заднего торца не может превышать диаметр шашки.</translation>
+        </message>
+        <message>
+            <location filename="../../motorlib/grains/conical.py" line="203" />
+            <source>Forward core diameter cannot be larger than grain diameter.</source>
+            <translation>Диаметр канала у переднего торца не может превышать диаметр шашки.</translation>
         </message>
     </context>
     <context>
@@ -3908,34 +3973,14 @@ The rest of the motor will be imported.</source>
     <context>
         <name>Tools</name>
         <message>
-            <location filename="../tools/nozzleCoeff.py" line="24" />
-            <source>Nozzle Erosion/Slag Coefficient</source>
-            <translation>Коэффициент эрозии / отложения шлака в сопле</translation>
+            <location filename="../tools/maxKN.py" line="11" />
+            <source>Max Kn</source>
+            <translation>Максимальный Kn</translation>
         </message>
         <message>
-            <location filename="../tools/nozzleCoeff.py" line="25" />
-            <source>Use this tool to back-calculate the throat erosion or slag buildup coefficient from a measured post-firing throat diameter. If the throat grew, the erosion coefficient will be set (and slag cleared). If the throat shrank, the slag buildup coefficient will be set (and erosion cleared).</source>
-            <translation>Определяет коэффициент эрозии или отложения шлака по измеренному диаметру критического сечения после испытания. Если диаметр увеличился, задаётся коэффициент эрозии, а коэффициент отложения шлака обнуляется. Если диаметр уменьшился, задаётся коэффициент отложения шлака, а коэффициент эрозии обнуляется.</translation>
-        </message>
-        <message>
-            <location filename="../tools/expansion.py" line="11" />
-            <source>Nozzle Expansion</source>
-            <translation>Расширение сопла</translation>
-        </message>
-        <message>
-            <location filename="../tools/expansion.py" line="12" />
-            <source>Use this tool to set the nozzle exit diameter to optimize expansion for your configured ambient pressure.</source>
-            <translation>Задаёт диаметр выходного сечения сопла для оптимального расширения при заданном давлении окружающей среды.</translation>
-        </message>
-        <message>
-            <location filename="../tools/maxPressure.py" line="11" />
-            <source>Max Pressure</source>
-            <translation>Максимальное давление</translation>
-        </message>
-        <message>
-            <location filename="../tools/maxPressure.py" line="12" />
-            <source>Use this tool to set the nozzle throat to keep the chamber pressure below a certain value during the burn.</source>
-            <translation>Задаёт диаметр критического сечения сопла, чтобы давление в камере не превышало указанное значение во время горения.</translation>
+            <location filename="../tools/maxKN.py" line="12" />
+            <source>Use this tool to set the nozzle throat to keep the Kn below a certain value during the burn.</source>
+            <translation>Задаёт диаметр критического сечения сопла, чтобы Kn не превышал указанное значение во время горения.</translation>
         </message>
         <message>
             <location filename="../tools/changeDiameter.py" line="11" />
@@ -3948,6 +3993,16 @@ The rest of the motor will be imported.</source>
             <translation>Задаёт диаметр всех шашек двигателя.</translation>
         </message>
         <message>
+            <location filename="../tools/expansion.py" line="11" />
+            <source>Nozzle Expansion</source>
+            <translation>Расширение сопла</translation>
+        </message>
+        <message>
+            <location filename="../tools/expansion.py" line="12" />
+            <source>Use this tool to set the nozzle exit diameter to optimize expansion for your configured ambient pressure.</source>
+            <translation>Задаёт диаметр выходного сечения сопла для оптимального расширения при заданном давлении окружающей среды.</translation>
+        </message>
+        <message>
             <location filename="../tools/neutralBates.py" line="15" />
             <source>Neutral BATES Geometry</source>
             <translation>Нейтральная геометрия BATES</translation>
@@ -3956,6 +4011,16 @@ The rest of the motor will be imported.</source>
             <location filename="../tools/neutralBates.py" line="16" />
             <source>Use this tool to generate the geometry for a neutral BATES motor of a specified diameter and length. The length field should be the total length that the propellant fits into, including spacers.</source>
             <translation>Создаёт геометрию двигателя BATES с нейтральным законом изменения площади горения для заданных диаметра и длины. Укажите полную длину пространства, занимаемого топливом и проставками.</translation>
+        </message>
+        <message>
+            <location filename="../tools/nozzleCoeff.py" line="24" />
+            <source>Nozzle Erosion/Slag Coefficient</source>
+            <translation>Коэффициент эрозии / отложения шлака в сопле</translation>
+        </message>
+        <message>
+            <location filename="../tools/nozzleCoeff.py" line="25" />
+            <source>Use this tool to back-calculate the throat erosion or slag buildup coefficient from a measured post-firing throat diameter. If the throat grew, the erosion coefficient will be set (and slag cleared). If the throat shrank, the slag buildup coefficient will be set (and erosion cleared).</source>
+            <translation>Определяет коэффициент эрозии или отложения шлака по измеренному диаметру критического сечения после испытания. Если диаметр увеличился, задаётся коэффициент эрозии, а коэффициент отложения шлака обнуляется. Если диаметр уменьшился, задаётся коэффициент отложения шлака, а коэффициент эрозии обнуляется.</translation>
         </message>
         <message>
             <location filename="../tools/initialKN.py" line="11" />
@@ -3968,14 +4033,14 @@ The rest of the motor will be imported.</source>
             <translation>Задаёт диаметр критического сечения сопла для получения указанного начального Kn.</translation>
         </message>
         <message>
-            <location filename="../tools/maxKN.py" line="11" />
-            <source>Max Kn</source>
-            <translation>Максимальный Kn</translation>
+            <location filename="../tools/maxPressure.py" line="11" />
+            <source>Max Pressure</source>
+            <translation>Максимальное давление</translation>
         </message>
         <message>
-            <location filename="../tools/maxKN.py" line="12" />
-            <source>Use this tool to set the nozzle throat to keep the Kn below a certain value during the burn.</source>
-            <translation>Задаёт диаметр критического сечения сопла, чтобы Kn не превышал указанное значение во время горения.</translation>
+            <location filename="../tools/maxPressure.py" line="12" />
+            <source>Use this tool to set the nozzle throat to keep the chamber pressure below a certain value during the burn.</source>
+            <translation>Задаёт диаметр критического сечения сопла, чтобы давление в камере не превышало указанное значение во время горения.</translation>
         </message>
     </context>
     <context>

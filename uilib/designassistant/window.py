@@ -578,6 +578,7 @@ class DesignAssistantWindow(QDialog):
         if smart:
             sources = {
                 "manual": "Ready",
+                "screening": "Broad screening",
                 "exploration": "Exploration",
                 "selection": "Selection",
                 "refinement": "Refinement",

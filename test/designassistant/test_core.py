@@ -366,11 +366,11 @@ class CandidateTests(unittest.TestCase):
 
 
 class EvaluationTests(unittest.TestCase):
-    def test_normalized_weighted_deviation(self):
+    def test_relative_weighted_and_worst_deviation(self):
         req = requirements(targets=(Target("burn_time", 2, 2, 1), Target("maximum_pressure", 6, 4, 3)))
         result = Objective().evaluate(completed(), req)
         self.assertTrue(result.constraints.feasible)
-        self.assertEqual(result.score, 0.875)
+        self.assertAlmostEqual(result.score, 31 / 48)
 
     def test_exact_target_zero_score(self):
         result = Objective().evaluate(completed(burn_time=2.0), requirements())

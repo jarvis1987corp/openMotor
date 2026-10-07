@@ -9,6 +9,7 @@ from designassistant import MetricRegistry
 from motorlib.units import convert
 from uilib.localization import display_text, geometry_name
 
+from .assessment import assessment_lines
 from .presentation import (
     STATUS_LABELS,
     available_variables,
@@ -170,6 +171,8 @@ class SmartResultsModel(QAbstractTableModel):
             lines.append(f"{metric_label(metric.key)}: {display_number(metric.value, unit, display)} {display}")
         record = self.ranked.get(candidate_id)
         if record:
+            lines.extend(("", *assessment_lines(record.analysis, evaluation.constraints.feasible,
+                                                label=metric_label)))
             lines.extend(("", translate("Target Deviations")))
             for target in record.analysis.targets:
                 unit, display = metric_unit(target.metric, self.preferences)

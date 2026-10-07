@@ -55,9 +55,11 @@ class _FiniteSearch(SearchStrategy):
         candidate_id = "candidate-{:012d}".format(self._issued)
         self._issued += 1
         self._pending.add(candidate_id)
-        return CandidateProposal(
-            candidate_id, tuple(Assignment(v.path, value) for v, value in zip(self.requirements.variables, values))
-        )
+        pairs = tuple((v.path, value) for v, value in zip(self.requirements.variables, values))
+        factory = getattr(self, "_proposal_factory", None)
+        if factory is not None:
+            return factory(candidate_id, pairs)
+        return CandidateProposal(candidate_id, tuple(Assignment(path, value) for path, value in pairs))
 
     def tell(self, evaluation):
         if not isinstance(evaluation, CandidateEvaluation):
@@ -117,12 +119,14 @@ class CoarseToFineSearchStrategy(_FiniteSearch):
     Budgets include rechecks and no engine settings are modified.
     """
 
-    def __init__(self, requirements, *, seed, budget, top_n=10, initial_values=None, verify_finalists=True):
+    def __init__(self, requirements, *, seed, budget, top_n=10, initial_values=None, verify_finalists=True,
+                 proposal_factory=None):
         if type(seed) is not int or type(budget) is not int or budget < 1:
             raise ValueError("Seed and budget must be integers; budget must be positive.")
         if type(top_n) is not int or top_n < 1:
             raise ValueError("Top N must be positive.")
         super().__init__(requirements)
+        self._proposal_factory = proposal_factory
         self.seed, self.budget = seed, budget
         self._random = random.Random(seed)
         self._proposals, self._stages, self._verification_sources = {}, {}, {}
@@ -217,33 +221,34 @@ class CoarseToFineSearchStrategy(_FiniteSearch):
 
 
 class SmartSearchStrategy(SearchStrategy):
-    """Fair round-robin search over exact library/geometry variants, one budget.
+    """Generic categorical screening/refinement over existing supplied variants.
 
-    Each variant has an independent seed and ask/tell state. The GUI/runner
-    schedules proposals and hands their immutable requests to EngineAdapter.
+    No variant generation or domain ranges are changed. A separate global
+    finalist replay retains the existing final validation contract.
     """
 
     def __init__(self, plan):
         from .generator import CandidateGenerator
+        from .hierarchical import HierarchicalSearchStrategy, SearchOption
         from .smart_results import SmartResultStore
 
         self.plan = plan
         self.results = SmartResultStore(plan)
         self._verification_budget = min(plan.requirements.top_n, (plan.requirements.budget - len(plan.variants)) // 2)
-        quotient, remainder = divmod(plan.requirements.budget - self._verification_budget, len(plan.variants))
-        self._searches = tuple(
-            CoarseToFineSearchStrategy(
-                v.requirements,
-                seed=plan.requirements.seed + i,
-                budget=quotient + int(i < remainder),
-                top_n=plan.requirements.top_n,
-                initial_values=v.initial_values,
-                verify_finalists=False,
-            )
-            for i, v in enumerate(plan.variants)
+        self._options = tuple(SearchOption(
+            v.baseline.digest, (("library", v.library_key), ("geometry", "/".join(dict.fromkeys(v.geometries))),
+                                ("count", str(len(v.geometries)))), v.requirements, v.initial_values,
+        ) for v in plan.variants)
+        self._option_indices = {o.key: i for i, o in enumerate(self._options)}
+        self._search = HierarchicalSearchStrategy(
+            self._options, seed=plan.requirements.seed,
+            budget=plan.requirements.budget - self._verification_budget,
+            proposal_factory=lambda identity, pairs: CandidateProposal(
+                identity, tuple(Assignment(path, value) for path, value in pairs)
+            ),
         )
         self._generators = tuple(CandidateGenerator(v.baseline.to_dict(), v.requirements) for v in plan.variants)
-        self._issued, self._cursor = {}, 0
+        self._issued = {}
         self._finalists = None
         self._verification_index = 0
         self._rechecks = {}
@@ -252,7 +257,7 @@ class SmartSearchStrategy(SearchStrategy):
     @property
     def exhausted(self):
         return (
-            all(s.exhausted for s in self._searches)
+            self._search.exhausted
             and self._finalists is not None
             and self._verification_index >= len(self._finalists)
             and not self._pending_rechecks
@@ -263,15 +268,13 @@ class SmartSearchStrategy(SearchStrategy):
         return f"smart-{index:04d}-{candidate_id}"
 
     def ask(self):
-        for _ in self._searches:
-            index = self._cursor
-            self._cursor = (self._cursor + 1) % len(self._searches)
-            local = self._searches[index].ask()
-            if local is not None:
-                global_proposal = replace(local, candidate_id=self._global_id(index, local.candidate_id))
-                self._issued[global_proposal.candidate_id] = (index, local)
-                return global_proposal
-        if not all(s.exhausted for s in self._searches):
+        local = self._search.ask()
+        if local is not None:
+            index = self._option_indices[self._search.option_for(local.candidate_id).key]
+            global_proposal = replace(local, candidate_id=self._global_id(index, local.candidate_id))
+            self._issued[global_proposal.candidate_id] = (index, local)
+            return global_proposal
+        if not self._search.exhausted:
             return None
         if self._finalists is None:
             self._finalists = self.results.ranked(self._verification_budget)
@@ -295,12 +298,9 @@ class SmartSearchStrategy(SearchStrategy):
         index, proposal = self._issued[candidate_id]
         if candidate_id in self._rechecks:
             return SmartCandidateContext(self.plan.variants[index].key, "verification", self._rechecks[candidate_id])
-        strategy = self._searches[index]
-        source = strategy.verification_source(proposal.candidate_id)
         return SmartCandidateContext(
             self.plan.variants[index].key,
-            strategy.stage_for(proposal.candidate_id),
-            None if source is None else self._global_id(index, source),
+            self._search.stage_for(proposal.candidate_id),
         )
 
     def requirements_for(self, candidate_id):
@@ -320,7 +320,7 @@ class SmartSearchStrategy(SearchStrategy):
                 raise ValueError("Candidate was never asked, or already completed.")
             self._pending_rechecks.remove(evaluation.candidate_id)
         else:
-            self._searches[index].tell(
+            self._search.tell(
                 replace(
                     evaluation,
                     outcome=replace(evaluation.outcome, candidate_id=local.candidate_id),
@@ -329,3 +329,12 @@ class SmartSearchStrategy(SearchStrategy):
             )
         proposal = replace(local, candidate_id=evaluation.candidate_id)
         self.results.append(proposal, evaluation, self.context_for(evaluation.candidate_id))
+
+    @property
+    def diagnostics(self):
+        data = self._search.diagnostics
+        evaluations = [r[1] for r in self.results.records.values()]
+        data.update(candidates_evaluated=len(evaluations),
+                    valid=sum(e.constraints.feasible and e.score is not None for e in evaluations),
+                    rejected=sum(not e.constraints.feasible or e.score is None for e in evaluations))
+        return data

@@ -410,8 +410,16 @@ class CandidateEvaluation:
     outcome: SimulationOutcome
     constraints: ConstraintEvaluation
     score: float | None
+    objective_errors: tuple = ()
+
+    @property
+    def target_status(self):
+        from .objectives import target_status
+
+        return target_status(self.objective_errors)
 
     def __post_init__(self):
+        object.__setattr__(self, "objective_errors", tuple(self.objective_errors))
         if not isinstance(self.outcome, SimulationOutcome) or not isinstance(self.constraints, ConstraintEvaluation):
             raise TypeError("Evaluations require immutable outcome/constraint objects.")
         if self.outcome.candidate_id != self.constraints.candidate_id:

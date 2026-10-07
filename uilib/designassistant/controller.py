@@ -1,5 +1,6 @@
 """One background worker, queued DTO signals, cooperative cancellation."""
 
+import json
 import math
 import time
 from dataclasses import dataclass, replace
@@ -35,6 +36,7 @@ class SearchProgress:
     stage: str = "manual"
     best_score: float | None = None
     elapsed: float = 0.0
+    diagnostics_json: str = ""
 
 
 @dataclass(frozen=True)
@@ -145,6 +147,7 @@ class SearchWorker(QObject):
                     if context
                     else (search.ranked[0].score if search.ranked else None),
                     time.monotonic() - started,
+                    json.dumps(search.diagnostics, sort_keys=True) if context else "",
                 )
                 if context:
                     self.smartCandidateReady.emit(proposal, evaluation, context)

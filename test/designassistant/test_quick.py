@@ -353,7 +353,7 @@ class QuickProblemTests(unittest.TestCase):
 class QuickRecommendationsTests(unittest.TestCase):
     def test_match_is_monotonic_display_index(self):
         self.assertEqual(match_percentage(0), 100)
-        self.assertEqual(match_percentage(1), 50)
+        self.assertAlmostEqual(match_percentage(1), 100 * math.exp(-3))
         self.assertLess(match_percentage(2), match_percentage(1))
         for value in (-1, math.inf, math.nan, True):
             with self.assertRaises(ValueError):

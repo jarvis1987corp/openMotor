@@ -166,7 +166,8 @@ class PackagingTests(unittest.TestCase):
         job = workflow["jobs"]["windows"]
         self.assertEqual(job["runs-on"], "windows-2022")
         artifacts = [step for step in job["steps"] if step.get("uses") == "actions/upload-artifact@v4"]
-        release = next(step for step in artifacts if step["with"]["name"] == "openMotor-QuickDesign-V2-Windows-x64")
+        release = next(step for step in artifacts
+                       if step["with"]["name"] == "openMotor-QuickDesign-V2-SearchInfrastructure-Windows-x64")
         self.assertEqual(release["with"]["path"], "dist/windows/onedir/openMotor/")
         commands = "\n".join(step.get("run", "") for step in job["steps"])
         self.assertIn("--mode onedir", commands)

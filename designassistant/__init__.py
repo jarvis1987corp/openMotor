@@ -3,6 +3,7 @@
 from .engine import EngineAdapter
 from .evaluation import ConstraintEvaluator, Objective
 from .generator import CandidateGenerator
+from .hierarchical import HierarchicalSearchStrategy, SearchOption
 from .metrics import DEFAULT_METRICS, MetricDefinition, MetricRegistry
 from .models import (
     Assignment,
@@ -22,6 +23,7 @@ from .models import (
     Target,
     TextRecord,
 )
+from .objectives import TargetStatus, TargetTolerancePolicy
 from .paths import PropertyPath, PropertyValidationError
 from .provenance import engine_fingerprint
 from .search import (
@@ -35,6 +37,10 @@ from .smart import LibraryEntry, SearchSpaceBuilder, SmartDesignRequirements, Sm
 from .smart_results import CandidateAnalysis, SmartCandidateContext, SmartResultStore, analyze_candidate
 
 __all__ = [
+    "HierarchicalSearchStrategy",
+    "SearchOption",
+    "TargetStatus",
+    "TargetTolerancePolicy",
     "Assignment",
     "CandidateEvaluation",
     "CandidateAnalysis",

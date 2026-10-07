@@ -4,6 +4,7 @@ import math
 
 from .metrics import MetricRegistry
 from .models import CandidateEvaluation, ConstraintEvaluation, diagnostic
+from .objectives import objective_score, target_errors
 
 
 class ConstraintEvaluator:
@@ -43,20 +44,21 @@ class Objective:
     def evaluate(self, outcome, requirements):
         evaluation = self.constraints.evaluate(outcome, requirements)
         if not evaluation.feasible:
-            return CandidateEvaluation(outcome, evaluation, None)
+            errors = ()
+            if outcome.valid:
+                try:
+                    errors = target_errors(requirements.targets, outcome.metric)
+                except (KeyError, ValueError, OverflowError):
+                    pass
+            return CandidateEvaluation(outcome, evaluation, None, errors)
         if not requirements.targets:
             raise ValueError("Scoring requires at least one target.")
-        weight_sum = sum(t.weight for t in requirements.targets)
         try:
-            # Divide each weight first to avoid unnecessary weighted-sum overflow.
-            score = math.fsum(
-                (t.weight / weight_sum) * abs(outcome.metric(t.metric) - t.value) / t.scale
-                for t in requirements.targets
-                if t.weight
-            )
+            errors = target_errors(requirements.targets, outcome.metric)
+            score = objective_score(errors)
             if not math.isfinite(score):
                 raise ValueError("Nonfinite score.")
         except (KeyError, ValueError, OverflowError) as error:
             violation = diagnostic("invalid_score", "Cannot score candidate: {reason}", reason=str(error))
             return CandidateEvaluation(outcome, ConstraintEvaluation(outcome.candidate_id, False, (violation,)), None)
-        return CandidateEvaluation(outcome, evaluation, score)
+        return CandidateEvaluation(outcome, evaluation, score, errors)

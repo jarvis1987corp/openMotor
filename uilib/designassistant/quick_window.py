@@ -41,6 +41,8 @@ from designassistant.smart import CURRENT_GEOMETRY, QUALITY_BUDGETS, SearchSpace
 from motorlib.units import convert
 from uilib.localization import geometry_name
 
+from .assessment import assessment_lines, closest_only
+from .assessment import tr as assessment_translate
 from .controller import DesignController, SearchProgress
 from .editors import OptionalBound, number_editor
 from .presentation import METRIC_LABELS, diagnostic_text, display_number, metric_label, metric_unit, translate
@@ -134,13 +136,15 @@ class RecommendationCard(QGroupBox):
         layout = QVBoxLayout(self)
         self.selected = QCheckBox()
         self.selected.toggled.connect(window._selection_changed)
-        self.summary, self.limits, self.warnings, self.why = QLabel(), QLabel(), QLabel(), QLabel()
-        for label in (self.summary, self.limits, self.warnings, self.why):
+        self.summary, self.limits, self.targets, self.warnings, self.why = (
+            QLabel(), QLabel(), QLabel(), QLabel(), QLabel()
+        )
+        for label in (self.summary, self.limits, self.targets, self.warnings, self.why):
             label.setWordWrap(True)
             label.setTextFormat(Qt.TextFormat.PlainText)
         self.why.hide()
         layout.addWidget(self.selected)
-        for label in (self.summary, self.limits, self.warnings, self.why):
+        for label in (self.summary, self.limits, self.targets, self.warnings, self.why):
             layout.addWidget(label)
         buttons = QHBoxLayout()
         self.why_button, self.details_button, self.open_button = QPushButton(), QPushButton(), QPushButton()
@@ -156,6 +160,8 @@ class RecommendationCard(QGroupBox):
     def retranslate(self):
         record, preferences = self.record, self.window.preferences
         self.setTitle(quick_translate("Recommended Design {number}").format(number=self.index))
+        if record.analysis.target_status.value != "MATCHED":
+            self.setTitle(assessment_translate("Closest candidate {number}").format(number=self.index))
         self.selected.setText(quick_translate("Select for comparison"))
         lines = [
             quick_translate("Match: {percent}%").format(
@@ -163,7 +169,7 @@ class RecommendationCard(QGroupBox):
             )
         ]
         self.summary.setToolTip(
-            quick_translate("Match is 100 / (1 + normalized score), not a probability or guarantee.")
+            assessment_translate("Match = 100 × exp(-3 × score); score includes a worst-objective penalty.")
         )
         for key in (
             "burn_time",
@@ -198,9 +204,14 @@ class RecommendationCard(QGroupBox):
                         f"{metric_label(constraint.metric)} — {quick_translate(mode)}: "
                         f"{display_number(value, unit, display)} {display}"
                     )
-        self.limits.setText(
-            quick_translate("Meets configured constraints") + ("\n" + "\n".join(bounds) if bounds else "")
-        )
+        def formatted(key, number):
+            unit, display = metric_unit(key, preferences)
+            return f"{display_number(number, unit, display)} {display}"
+
+        assessment = assessment_lines(record.analysis, record.evaluation.constraints.feasible,
+                                      label=metric_label, value=formatted)
+        self.limits.setText(assessment[0] + ("\n" + "\n".join(bounds) if bounds else ""))
+        self.targets.setText("\n".join(assessment[1:]))
         warnings = [d for d in record.evaluation.outcome.diagnostics if d.level == "WARNING"]
         self.warnings.setText(
             quick_translate("Warnings: {count}").format(count=len(warnings))
@@ -530,6 +541,12 @@ class QuickDesignWindow(QDialog):
                 seconds="{:.1f}".format(elapsed),
             )
         )
+        if progress.diagnostics_json:
+            data = json.loads(progress.diagnostics_json)
+            self.counts_label.setText(self.counts_label.text() + "\n" + assessment_translate(
+                "Combinations screened: {screened}/{available}"
+            ).format(screened=data["combinations_screened"], available=data["combinations_available"]))
+            self.counts_label.setToolTip(json.dumps(data["coverage"], ensure_ascii=False, indent=2))
         self.progress_bar.setRange(0, max(1, progress.total))
         self.progress_bar.setValue(progress.processed)
         self.stop_button.setEnabled(running and self._state != "stopping")
@@ -740,6 +757,8 @@ class QuickDesignWindow(QDialog):
         self.pages.widget(0).setEnabled(not running)
         self.pages.widget(1).setEnabled(not running)
         self.results_label.setText(quick_translate("Recommended designs"))
+        if closest_only(self.recommendations):
+            self.results_label.setText(assessment_translate("Closest candidates"))
         self.results_hint.setText(
             quick_translate("Stopped results may be provisional.")
             if self._state == "stopped"
@@ -747,6 +766,12 @@ class QuickDesignWindow(QDialog):
             if self.recommendations
             else quick_translate("No admissible designs yet. Review requirements or allowed options.")
         )
+        if closest_only(self.recommendations):
+            all_ranked = self.controller.smart_store.ranked()
+            self.results_hint.setText(assessment_translate(
+                "No candidate matched all targets within this search. Closest candidates follow."
+                if closest_only(all_ranked) else "Closest candidates"
+            ))
         for card in self.cards.values():
             card.retranslate()
         self._selection_changed()

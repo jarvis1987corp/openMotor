@@ -52,7 +52,6 @@ QUICK_MESSAGES = (
     QT_TRANSLATE_NOOP("QuickDesign", "Known requirements"),
     QT_TRANSLATE_NOOP("QuickDesign", "Library entry: {name}"),
     QT_TRANSLATE_NOOP("QuickDesign", "Match burn time"),
-    QT_TRANSLATE_NOOP("QuickDesign", "Match is 100 / (1 + normalized score), not a probability or guarantee."),
     QT_TRANSLATE_NOOP("QuickDesign", "Match thrust"),
     QT_TRANSLATE_NOOP("QuickDesign", "Match total impulse"),
     QT_TRANSLATE_NOOP("QuickDesign", "Match: {percent}%"),
