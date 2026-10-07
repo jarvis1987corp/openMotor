@@ -132,7 +132,16 @@ class QuickDesignGeometryFactory:
 
 
 class QuickDesignNozzleFactory:
-    """Existing nozzle type, initialized independently of the source project."""
+    """Existing nozzle type, initialized independently of the source project.
+
+    Nozzle() initializes numeric properties at their metadata minima, including
+    an invalid zero efficiency. Use a fixed unit efficiency initialization and
+    the angle assumptions already used by BurnSimImporter (15/45 degrees).
+    These are generation presets, not constructor defaults or score variables.
+    Throat length, slag and erosion retain the unchanged constructor defaults.
+    """
+
+    FIXED_INITIAL_PROPERTIES = {"efficiency": 1.0, "divAngle": 15.0, "convAngle": 45.0}
 
     def create(self, dimensions, geometry=None):
         nozzle = Nozzle()
@@ -147,7 +156,7 @@ class QuickDesignNozzleFactory:
             ),
             _range(nozzle, "exit", diameter * 0.31, diameter * 0.60, diameter * 0.40),
         )
-        for key, value in (("efficiency", 1.0), ("divAngle", 15.0), ("convAngle", 45.0)):
+        for key, value in self.FIXED_INITIAL_PROPERTIES.items():
             _set(nozzle, key, value)
         errors = [alert.description for alert in nozzle.getGeometryErrors() if alert.level == SimAlertLevel.ERROR]
         if errors:

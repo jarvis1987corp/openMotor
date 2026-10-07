@@ -193,6 +193,62 @@ class QuickFromScratchTests(unittest.TestCase):
         self.assertLess(bounds["throat"].maximum, bounds["exit"].minimum)
         self.assertLessEqual(bounds["exit"].maximum, 0.1)
 
+    def test_joint_candidates_never_optimize_empirical_nozzle_parameters(self):
+        from motorlib.nozzle import Nozzle
+
+        stock = Nozzle().getProperties()
+        problem = build()
+        for variant in problem.plan.variants:
+            paths = {variable.path.value for variable in variant.requirements.variables}
+            self.assertEqual({p for p in paths if p.startswith("nozzle.")}, {"nozzle.throat", "nozzle.exit"})
+            self.assertTrue(any(p.startswith("grains.") for p in paths))
+            nozzle = variant.baseline.to_dict()["nozzle"]
+            for key in set(stock) - {"throat", "exit"}:
+                expected = QuickDesignNozzleFactory.FIXED_INITIAL_PROPERTIES.get(key, stock[key])
+                self.assertEqual(nozzle[key], expected)
+            generator = CandidateGenerator(variant.baseline.to_dict(), variant.requirements)
+            for endpoint in ("minimum", "maximum"):
+                request = generator.generate(
+                    CandidateProposal.from_values(
+                        endpoint, {v.path.value: getattr(v.range, endpoint) for v in variant.requirements.variables}
+                    )
+                )
+                motor = Motor(request.snapshot.to_dict())
+                self.assertFalse(motor.nozzle.getGeometryErrors())
+                self.assertGreater(motor.nozzle.calcExpansion(), 1)
+                self.assertEqual(
+                    {k: motor.nozzle.getProperty(k) for k in set(stock) - {"throat", "exit"}},
+                    {k: nozzle[k] for k in set(stock) - {"throat", "exit"}},
+                )
+
+    def test_every_generated_geometry_reaches_the_real_simulation_api(self):
+        from designassistant import EngineAdapter, MetricRegistry, OutcomeStatus
+        from test.designassistant.test_quick import inputs
+
+        problem = build(inputs())
+        adapter = EngineAdapter(MetricRegistry(problem.plan.requirements.metric_definitions))
+        seen = set()
+        simulate = Motor.runSimulation
+
+        def record_simulation(motor, callback=None):
+            seen.add(tuple(g.geomName for g in motor.grains))
+            return simulate(motor, callback)
+
+        with patch.object(Motor, "runSimulation", record_simulation):
+            for variant in problem.plan.variants:
+                request = CandidateGenerator(variant.baseline.to_dict(), variant.requirements).generate(
+                    CandidateProposal.from_values(
+                        variant.key,
+                        {
+                            v.path.value: value
+                            for v, value in zip(variant.requirements.variables, variant.initial_values)
+                        },
+                    )
+                )
+                outcome = adapter.run(request)
+                self.assertNotIn(outcome.status, (OutcomeStatus.INVALID_REQUEST, OutcomeStatus.EXCEPTION))
+        self.assertEqual({g[0] for g in seen}, set(grainTypes))
+
     def test_grain_counts_follow_dimensions_and_are_explored(self):
         factory = QuickDesignGeometryFactory()
         self.assertEqual(factory.grain_counts(QuickDimensions(0.1, 0.8)), (1, 2, 3, 4, 5, 6))

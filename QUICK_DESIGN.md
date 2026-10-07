@@ -84,8 +84,15 @@ numeric dimensions, not arbitrary polygon topology or imported DXF shapes.
 Nozzle throat and exit are independent search variables with ordered ranges
 (6–30% and 31–60% of maximum diameter). Its initial throat is 15%, or 6% for End
 Burner; initial exit is 40%. Efficiency starts at 1, divergence/convergence angles
-at 15/45 degrees; other properties retain constructor defaults. These are valid
-starting/search presets, not a prediction of the appropriate nozzle.
+at 15/45 degrees; other properties retain constructor defaults. The angle
+assumptions match the existing BurnSim importer. Unit efficiency is an explicit
+generation preset: the constructor's zero efficiency fails stock validation.
+These fixed values are not fitted to improve score. Throat length, slag and
+erosion remain at constructor defaults (zero); no empirical/model parameter is
+an optimization variable. These are starting/search presets, not a prediction
+of the appropriate nozzle. Expansion ratio is derived by the existing
+`Nozzle.calcExpansion()` from the jointly searched throat and exit diameters;
+it is not a third independent variable.
 
 The exploration count is 1 through min(6, floor(2 × maximum length / maximum
 diameter)), with at least one grain. This aspect-ratio heuristic limits search
